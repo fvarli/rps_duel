@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
 import 'package:rps_duel/domain/duel_state.dart';
 import 'package:rps_duel/domain/move_choice.dart';
@@ -20,10 +21,16 @@ class DuelController {
   final DateTime Function() _now;
   final Duration _cpuThinkingDelay;
   DuelState _state = DuelState.initial();
+  CpuDifficulty _difficulty = CpuDifficulty.normal;
 
   void Function()? onStateChanged;
 
   DuelState get state => _state;
+  CpuDifficulty get difficulty => _difficulty;
+
+  void setDifficulty(CpuDifficulty difficulty) {
+    _difficulty = difficulty;
+  }
 
   void _setState(DuelState newState) {
     _state = newState;
@@ -31,7 +38,7 @@ class DuelController {
   }
 
   DuelState selectMove(MoveChoice move) {
-    final cpu = _engine.cpuMove();
+    final cpu = _engine.cpuMoveFor(playerMove: move, difficulty: _difficulty);
     final outcome = _engine.resolve(playerMove: move, cpuMove: cpu);
     final record = RoundRecord(
       playerMove: move,

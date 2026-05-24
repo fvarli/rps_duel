@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/game/difficulty_picker_sheet.dart';
 
 Future<void> showSettingsSheet(
   BuildContext context, {
+  required CpuDifficulty currentDifficulty,
+  required VoidCallback onDifficulty,
   required VoidCallback onLanguage,
   required VoidCallback onResetData,
   required VoidCallback onAbout,
@@ -23,6 +27,16 @@ Future<void> showSettingsSheet(
                 l10n.settingsTitle,
                 style: Theme.of(ctx).textTheme.titleMedium,
               ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.smart_toy),
+              title: Text(l10n.difficultyPickerTitle),
+              subtitle: Text(difficultyLabel(l10n, currentDifficulty)),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                onDifficulty();
+              },
             ),
             ListTile(
               leading: const Icon(Icons.language),

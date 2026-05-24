@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rps_duel/app/locale_scope.dart';
+import 'package:rps_duel/data/local_difficulty_storage.dart';
+import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
 import 'package:rps_duel/ui/game/game_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -225,5 +227,47 @@ void main() {
       find.text('Streak: 0 · Best: 0 · Win rate: 0%'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('Settings → Difficulty opens the difficulty picker',
+      (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    expect(find.text('Difficulty'), findsOneWidget);
+    // Difficulty tile subtitle shows the default (Normal).
+    expect(find.text('Normal'), findsAtLeastNWidgets(1));
+
+    await tester.tap(find.text('Difficulty'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Easy'), findsOneWidget);
+    expect(find.text('Hard'), findsOneWidget);
+  });
+
+  testWidgets(
+      'Settings → Difficulty → Easy persists and surfaces in settings',
+      (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Difficulty'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Easy'));
+    await tester.pumpAndSettle();
+
+    // Reopen settings — Difficulty tile subtitle should now read "Easy".
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    expect(find.text('Easy'), findsAtLeastNWidgets(1));
+
+    // Verify persistence via the storage abstraction (avoids
+    // mock-vs-runtime key-prefix ambiguity).
+    final storage = await DifficultyStorage.open();
+    expect(storage.load(), CpuDifficulty.easy);
   });
 }

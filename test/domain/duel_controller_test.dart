@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/domain/duel_controller.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
 import 'package:rps_duel/domain/move_choice.dart';
@@ -13,6 +14,13 @@ class _FixedCpuEngine extends RpsEngine {
 
   @override
   MoveChoice cpuMove() => _cpu;
+
+  @override
+  MoveChoice cpuMoveFor({
+    required MoveChoice playerMove,
+    required CpuDifficulty difficulty,
+  }) =>
+      _cpu;
 }
 
 void main() {
@@ -241,6 +249,21 @@ void main() {
       controller.reset();
       expect(controller.state.currentStreak, 0);
       expect(controller.state.bestStreak, 0);
+    });
+
+    test('controller defaults to normal difficulty and setDifficulty propagates',
+        () {
+      final controller = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.scissors),
+      );
+      expect(controller.difficulty, CpuDifficulty.normal);
+
+      controller.setDifficulty(CpuDifficulty.hard);
+      expect(controller.difficulty, CpuDifficulty.hard);
+
+      controller.selectMove(MoveChoice.rock);
+      expect(controller.state.cpuMove, MoveChoice.scissors);
+      expect(controller.state.outcome, RoundOutcome.playerWin);
     });
   });
 }

@@ -81,6 +81,15 @@
   "@aboutDescription": { "description": "Short tagline shown in the About dialog body." },
   "@aboutClose": { "description": "Close button on the About dialog." },
 
+  "difficultyPickerTitle": "Difficulty",
+  "difficultyEasy": "Easy",
+  "difficultyNormal": "Normal",
+  "difficultyHard": "Hard",
+  "@difficultyPickerTitle": { "description": "Header / tooltip for the CPU difficulty picker." },
+  "@difficultyEasy": { "description": "Easy CPU difficulty label." },
+  "@difficultyNormal": { "description": "Normal (uniform random) CPU difficulty label." },
+  "@difficultyHard": { "description": "Hard CPU difficulty label." },
+
   "statsLine": "Streak: {streak} · Best: {best} · Win rate: {rate}%",
   "@statsLine": {
     "description": "Compact secondary stats line under the round summary. Three int placeholders: current streak, best streak, win rate as a whole percent (0-100).",

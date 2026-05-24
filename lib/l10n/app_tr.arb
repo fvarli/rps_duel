@@ -43,5 +43,10 @@
   "aboutDescription": "Cebine sığan 30 saniyelik taş-kağıt-makas düellosu.",
   "aboutClose": "Kapat",
 
+  "difficultyPickerTitle": "Zorluk",
+  "difficultyEasy": "Kolay",
+  "difficultyNormal": "Normal",
+  "difficultyHard": "Zor",
+
   "statsLine": "Seri: {streak} · En iyi: {best} · Kazanma: %{rate}"
 }

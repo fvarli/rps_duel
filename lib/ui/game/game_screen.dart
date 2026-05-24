@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:rps_duel/app/locale_scope.dart';
+import 'package:rps_duel/data/local_difficulty_storage.dart';
 import 'package:rps_duel/data/local_game_storage.dart';
+import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/domain/duel_controller.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
 import 'package:rps_duel/domain/duel_state.dart';
@@ -11,6 +13,7 @@ import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/game/difficulty_picker_sheet.dart';
 import 'package:rps_duel/ui/game/language_picker_sheet.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
 import 'package:rps_duel/ui/game/settings_sheet.dart';
@@ -30,6 +33,7 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   late final DuelController _controller;
   LocalGameStorage? _storage;
+  DifficultyStorage? _difficultyStorage;
 
   @override
   void initState() {
@@ -77,8 +81,12 @@ class _GameScreenState extends State<GameScreen> {
 
   Future<void> _loadAndApply() async {
     final storage = await LocalGameStorage.open();
+    final difficultyStorage = await DifficultyStorage.open();
     if (!mounted) return;
     _storage = storage;
+    _difficultyStorage = difficultyStorage;
+    _controller.setDifficulty(difficultyStorage.load());
+
     final s = _controller.state;
     final pristine = s.playerScore == 0 &&
         s.cpuScore == 0 &&
@@ -91,6 +99,11 @@ class _GameScreenState extends State<GameScreen> {
     if (restored != null) {
       _controller.restoreFrom(restored);
     }
+  }
+
+  Future<void> _setDifficulty(CpuDifficulty difficulty) async {
+    _controller.setDifficulty(difficulty);
+    await _difficultyStorage?.save(difficulty);
   }
 
   void _select(MoveChoice move) {
@@ -179,6 +192,14 @@ class _GameScreenState extends State<GameScreen> {
             onPressed: () {
               unawaited(showSettingsSheet(
                 context,
+                currentDifficulty: _controller.difficulty,
+                onDifficulty: () => unawaited(
+                  showDifficultyPicker(
+                    context,
+                    _controller.difficulty,
+                    (d) => unawaited(_setDifficulty(d)),
+                  ),
+                ),
                 onLanguage: () => unawaited(
                   showLanguagePicker(context, LocaleScope.of(context)),
                 ),

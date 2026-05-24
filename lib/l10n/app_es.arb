@@ -43,5 +43,10 @@
   "aboutDescription": "Un duelo de piedra-papel-tijera de 30 segundos para llevar en el bolsillo.",
   "aboutClose": "Cerrar",
 
+  "difficultyPickerTitle": "Dificultad",
+  "difficultyEasy": "Fácil",
+  "difficultyNormal": "Normal",
+  "difficultyHard": "Difícil",
+
   "statsLine": "Racha: {streak} · Mejor: {best} · Victorias: {rate}%"
 }

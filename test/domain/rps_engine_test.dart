@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/rps_engine.dart';
@@ -94,6 +97,37 @@ void main() {
         final move = engine.cpuMove();
         expect(MoveChoice.values, contains(move));
       }
+    });
+  });
+
+  group('RpsEngine.cpuMoveFor — weighted by difficulty', () {
+    test('Easy difficulty produces mostly losing CPU moves over 1000 calls',
+        () {
+      final engine = RpsEngine(random: Random(42));
+      var losing = 0;
+      for (var i = 0; i < 1000; i++) {
+        final cpu = engine.cpuMoveFor(
+          playerMove: MoveChoice.rock,
+          difficulty: CpuDifficulty.easy,
+        );
+        if (cpu == MoveChoice.scissors) losing++;
+      }
+      // E[X] = 600, sigma ~= 15.5. >550 is well within 4 sigma.
+      expect(losing, greaterThan(550));
+    });
+
+    test('Hard difficulty produces mostly winning CPU moves over 1000 calls',
+        () {
+      final engine = RpsEngine(random: Random(42));
+      var winning = 0;
+      for (var i = 0; i < 1000; i++) {
+        final cpu = engine.cpuMoveFor(
+          playerMove: MoveChoice.rock,
+          difficulty: CpuDifficulty.hard,
+        );
+        if (cpu == MoveChoice.paper) winning++;
+      }
+      expect(winning, greaterThan(550));
     });
   });
 }
