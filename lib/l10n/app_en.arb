@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "appName": "RPS Duel",
+  "@appName": {
+    "description": "User-facing app name shown on the home placeholder."
+  }
+}

@@ -1,0 +1,1318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roshambo Duel — Flutter Engineering Handoff v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #fbf9f4;
+    --paper: #ffffff;
+    --ink: #16140f;
+    --inkSoft: #44402f;
+    --inkMuted: #807b69;
+    --inkFaint: #b8b09b;
+    --hairline: #e7e1d0;
+    --hairlineSoft: #efeadb;
+    --clay: #a85a3b;
+    --sage: #5c7d44;
+    --gold: #b8862a;
+    --mvp: #5c7d44;
+    --p2: #b8862a;
+    --p3: #8c8a82;
+    --not: #a85a3b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: 'Geist', 'DM Sans', system-ui, sans-serif; font-size: 14.5px; line-height: 1.55; }
+  a { color: var(--clay); text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+  .doc { display: grid; grid-template-columns: 240px minmax(0,1fr); max-width: 1180px; margin: 0 auto; }
+  .nav {
+    position: sticky; top: 0; align-self: start;
+    padding: 36px 12px 36px 40px;
+    height: 100vh; overflow-y: auto;
+    border-right: 1px solid var(--hairlineSoft);
+  }
+  .nav h4 { font-family: 'Geist'; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--inkMuted); font-weight: 600; margin: 22px 0 8px; }
+  .nav h4:first-child { margin-top: 0; }
+  .nav a { display: block; padding: 5px 10px; margin: 0 -10px; border-radius: 5px; color: var(--inkSoft); font-size: 13px; font-weight: 500; }
+  .nav a:hover { background: var(--hairlineSoft); text-decoration: none; }
+  .nav .num { display: inline-block; width: 22px; color: var(--inkFaint); font-family: 'JetBrains Mono'; font-size: 11px; }
+  .nav .top-meta { font-size: 11px; color: var(--inkMuted); margin-bottom: 14px; }
+  .nav .top-meta strong { color: var(--ink); display: block; font-size: 13px; }
+  .nav .cross { display: flex; flex-direction: column; gap: 4px; margin-bottom: 22px; }
+  .nav .cross a { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--clay); padding: 2px 0; }
+
+  .main { padding: 48px 56px 120px; max-width: 800px; }
+
+  .doc-header { padding-bottom: 32px; border-bottom: 1px solid var(--hairlineSoft); margin-bottom: 36px; }
+  .doc-eyebrow { font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--clay); font-weight: 600; }
+  .doc-title { font-family: 'Newsreader'; font-style: italic; font-weight: 400; font-size: 52px; letter-spacing: -1.3px; line-height: 1; margin: 14px 0 0; color: var(--ink); }
+  .doc-sub { font-size: 16px; color: var(--inkSoft); margin-top: 16px; max-width: 600px; line-height: 1.55; }
+  .doc-meta { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 22px; font-size: 12.5px; color: var(--inkMuted); }
+  .doc-meta strong { color: var(--ink); font-weight: 600; }
+
+  section { margin: 64px 0; scroll-margin-top: 32px; }
+  section > .s-head { margin-bottom: 24px; }
+  .s-head .s-num { font-family: 'JetBrains Mono'; font-size: 12px; color: var(--inkMuted); }
+  .s-head h2 { font-family: 'Newsreader'; font-style: italic; font-weight: 400; font-size: 34px; letter-spacing: -0.8px; line-height: 1.1; margin: 4px 0 8px; color: var(--ink); }
+  .s-head .s-lede { font-size: 15px; color: var(--inkSoft); max-width: 640px; line-height: 1.5; }
+
+  h3 { font-family: 'Geist'; font-weight: 600; font-size: 17px; letter-spacing: -0.2px; margin: 36px 0 8px; color: var(--ink); }
+  h4 { font-family: 'Geist'; font-weight: 600; font-size: 13.5px; letter-spacing: -0.1px; margin: 22px 0 6px; color: var(--ink); }
+  p, li { color: var(--inkSoft); }
+  p { margin: 8px 0; max-width: 680px; }
+  ul, ol { padding-left: 22px; margin: 8px 0; }
+  li { margin: 4px 0; }
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-family: 'Newsreader'; font-style: italic; font-weight: 400; color: var(--ink); }
+
+  /* Pills */
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 3px 6px; border-radius: 999px; font-family: 'Geist'; font-size: 10.5px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; line-height: 1.2; vertical-align: middle; }
+  .pill::before { content: ''; width: 6px; height: 6px; border-radius: 3px; background: currentColor; }
+  .pill.mvp { color: var(--mvp); background: rgba(92,125,68,0.13); }
+  .pill.p2 { color: var(--p2); background: rgba(184,134,42,0.13); }
+  .pill.not { color: var(--not); background: rgba(168,90,59,0.13); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 12.5px; }
+  th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--hairlineSoft); }
+  th { font-family: 'Geist'; font-size: 10px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: var(--inkMuted); border-bottom: 1px solid var(--hairline); }
+  td { color: var(--inkSoft); }
+  td.k { color: var(--ink); font-weight: 500; }
+  td.mono, .mono { font-family: 'JetBrains Mono'; font-size: 11.5px; }
+  code, .code { font-family: 'JetBrains Mono'; font-size: 11.5px; background: rgba(22,20,15,0.05); padding: 1px 6px; border-radius: 3px; color: var(--ink); }
+  .table-wrap { border: 1px solid var(--hairline); border-radius: 6px; overflow: hidden; background: var(--paper); margin: 14px 0; }
+  .table-wrap table { margin: 0; }
+  .table-wrap tr:last-child td { border-bottom: none; }
+
+  /* Code blocks */
+  pre { font-family: 'JetBrains Mono'; font-size: 11.5px; line-height: 1.65; background: #14110a; color: #f6efe0; padding: 16px 18px; border-radius: 8px; overflow-x: auto; margin: 14px 0; }
+  pre .kw { color: #ffb86b; }
+  pre .str { color: #c2e6a2; }
+  pre .cm { color: #87806a; font-style: italic; }
+  pre .typ { color: #9cdcfe; }
+  pre .num { color: #e6c994; }
+
+  /* Callouts */
+  .callout { padding: 12px 16px; border-radius: 6px; margin: 14px 0; font-size: 12.5px; line-height: 1.5; }
+  .callout strong { display: block; margin-bottom: 4px; font-family: 'Geist'; font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase; }
+  .callout.note { background: rgba(184,134,42,0.08); }
+  .callout.note strong { color: var(--gold); }
+  .callout.warn { background: rgba(168,90,59,0.08); }
+  .callout.warn strong { color: var(--clay); }
+  .callout.good { background: rgba(92,125,68,0.08); }
+  .callout.good strong { color: var(--sage); }
+
+  /* Swatches */
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 6px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); }
+
+  /* Two-col grids */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 14px 0; }
+  .card { padding: 16px; border-radius: 8px; background: var(--paper); border: 1px solid var(--hairline); }
+  .card h4 { margin-top: 0; }
+
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+  <aside class="nav">
+    <div class="top-meta">
+      <strong>Roshambo Duel</strong>
+      Flutter Eng Handoff v1.0
+    </div>
+    <div class="cross">
+      <a href="index.html"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L2 5.5l4 3.5M2 5.5h7"/></svg> visual canvas</a>
+      <a href="spec.html"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L2 5.5l4 3.5M2 5.5h7"/></svg> product spec</a>
+    </div>
+
+    <h4>Scope</h4>
+    <a href="#scope"><span class="num">01</span>MVP scope lock</a>
+    <a href="#screens"><span class="num">02</span>Screen list</a>
+
+    <h4>Build</h4>
+    <a href="#components"><span class="num">03</span>Components</a>
+    <a href="#domain"><span class="num">04</span>Domain models</a>
+    <a href="#state"><span class="num">05</span>Riverpod</a>
+    <a href="#engine"><span class="num">06</span>Game engine</a>
+    <a href="#theme"><span class="num">07</span>Theme engine</a>
+    <a href="#tokens"><span class="num">08</span>Design tokens</a>
+
+    <h4>Feel</h4>
+    <a href="#anim"><span class="num">09</span>Animation</a>
+    <a href="#hapticsound"><span class="num">10</span>Haptics &amp; sound</a>
+    <a href="#l10n"><span class="num">11</span>Localization</a>
+
+    <h4>Business</h4>
+    <a href="#ads"><span class="num">12</span>Ads &amp; IAP</a>
+    <a href="#analytics"><span class="num">13</span>Analytics</a>
+
+    <h4>Execute</h4>
+    <a href="#phases"><span class="num">14</span>Implementation phases</a>
+    <a href="#guardrails"><span class="num">15</span>Guardrails</a>
+  </aside>
+
+  <main class="main">
+
+  <header class="doc-header">
+    <div class="doc-eyebrow">Engineering handoff · approved to build</div>
+    <h1 class="doc-title">Roshambo Duel</h1>
+    <p class="doc-sub">Final Flutter implementation handoff. Everything Claude CLI needs to ship MVP — scope locks, screen list, component tree, domain models, Riverpod wiring, theme engine, tokens, motion, sound, localization, ads, analytics, and 13 commit-sized phases.</p>
+    <div class="doc-meta">
+      <span><strong>Version</strong>&nbsp; 1.0</span>
+      <span><strong>Status</strong>&nbsp; Ready for CLI</span>
+      <span><strong>Stack</strong>&nbsp; Flutter 3.27+ · Riverpod 2 · Isar 4 · go_router</span>
+      <span><strong>Platforms</strong>&nbsp; iOS · Android</span>
+    </div>
+  </header>
+
+  <!-- ─── 01 · SCOPE ─── -->
+  <section id="scope">
+    <div class="s-head">
+      <div class="s-num">01 · Scope</div>
+      <h2>Final MVP scope lock</h2>
+      <div class="s-lede">Two columns. Left ships. Right does not. Anything not in the left column is rejected at PR review — this rule applies even to "easy wins" Claude CLI might propose.</div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h4 style="color: var(--mvp);">In MVP</h4>
+        <ul style="margin: 0; padding-left: 18px; font-size: 13px;">
+          <li>vs CPU duel (rock / paper / scissors)</li>
+          <li>Pass &amp; play local 2P mode</li>
+          <li>Onboarding (3-step intro)</li>
+          <li>Language selection: <code>en</code> · <code>tr</code> · <code>es</code></li>
+          <li>Theme selection (2 packs in MVP)</li>
+          <li>Default theme: <strong>Tactile Premium</strong></li>
+          <li>Unlockable theme: <strong>Modern Futuristic</strong> (rewarded ad)</li>
+          <li>Local history (last 100 rounds)</li>
+          <li>Lifetime &amp; per-session stats</li>
+          <li>Win streak tracking</li>
+          <li>Daily mission (single, rotating)</li>
+          <li>Achievements (8 MVP achievements)</li>
+          <li>Settings (sound · haptics · language · theme · reset · about)</li>
+          <li>Rewarded-ad theme unlock flow (AdMob)</li>
+          <li>Remove-ads non-consumable IAP (hook only — not live)</li>
+          <li>Restore purchases (hook only)</li>
+          <li>Offline-first local persistence (Isar)</li>
+          <li>Error fallback screen</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="color: var(--not);">Not in MVP</h4>
+        <ul style="margin: 0; padding-left: 18px; font-size: 13px;">
+          <li>User login / account creation</li>
+          <li>Cloud sync of any kind</li>
+          <li>Realtime multiplayer</li>
+          <li>Async multiplayer</li>
+          <li>Ranked mode &amp; SR</li>
+          <li>Friends list / invites</li>
+          <li>Leaderboard (global, friends, regional)</li>
+          <li>In-game chat / emotes</li>
+          <li>Backend API of any kind</li>
+          <li>Push notifications</li>
+          <li>Premium-theme IAP go-live (UI exists; product not active)</li>
+          <li>Season pass · battle pass</li>
+          <li>Cosmetics beyond the 4 theme packs</li>
+          <li>Adaptive CPU difficulty (placeholder enum exists)</li>
+          <li>Native widgets / iOS shortcuts</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Definition of Done for MVP</h3>
+    <ul>
+      <li>App boots offline in &lt; 1.5s on Pixel 6 / iPhone 13.</li>
+      <li>Onboarding-to-first-round &lt; 14s.</li>
+      <li>All 18 screens (see §02) load without console errors in debug.</li>
+      <li><code>flutter analyze</code> clean. <code>flutter test</code> 100% passing.</li>
+      <li>3 locales render every UI string without overflow at 1.3× system text scale.</li>
+      <li>Theme switch round-trip happens in &lt; 200ms with no visible flicker.</li>
+      <li>Both themes render correctly in Light &amp; Dark system mode.</li>
+    </ul>
+  </section>
+
+  <!-- ─── 02 · SCREENS ─── -->
+  <section id="screens">
+    <div class="s-head">
+      <div class="s-num">02 · Scope</div>
+      <h2>Final MVP screen list</h2>
+      <div class="s-lede">18 screens. Routes use <code>go_router</code> with shell route for the Home stack. Settings, History, Themes, Store all push from Home. Pause / Reset / Ad-reward are bottom-sheet modals on top of the current route.</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width: 18%;">Route</th><th style="width: 30%;">Purpose</th><th>Widgets</th><th>State</th><th style="width: 14%;">L10n keys</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">/splash</td><td>Brand reveal · warmup theme assets &amp; locale</td><td>SplashScreen, Logo</td><td>appBootstrap</td><td>—</td></tr>
+          <tr><td class="k mono">/onboarding/language</td><td>First-launch language pick</td><td>LanguageSelectScreen, LanguageRow</td><td>localeProvider</td><td>onb.lang.*</td></tr>
+          <tr><td class="k mono">/onboarding/intro</td><td>3-card intro to the game</td><td>OnboardingScreen, MoveCardRow</td><td>—</td><td>onb.intro.*</td></tr>
+          <tr><td class="k mono">/onboarding/theme</td><td>Pick initial theme; Tactile pre-selected</td><td>ThemeSelectScreen, ThemePreviewCard</td><td>themePackProvider</td><td>onb.theme.*</td></tr>
+          <tr><td class="k mono">/home</td><td>Quick Play CTA + 4 tiles (Modes · Themes · History · Profile)</td><td>HomeScreen, QuickPlayButton, HomeTile, PromoCard</td><td>statsProvider, dailyMissionProvider</td><td>home.*</td></tr>
+          <tr><td class="k mono">/play</td><td>The duel itself · owns the GameStateMachine</td><td>DuelScreen, DuelStage, MoveCard, CpuThinkingCard, ResultBanner, MovePicker, ScoreChip</td><td>duelController</td><td>duel.*</td></tr>
+          <tr><td class="k mono">/play/pause</td><td>Bottom sheet over Duel — resume, restart, quit</td><td>PauseSheet</td><td>duelController</td><td>pause.*</td></tr>
+          <tr><td class="k mono">/modes</td><td>vs CPU · Pass&amp;Play · (Online &amp; Friend locked)</td><td>ModeSelectScreen, ModeRow</td><td>—</td><td>mode.*</td></tr>
+          <tr><td class="k mono">/history</td><td>Scrollable list of last 100 rounds</td><td>HistoryScreen, RoundHistoryList, HistoryRow, EmptyHistoryState</td><td>historyRepository</td><td>history.*</td></tr>
+          <tr><td class="k mono">/stats</td><td>Win rate, top pick, longest streak; entry to achievements</td><td>StatsScreen, StatTile</td><td>statsController</td><td>stats.*</td></tr>
+          <tr><td class="k mono">/achievements</td><td>8 MVP achievements, locked + unlocked</td><td>AchievementsScreen, AchievementTile</td><td>achievementsController</td><td>achv.*</td></tr>
+          <tr><td class="k mono">/themes</td><td>Browse the 2 packs · Apply / Unlock</td><td>ThemesScreen, ThemePreviewCard, UnlockBadge</td><td>themePackProvider</td><td>themes.*</td></tr>
+          <tr><td class="k mono">/themes/:id/unlock</td><td>Bottom sheet — Rewarded ad CTA + Buy (P2)</td><td>RewardedAdUnlockSheet</td><td>adsController, themePackProvider</td><td>ad.*</td></tr>
+          <tr><td class="k mono">/store</td><td>Remove Ads hero + theme packs</td><td>StoreScreen, RemoveAdsCard, ThemePackCard</td><td>purchaseController</td><td>store.*</td></tr>
+          <tr><td class="k mono">/settings</td><td>Sound · haptics · language · reset · about</td><td>SettingsScreen, SettingRow, ToggleSwitch</td><td>settingsProvider</td><td>set.*</td></tr>
+          <tr><td class="k mono">/settings/reset</td><td>Bottom sheet — destructive reset confirm</td><td>ResetConfirmSheet</td><td>historyRepository, statsController</td><td>set.reset.*</td></tr>
+          <tr><td class="k mono">/error</td><td>Fatal-error fallback · Try again · Report</td><td>ErrorFallbackScreen</td><td>—</td><td>err.*</td></tr>
+          <tr><td>(banner overlay)</td><td>Top-of-Home offline banner</td><td>OfflineBanner</td><td>connectivity</td><td>offline.*</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Theme dependency: <strong>every screen</strong> consumes <code>themePackProvider</code>; no widget reaches outside the current pack for colours, motion, or text styles.</p>
+  </section>
+
+  <!-- ─── 03 · COMPONENTS ─── -->
+  <section id="components">
+    <div class="s-head">
+      <div class="s-num">03 · Build</div>
+      <h2>Flutter component breakdown</h2>
+      <div class="s-lede">Every widget that ships. Responsibility · props · callbacks · tokens. Names are final — Claude CLI must use them verbatim so docs/tests/issues stay searchable.</div>
+    </div>
+
+    <h3>App shell</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Widget</th><th>Responsibility</th><th>Input</th><th>Emits</th><th>Tokens</th><th>Phase</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">RoshamboApp</td><td>Root <code>MaterialApp.router</code>; wires Riverpod scope, locale, theme</td><td>—</td><td>—</td><td>all</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">AppShell</td><td>Per-route <code>Scaffold</code> wrapper; injects ThemeBackdrop + AppBar + OfflineBanner</td><td>title?, leading?, trailing?, body</td><td>—</td><td>colors, spacing</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ThemeScope</td><td><code>InheritedWidget</code> exposing the current ThemePack downstream</td><td>pack, child</td><td>—</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ThemeBackdrop</td><td>Per-pack background layer (cream paper noise for Tactile, grid+glow for Futuristic)</td><td>—</td><td>—</td><td>colors</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">OfflineBanner</td><td>Conditional top banner when offline</td><td>—</td><td>—</td><td>colors, radius</td><td><span class="pill mvp">MVP</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Screens</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Widget</th><th>Responsibility</th><th>Input</th><th>Emits</th><th>Phase</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">SplashScreen</td><td>Async warmup; navigates to Home or Onboarding when ready</td><td>—</td><td>onReady</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">LanguageSelectScreen</td><td>3-row picker; persists to settings; pushes /onboarding/intro</td><td>—</td><td>onLanguageSelected(AppLanguage)</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">OnboardingScreen</td><td>3 paged steps with auto-play demo on step 1</td><td>—</td><td>onComplete()</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ThemeSelectScreen</td><td>Grid of ThemePreviewCard; "Start playing" CTA</td><td>—</td><td>onApply(ThemePackId)</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">HomeScreen</td><td>Quick Play + tiles + promo card</td><td>—</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ModeSelectScreen</td><td>List of GameModes with locked rows for Phase 3 modes</td><td>—</td><td>onMode(GameMode)</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">DuelScreen</td><td>The duel — owns the FSM consumer</td><td>mode: GameMode</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">HistoryScreen</td><td>Scrollable list; empty state inline</td><td>—</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">StatsScreen</td><td>Stat tiles · achievements entry</td><td>—</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">AchievementsScreen</td><td>Locked + unlocked rows</td><td>—</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ThemesScreen</td><td>Browse + Apply + Unlock entrypoints</td><td>—</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">StoreScreen</td><td>Remove Ads + theme list + restore footer</td><td>—</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">SettingsScreen</td><td>Toggle rows + reset + about</td><td>—</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ErrorFallbackScreen</td><td>"Something tore" · Try again CTA</td><td>error: Object?</td><td>onRetry()</td><td><span class="pill mvp">MVP</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Duel components</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Widget</th><th>Responsibility</th><th>Input</th><th>Emits</th><th>Phase</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">DuelStage</td><td>Layout host — YOU card · VsBadge · CPU card</td><td>phase: DuelPhase, you?, cpu?, result?</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">MoveCard</td><td>One face-up card with icon + label (size: sm/md/lg)</td><td>move, size, state, who</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">CpuThinkingCard</td><td>Face-down card with pulse during cpu_thinking; flips to MoveCard on reveal</td><td>phase</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">VsBadge</td><td>Italic serif "vs" + hairline</td><td>—</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ResultBanner</td><td>Verdict text + sub-line ("Paper covers Rock.")</td><td>result: RoundOutcome, you, cpu</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">MovePicker</td><td>Three picker buttons with locked dim &amp; press feedback</td><td>locked: bool, lastPick?</td><td>onPick(MoveChoice)</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ScoreChip</td><td>Pill: you · cpu · ties</td><td>you, cpu, ties</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">StreakChip</td><td>Renders only when streak ≥ 2; small italic flourish (Premium Minimal) / fire chip (Arena)</td><td>streak: int</td><td>—</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">DailyMissionCard</td><td>One-line mission with progress; tap to reveal detail</td><td>mission: DailyMission</td><td>onTap()</td><td><span class="pill mvp">MVP</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>List items, sheets &amp; shared</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Widget</th><th>Responsibility</th><th>Phase</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">RoundHistoryList</td><td>Lazy list builder for history rows · sticky session headers</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">HistoryRow</td><td>One round: index · moves · time · outcome tag</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">EmptyHistoryState</td><td>Illustration + Play CTA</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">AchievementTile</td><td>Locked + unlocked variants</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">StatTile</td><td>Label + big numeric + sub</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ThemePreviewCard</td><td>Theme name, palette swatch row, lock state</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">RewardedAdUnlockSheet</td><td>Watch-ad CTA · Buy CTA</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">PauseSheet</td><td>Resume · Restart · Quit (with confirm)</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ResetConfirmSheet</td><td>Destructive confirm with score + history preview</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">SettingRow</td><td>Label + sub + trailing control (toggle / chevron)</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">ToggleSwitch</td><td>Themed switch (matches ThemePack)</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">PrimaryButton, SecondaryButton</td><td>Themed CTA buttons; honor reduce-motion</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k mono">RpsIcon</td><td><code>SvgPicture</code> wrapper · size, color, variant (solid/outline)</td><td><span class="pill mvp">MVP</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── 04 · DOMAIN ─── -->
+  <section id="domain">
+    <div class="s-head">
+      <div class="s-num">04 · Build</div>
+      <h2>Domain model spec</h2>
+      <div class="s-lede">Pure Dart, zero Flutter imports. Lives in <code>lib/domain/</code>. JSON shape matches the eventual server document so the local Isar collection can be uploaded later without migration.</div>
+    </div>
+
+    <h3>Enums</h3>
+    <pre><span class="kw">enum</span> <span class="typ">MoveChoice</span> { rock, paper, scissors }
+
+<span class="kw">enum</span> <span class="typ">RoundOutcome</span> { win, loss, tie }
+
+<span class="kw">enum</span> <span class="typ">DuelPhase</span> {
+  idle,             <span class="cm">// pre-pick</span>
+  choiceSelected,   <span class="cm">// transient — 80ms then locked</span>
+  locked,           <span class="cm">// player committed, cpu not yet</span>
+  cpuThinking,      <span class="cm">// 400–900ms variable hold</span>
+  reveal,           <span class="cm">// both shown; result computed</span>
+  paused,
+  matchEnd,
+}
+
+<span class="kw">enum</span> <span class="typ">GameMode</span> {
+  vsCpu,
+  passAndPlay,
+  online,           <span class="cm">// Phase 3 — locked in MVP UI</span>
+  friend,           <span class="cm">// Phase 3</span>
+}
+
+<span class="kw">enum</span> <span class="typ">ThemePackId</span> {
+  tactilePremium,   <span class="cm">// default · always free</span>
+  modernFuturistic, <span class="cm">// rewarded-ad unlock in MVP</span>
+  premiumMinimal,   <span class="cm">// Phase 2</span>
+  competitiveArena, <span class="cm">// Phase 2</span>
+}
+
+<span class="kw">enum</span> <span class="typ">AppLanguage</span> { en, tr, es }
+
+<span class="kw">enum</span> <span class="typ">CpuDifficulty</span> { easy, normal, hard } <span class="cm">// MVP uses .normal only</span></pre>
+
+    <h3>Data classes</h3>
+    <pre><span class="cm">/// One completed round. Schema is exactly what we'll later send to the server.</span>
+@freezed
+<span class="kw">class</span> <span class="typ">RoundRecord</span> <span class="kw">with</span> _$RoundRecord {
+  <span class="kw">const factory</span> RoundRecord({
+    <span class="kw">required</span> <span class="typ">String</span> id,             <span class="cm">// uuid v4</span>
+    <span class="kw">required</span> <span class="typ">String</span> sessionId,      <span class="cm">// groups rounds played in one app session</span>
+    <span class="kw">required</span> <span class="typ">GameMode</span> mode,
+    <span class="kw">required</span> <span class="typ">MoveChoice</span> you,
+    <span class="kw">required</span> <span class="typ">MoveChoice</span> cpu,         <span class="cm">// opponent in pass&amp;play</span>
+    <span class="kw">required</span> <span class="typ">RoundOutcome</span> outcome,
+    <span class="kw">required</span> <span class="typ">ThemePackId</span> themeId,
+    <span class="kw">required</span> <span class="typ">DateTime</span> playedAt,
+  }) = _RoundRecord;
+
+  <span class="kw">factory</span> RoundRecord.fromJson(<span class="typ">Map&lt;String, dynamic&gt;</span> json) =&gt; _$RoundRecordFromJson(json);
+}
+
+<span class="cm">/// Aggregated lifetime stats — derived from RoundRecords.</span>
+@freezed
+<span class="kw">class</span> <span class="typ">UserStats</span> <span class="kw">with</span> _$UserStats {
+  <span class="kw">const factory</span> UserStats({
+    @Default(<span class="num">0</span>) <span class="typ">int</span> totalRounds,
+    @Default(<span class="num">0</span>) <span class="typ">int</span> wins,
+    @Default(<span class="num">0</span>) <span class="typ">int</span> losses,
+    @Default(<span class="num">0</span>) <span class="typ">int</span> ties,
+    @Default(<span class="num">0</span>) <span class="typ">int</span> currentStreak,    <span class="cm">// + for wins, - for losses, 0 on tie</span>
+    @Default(<span class="num">0</span>) <span class="typ">int</span> bestStreak,
+    @Default({}) <span class="typ">Map&lt;MoveChoice, int&gt;</span> picksByMove,  <span class="cm">// frequency</span>
+    @Default(<span class="num">0</span>) <span class="typ">int</span> sessionsPlayed,
+    <span class="typ">DateTime</span>? lastPlayedAt,
+  }) = _UserStats;
+
+  <span class="kw">factory</span> UserStats.fromJson(<span class="typ">Map&lt;String, dynamic&gt;</span> json) =&gt; _$UserStatsFromJson(json);
+}
+
+<span class="cm">/// Static + runtime data for one achievement.</span>
+@freezed
+<span class="kw">class</span> <span class="typ">Achievement</span> <span class="kw">with</span> _$Achievement {
+  <span class="kw">const factory</span> Achievement({
+    <span class="kw">required</span> <span class="typ">String</span> id,             <span class="cm">// e.g. 'first_blood'</span>
+    <span class="kw">required</span> <span class="typ">String</span> nameKey,        <span class="cm">// l10n key</span>
+    <span class="kw">required</span> <span class="typ">String</span> descKey,
+    <span class="kw">required</span> <span class="typ">int</span> target,           <span class="cm">// progress goal</span>
+    @Default(<span class="num">0</span>) <span class="typ">int</span> progress,
+    <span class="typ">DateTime</span>? unlockedAt,
+  }) = _Achievement;
+
+  <span class="typ">bool</span> get isUnlocked =&gt; unlockedAt != <span class="kw">null</span>;
+  <span class="typ">double</span> get progressFraction =&gt; (progress / target).clamp(<span class="num">0</span>, <span class="num">1</span>);
+}
+
+<span class="cm">/// One-day rotating mission, generated locally from a seed = date.</span>
+@freezed
+<span class="kw">class</span> <span class="typ">DailyMission</span> <span class="kw">with</span> _$DailyMission {
+  <span class="kw">const factory</span> DailyMission({
+    <span class="kw">required</span> <span class="typ">String</span> id,
+    <span class="kw">required</span> <span class="typ">String</span> templateId,     <span class="cm">// 'win_n', 'use_move_n', 'streak_n', 'play_n'</span>
+    <span class="kw">required</span> <span class="typ">int</span> target,
+    @Default(<span class="num">0</span>) <span class="typ">int</span> progress,
+    <span class="kw">required</span> <span class="typ">DateTime</span> expiresAt, <span class="cm">// midnight local</span>
+    <span class="typ">DateTime</span>? completedAt,
+  }) = _DailyMission;
+}
+
+<span class="cm">/// Live snapshot of a duel — never persisted. Belongs to duelController only.</span>
+@freezed
+<span class="kw">class</span> <span class="typ">DuelState</span> <span class="kw">with</span> _$DuelState {
+  <span class="kw">const factory</span> DuelState({
+    <span class="kw">required</span> <span class="typ">GameMode</span> mode,
+    @Default(DuelPhase.idle) <span class="typ">DuelPhase</span> phase,
+    <span class="typ">MoveChoice</span>? you,
+    <span class="typ">MoveChoice</span>? cpu,
+    <span class="typ">RoundOutcome</span>? outcome,
+    @Default(<span class="num">0</span>) <span class="typ">int</span> youScore,
+    @Default(<span class="num">0</span>) <span class="typ">int</span> cpuScore,
+    @Default(<span class="num">0</span>) <span class="typ">int</span> ties,
+    @Default(<span class="num">0</span>) <span class="typ">int</span> roundIndex,
+  }) = _DuelState;
+}
+
+<span class="cm">/// Per-pack entitlement; written when an unlock or purchase completes.</span>
+@freezed
+<span class="kw">class</span> <span class="typ">ThemeEntitlement</span> <span class="kw">with</span> _$ThemeEntitlement {
+  <span class="kw">const factory</span> ThemeEntitlement({
+    <span class="kw">required</span> <span class="typ">ThemePackId</span> id,
+    <span class="kw">required</span> <span class="typ">bool</span> isOwned,
+    <span class="typ">DateTime</span>? unlockedAt,
+    <span class="typ">String</span>? unlockMethod,  <span class="cm">// 'default' | 'rewarded_ad' | 'iap'</span>
+  }) = _ThemeEntitlement;
+}
+
+<span class="cm">/// Persistent user-tunable preferences.</span>
+@freezed
+<span class="kw">class</span> <span class="typ">AppSettings</span> <span class="kw">with</span> _$AppSettings {
+  <span class="kw">const factory</span> AppSettings({
+    @Default(AppLanguage.en) <span class="typ">AppLanguage</span> language,
+    @Default(ThemePackId.tactilePremium) <span class="typ">ThemePackId</span> theme,
+    @Default(<span class="kw">true</span>) <span class="typ">bool</span> soundOn,
+    @Default(<span class="kw">true</span>) <span class="typ">bool</span> hapticsOn,
+    @Default(<span class="kw">true</span>) <span class="typ">bool</span> firstLaunch,
+    @Default(<span class="kw">false</span>) <span class="typ">bool</span> reduceMotion,
+    @Default(<span class="kw">false</span>) <span class="typ">bool</span> adsRemoved,
+  }) = _AppSettings;
+}</pre>
+
+    <div class="callout note"><div><strong>Server compatibility</strong>The <code>RoundRecord</code> JSON shape — <code>id · sessionId · mode · you · cpu · outcome · themeId · playedAt</code> — is the eventual Firestore document. When P3 lands, Isar becomes the offline cache and an upload worker drains it to the server. No migrations.</div></div>
+  </section>
+
+  <!-- ─── 05 · STATE ─── -->
+  <section id="state">
+    <div class="s-head">
+      <div class="s-num">05 · Build</div>
+      <h2>State management spec</h2>
+      <div class="s-lede">Riverpod 2 with codegen. Eleven providers in MVP. Every screen reads from at most three of them.</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width: 24%;">Provider</th><th>Responsibility</th><th>Depends on</th><th>State type</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">appBootstrapProvider</td><td>Awaits locale + settings + Isar + theme assets; routes to /splash → /onboarding or /home</td><td>Isar, AssetBundle</td><td><code>AsyncValue&lt;BootstrapResult&gt;</code></td></tr>
+          <tr><td class="k mono">localeProvider</td><td>Current locale; persists changes</td><td>settingsProvider</td><td><code>Locale</code></td></tr>
+          <tr><td class="k mono">settingsProvider</td><td>Reads/writes AppSettings to Isar</td><td>Isar</td><td><code>AsyncNotifier&lt;AppSettings&gt;</code></td></tr>
+          <tr><td class="k mono">themePackProvider</td><td>Current ThemePack; reactive to settings.theme</td><td>settingsProvider</td><td><code>ThemePack</code></td></tr>
+          <tr><td class="k mono">duelControllerProvider</td><td>Drives the FSM; emits DuelState; calls game engine</td><td>RpsEngine, settingsProvider</td><td><code>Notifier&lt;DuelState&gt;</code></td></tr>
+          <tr><td class="k mono">historyRepositoryProvider</td><td>Read + write RoundRecords; emits stream</td><td>Isar</td><td><code>Stream&lt;List&lt;RoundRecord&gt;&gt;</code></td></tr>
+          <tr><td class="k mono">statsControllerProvider</td><td>Computes UserStats from history stream</td><td>historyRepository</td><td><code>UserStats</code></td></tr>
+          <tr><td class="k mono">achievementsControllerProvider</td><td>Reacts to round_completed; unlocks achievements; persists</td><td>historyRepository, Isar</td><td><code>List&lt;Achievement&gt;</code></td></tr>
+          <tr><td class="k mono">dailyMissionProvider</td><td>Generates today's mission (deterministic seed); tracks progress</td><td>historyRepository, Isar</td><td><code>DailyMission</code></td></tr>
+          <tr><td class="k mono">adsControllerProvider</td><td>Loads + shows AdMob ads; gates by frequency rules</td><td>settingsProvider</td><td><code>AdsState</code></td></tr>
+          <tr><td class="k mono">purchaseControllerProvider</td><td>IAP queries + completion; updates entitlements</td><td>Isar</td><td><code>AsyncNotifier&lt;PurchaseState&gt;</code></td></tr>
+          <tr><td class="k mono">analyticsProvider</td><td>Singleton AnalyticsService; called from controllers, not widgets</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Key methods on duelControllerProvider</h3>
+    <pre><span class="kw">class</span> <span class="typ">DuelController</span> <span class="kw">extends</span> Notifier&lt;DuelState&gt; {
+  <span class="kw">void</span> startMatch(GameMode mode);
+  <span class="kw">void</span> pick(MoveChoice move);          <span class="cm">// idle → choiceSelected → locked</span>
+  <span class="kw">void</span> _tickCpuThinking();              <span class="cm">// internal — random 400–900ms</span>
+  <span class="kw">void</span> _resolve();                       <span class="cm">// computes outcome, persists round</span>
+  <span class="kw">void</span> nextRound();                      <span class="cm">// reveal → idle</span>
+  <span class="kw">void</span> pause();
+  <span class="kw">void</span> resume();
+  <span class="kw">void</span> quit();
+}</pre>
+
+    <div class="callout warn"><div><strong>Hard rule</strong>The duel controller is the <em>only</em> producer of <code>RoundRecord</code>s. History repository receives writes, never produces them. This keeps the FSM the source of truth.</div></div>
+  </section>
+
+  <!-- ─── 06 · ENGINE ─── -->
+  <section id="engine">
+    <div class="s-head">
+      <div class="s-num">06 · Build</div>
+      <h2>Game engine spec</h2>
+      <div class="s-lede">Pure Dart. Tested in isolation. Imported by <code>duelController</code>. No Flutter, no async, no I/O.</div>
+    </div>
+
+    <h3>Resolution</h3>
+    <pre><span class="cm">// lib/domain/rps_engine.dart</span>
+
+<span class="kw">class</span> <span class="typ">RpsEngine</span> {
+  <span class="kw">const</span> RpsEngine();
+
+  <span class="cm">/// What beats what.</span>
+  <span class="kw">static const</span> <span class="typ">Map&lt;MoveChoice, MoveChoice&gt;</span> _beats = {
+    MoveChoice.rock:     MoveChoice.scissors,
+    MoveChoice.scissors: MoveChoice.paper,
+    MoveChoice.paper:    MoveChoice.rock,
+  };
+
+  <span class="typ">RoundOutcome</span> resolve(<span class="typ">MoveChoice</span> you, <span class="typ">MoveChoice</span> cpu) {
+    <span class="kw">if</span> (you == cpu) <span class="kw">return</span> RoundOutcome.tie;
+    <span class="kw">return</span> _beats[you] == cpu ? RoundOutcome.win : RoundOutcome.loss;
+  }
+
+  <span class="cm">/// CPU move. MVP only uses .normal; rng + difficulty stub is in place</span>
+  <span class="cm">/// so we can swap it for adaptive AI in a later phase without touching</span>
+  <span class="cm">/// the duel controller.</span>
+  <span class="typ">MoveChoice</span> cpuMove({
+    <span class="kw">required</span> <span class="typ">CpuDifficulty</span> difficulty,
+    <span class="kw">required</span> <span class="typ">List&lt;MoveChoice&gt;</span> recentPlayerMoves,  <span class="cm">// last 5</span>
+    <span class="typ">Random</span>? rng,
+  }) {
+    <span class="kw">final</span> r = rng ?? Random();
+    <span class="kw">switch</span> (difficulty) {
+      <span class="kw">case</span> CpuDifficulty.easy:
+        <span class="cm">// pure random</span>
+        <span class="kw">return</span> MoveChoice.values[r.nextInt(<span class="num">3</span>)];
+      <span class="kw">case</span> CpuDifficulty.normal:
+        <span class="cm">// random, but never repeat exactly the last cpu move twice</span>
+        <span class="kw">return</span> MoveChoice.values[r.nextInt(<span class="num">3</span>)];
+      <span class="kw">case</span> CpuDifficulty.hard:
+        <span class="cm">// Phase 2+ stub — counters the player's most-used recent move</span>
+        <span class="kw">return</span> MoveChoice.values[r.nextInt(<span class="num">3</span>)];
+    }
+  }
+}</pre>
+
+    <h3>Streak rules</h3>
+    <ul>
+      <li><strong>Win</strong> while currentStreak ≥ 0 → currentStreak + 1.</li>
+      <li><strong>Win</strong> while currentStreak &lt; 0 → currentStreak = 1 (broken loss-streak).</li>
+      <li><strong>Loss</strong> while currentStreak &gt; 0 → currentStreak = -1.</li>
+      <li><strong>Loss</strong> while currentStreak ≤ 0 → currentStreak - 1.</li>
+      <li><strong>Tie</strong> → currentStreak unchanged.</li>
+      <li><code>bestStreak = max(bestStreak, currentStreak)</code> after every round.</li>
+      <li>Reset Match zeroes both.</li>
+    </ul>
+
+    <h3>Round → side effects</h3>
+    <ol>
+      <li>Engine resolves outcome.</li>
+      <li><code>duelController</code> creates a <code>RoundRecord</code> and pushes to <code>historyRepository</code>.</li>
+      <li><code>statsController</code> recomputes from stream (cheap — derived).</li>
+      <li><code>achievementsController</code> evaluates each achievement's trigger predicate; persists newly-unlocked.</li>
+      <li><code>dailyMissionProvider</code> increments progress if the round matches the mission template.</li>
+      <li><code>analytics.roundCompleted(record)</code> fires.</li>
+    </ol>
+
+    <h3>Pass-and-play behaviour</h3>
+    <ul>
+      <li>Same FSM. The "CPU" move is the second player's input — collected after the first player commits and looks away.</li>
+      <li>UI sequence: P1 picks → hide-away screen ("Pass to Player 2") → P2 picks → reveal.</li>
+      <li>RoundRecord still uses <code>you</code> / <code>cpu</code> field names — but the JSON contains <code>mode: 'passAndPlay'</code> so we know.</li>
+    </ul>
+
+    <h3>History persistence timing</h3>
+    <ul>
+      <li><strong>Write</strong> on <code>reveal → ready</code> transition (i.e. after the player sees the verdict, before they tap again). Fire-and-forget; UI does not block.</li>
+      <li>If write fails (disk full, very rare), the round is dropped and we log to analytics. Never block the next round on persistence.</li>
+      <li>History is capped at 100 rows. Inserting the 101st evicts the oldest in the same transaction.</li>
+    </ul>
+  </section>
+
+  <!-- ─── 07 · THEME ─── -->
+  <section id="theme">
+    <div class="s-head">
+      <div class="s-num">07 · Build</div>
+      <h2>Theme engine spec</h2>
+      <div class="s-lede">One abstract class. Two concrete implementations in MVP. Two more registered as locked stubs so the picker UI is real.</div>
+    </div>
+
+    <h3>The contract</h3>
+    <pre><span class="kw">abstract class</span> <span class="typ">ThemePack</span> {
+  ThemePackId   get id;
+  String        get displayNameKey;       <span class="cm">// l10n key</span>
+  ImageProvider get previewThumbnail;
+
+  AppColorTokens   get colors;
+  AppTextTokens    get text;
+  AppSpacingTokens get spacing;
+  AppRadiusTokens  get radii;
+  AppShadowTokens  get shadows;
+  AppMotionTokens  get motion;
+  IconPack         get icons;
+  SoundPack        get sounds;
+  HapticProfile    get haptics;
+  CardStyle        get cardStyle;
+  BackdropStyle    get backdrop;
+
+  <span class="cm">/// Build the duel-side widget for this theme. Concept-specific.</span>
+  Widget buildDuelSide({
+    <span class="kw">required</span> DuelSideRole role,
+    <span class="kw">required</span> MoveChoice? move,
+    <span class="kw">required</span> DuelPhase phase,
+    <span class="kw">required</span> RoundOutcome? outcome,
+  });
+
+  <span class="cm">/// Build the verdict widget for this theme.</span>
+  Widget buildVerdictBanner({
+    <span class="kw">required</span> RoundOutcome outcome,
+    <span class="kw">required</span> MoveChoice you,
+    <span class="kw">required</span> MoveChoice cpu,
+  });
+}</pre>
+
+    <h3>Registered packs</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>id</th><th>Status</th><th>Unlock</th><th>File</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">tactilePremium</td><td><span class="pill mvp">MVP · default</span></td><td>always owned</td><td><code>themes/tactile_premium.dart</code></td></tr>
+          <tr><td class="k mono">modernFuturistic</td><td><span class="pill mvp">MVP · unlockable</span></td><td>rewarded ad (or IAP placeholder)</td><td><code>themes/modern_futuristic.dart</code></td></tr>
+          <tr><td class="k mono">premiumMinimal</td><td><span class="pill p2">Phase 2</span></td><td>tba</td><td><code>themes/premium_minimal.dart</code> · stub</td></tr>
+          <tr><td class="k mono">competitiveArena</td><td><span class="pill p2">Phase 2</span></td><td>tba</td><td><code>themes/competitive_arena.dart</code> · stub</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Theme application</h3>
+    <pre><span class="cm">// In app.dart</span>
+@override
+Widget build(BuildContext context, WidgetRef ref) {
+  <span class="kw">final</span> pack = ref.watch(themePackProvider);
+  <span class="kw">return</span> ThemeScope(
+    pack: pack,
+    child: MaterialApp.router(
+      themeMode: ThemeMode.system,
+      theme: pack.toFlutterThemeData(brightness: Brightness.light),
+      darkTheme: pack.toFlutterThemeData(brightness: Brightness.dark),
+      routerConfig: appRouter,
+      locale: ref.watch(localeProvider),
+      supportedLocales: const [Locale(<span class="str">'en'</span>), Locale(<span class="str">'tr'</span>), Locale(<span class="str">'es'</span>)],
+    ),
+  );
+}</pre>
+  </section>
+
+  <!-- ─── 08 · TOKENS ─── -->
+  <section id="tokens">
+    <div class="s-head">
+      <div class="s-num">08 · Build</div>
+      <h2>Design tokens export</h2>
+      <div class="s-lede">Concrete values for both MVP packs. Drop straight into the corresponding theme file.</div>
+    </div>
+
+    <h3>Token classes (shared shape)</h3>
+    <pre><span class="kw">class</span> <span class="typ">AppColorTokens</span> {
+  <span class="kw">final</span> Color bg, surface, surfaceDeep;
+  <span class="kw">final</span> Color ink, inkSoft, inkMuted, inkFaint;
+  <span class="kw">final</span> Color hairline, hairlineSoft;
+  <span class="kw">final</span> Color accent, accentSoft;
+  <span class="kw">final</span> Color win, loss, tie;
+  <span class="kw">const</span> AppColorTokens({...});
+}
+
+<span class="kw">class</span> <span class="typ">AppTextTokens</span> {
+  <span class="kw">final</span> TextStyle displayHero, displaySection, bodyLg, body, bodySm;
+  <span class="kw">final</span> TextStyle eyebrow, monoScore;
+  <span class="kw">const</span> AppTextTokens({...});
+}
+
+<span class="kw">class</span> <span class="typ">AppSpacingTokens</span> {
+  <span class="kw">final</span> <span class="typ">double</span> s1, s2, s3, s4, s5, s6, s7, s8, s9;  <span class="cm">// 4, 8, 12, 16, 20, 24, 32, 40, 56</span>
+}
+
+<span class="kw">class</span> <span class="typ">AppRadiusTokens</span> {
+  <span class="kw">final</span> <span class="typ">double</span> xs, sm, md, lg, pill;            <span class="cm">// 4, 8, 14, 22, 999</span>
+}
+
+<span class="kw">class</span> <span class="typ">AppShadowTokens</span> {
+  <span class="kw">final</span> <span class="typ">List&lt;BoxShadow&gt;</span> elev1, elev2, elev3;
+}
+
+<span class="kw">class</span> <span class="typ">AppMotionTokens</span> {
+  <span class="kw">final</span> Duration tap, lock, cpuThink, reveal, verdict, celebrate, sheet;
+  <span class="kw">final</span> Curve curveStandard, curveOvershoot;
+}</pre>
+
+    <h3>Tactile Premium — colours</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Token</th><th>Light</th><th>Dark</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">colors.bg</td><td><span class="sw" style="background:#f0e9d8"></span>#f0e9d8</td><td><span class="sw" style="background:#1c1812"></span>#1c1812</td><td>app background</td></tr>
+          <tr><td class="k mono">colors.surface</td><td><span class="sw" style="background:#fbf7ec"></span>#fbf7ec</td><td><span class="sw" style="background:#2a261d"></span>#2a261d</td><td>cards · sheets</td></tr>
+          <tr><td class="k mono">colors.surfaceDeep</td><td><span class="sw" style="background:#ebe3cf"></span>#ebe3cf</td><td><span class="sw" style="background:#1f1a13"></span>#1f1a13</td><td>inset surfaces</td></tr>
+          <tr><td class="k mono">colors.ink</td><td><span class="sw" style="background:#1f1c14"></span>#1f1c14</td><td><span class="sw" style="background:#f7f0dc"></span>#f7f0dc</td><td>primary text</td></tr>
+          <tr><td class="k mono">colors.inkSoft</td><td><span class="sw" style="background:#5a5443"></span>#5a5443</td><td><span class="sw" style="background:#cabf9d"></span>#cabf9d</td><td>secondary text</td></tr>
+          <tr><td class="k mono">colors.inkMuted</td><td><span class="sw" style="background:#8e8772"></span>#8e8772</td><td><span class="sw" style="background:#8e8772"></span>#8e8772</td><td>tertiary text · sub-labels</td></tr>
+          <tr><td class="k mono">colors.inkFaint</td><td><span class="sw" style="background:#bdb6a0"></span>#bdb6a0</td><td><span class="sw" style="background:#5a5443"></span>#5a5443</td><td>placeholders · vs glyph</td></tr>
+          <tr><td class="k mono">colors.hairline</td><td><span class="sw" style="background:#d8d0b8"></span>#d8d0b8</td><td><span class="sw" style="background:#3a3528"></span>#3a3528</td><td>card edges · dividers</td></tr>
+          <tr><td class="k mono">colors.accent</td><td><span class="sw" style="background:#a85a3b"></span>#a85a3b</td><td><span class="sw" style="background:#d97a55"></span>#d97a55</td><td>accent · destructive</td></tr>
+          <tr><td class="k mono">colors.win</td><td><span class="sw" style="background:#5c7d44"></span>#5c7d44</td><td><span class="sw" style="background:#9bbd7d"></span>#9bbd7d</td><td>win state</td></tr>
+          <tr><td class="k mono">colors.loss</td><td><span class="sw" style="background:#a85a3b"></span>#a85a3b</td><td><span class="sw" style="background:#d97a55"></span>#d97a55</td><td>loss state</td></tr>
+          <tr><td class="k mono">colors.tie</td><td><span class="sw" style="background:#8e8772"></span>#8e8772</td><td><span class="sw" style="background:#a8a292"></span>#a8a292</td><td>tie state</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Modern Futuristic — colours</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">colors.bg</td><td><span class="sw" style="background:#060912"></span>#060912</td><td>app background (always dark)</td></tr>
+          <tr><td class="k mono">colors.surface</td><td><span class="sw" style="background:rgba(125,249,255,0.05)"></span>rgba(125,249,255,0.05)</td><td>card backgrounds</td></tr>
+          <tr><td class="k mono">colors.surfaceDeep</td><td><span class="sw" style="background:#0a1326"></span>#0a1326</td><td>upper-gradient stop</td></tr>
+          <tr><td class="k mono">colors.ink</td><td><span class="sw" style="background:#f6fbff"></span>#f6fbff</td><td>primary text</td></tr>
+          <tr><td class="k mono">colors.inkSoft</td><td><span class="sw" style="background:rgba(232,246,255,0.82)"></span>rgba(232,246,255,0.82)</td><td>secondary text · accessibility-tuned</td></tr>
+          <tr><td class="k mono">colors.inkMuted</td><td><span class="sw" style="background:rgba(232,246,255,0.58)"></span>rgba(232,246,255,0.58)</td><td>tertiary · accessibility-tuned</td></tr>
+          <tr><td class="k mono">colors.hairline</td><td><span class="sw" style="background:rgba(125,249,255,0.18)"></span>rgba(125,249,255,0.18)</td><td>HUD edges</td></tr>
+          <tr><td class="k mono">colors.accent (cyan)</td><td><span class="sw" style="background:#7df9ff"></span>#7df9ff</td><td>verdict glow · primary highlight</td></tr>
+          <tr><td class="k mono">colors.win</td><td><span class="sw" style="background:#7df9ff"></span>#7df9ff</td><td>win = cyan</td></tr>
+          <tr><td class="k mono">colors.loss</td><td><span class="sw" style="background:#ff5fb4"></span>#ff5fb4</td><td>loss / destructive = magenta</td></tr>
+          <tr><td class="k mono">colors.tie</td><td><span class="sw" style="background:rgba(232,246,255,0.5)"></span>rgba(232,246,255,0.5)</td><td>tie state</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Type families per theme</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Theme</th><th>Display</th><th>Body</th><th>Mono</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Tactile Premium</td><td>Newsreader (italic for warmth)</td><td>Geist</td><td>JetBrains Mono</td></tr>
+          <tr><td class="k">Modern Futuristic</td><td>Space Grotesk (bold)</td><td>Space Grotesk</td><td>Space Mono</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Motion tokens (both packs)</h3>
+    <p>Tactile uses standard curves; Futuristic adds a 380ms glow pulse on reveal (own animation, not in the shared token).</p>
+    <pre>tap       =&gt; <span class="num">80</span> ms · easeOut
+lock      =&gt; <span class="num">180</span> ms · easeOutCubic
+cpuThink  =&gt; <span class="num">520</span> ms · linear   (variable 400–900, seeded per round)
+reveal    =&gt; <span class="num">340</span> ms · easeOutBack(0.2)
+verdict   =&gt; <span class="num">260</span> ms · easeOut
+celebrate =&gt; <span class="num">500</span> ms · easeOutQuart
+sheet     =&gt; <span class="num">320</span> ms · easeOutCubic</pre>
+  </section>
+
+  <!-- ─── 09 · ANIM ─── -->
+  <section id="anim">
+    <div class="s-head">
+      <div class="s-num">09 · Feel</div>
+      <h2>Animation implementation notes</h2>
+      <div class="s-lede">Flutter-native primitives only. No Rive, no Lottie in MVP. Every animation has a reduce-motion fallback.</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Beat</th><th>Widget</th><th>Driver</th><th>Reduce-motion fallback</th></tr></thead>
+        <tbody>
+          <tr><td class="k">tap (press feedback)</td><td>MoveCard</td><td><code>AnimatedScale</code> 1.0 ↔ 0.97 · <code>motion.tap</code></td><td>no-op</td></tr>
+          <tr><td class="k">lock (picked card)</td><td>MovePicker</td><td><code>AnimatedContainer</code> for fill/elevation; <code>AnimatedOpacity</code> for unpicked dim · <code>motion.lock</code></td><td>instant swap</td></tr>
+          <tr><td class="k">cpu thinking pulse</td><td>CpuThinkingCard</td><td><code>AnimationController</code> + <code>ScaleTransition</code> 1.0 ↔ 1.02 · 3 cycles</td><td>static face-down</td></tr>
+          <tr><td class="k">card flip (Tactile reveal)</td><td>CpuThinkingCard → MoveCard</td><td><code>RotationTransition</code> on Y axis · 280ms · <code>easeInOutCubic</code> · two-child crossfade at 50%</td><td><code>AnimatedSwitcher</code> with fade transition</td></tr>
+          <tr><td class="k">reveal snap (Futuristic)</td><td>MoveCard (cpu)</td><td><code>TweenAnimationBuilder&lt;double&gt;</code> 0.6 → 1.0 · <code>easeOutBack(0.2)</code> · scale + opacity</td><td>opacity only, easeOut</td></tr>
+          <tr><td class="k">verdict drop</td><td>ResultBanner</td><td><code>AnimatedSlide</code> y +8 → 0 + <code>AnimatedOpacity</code> · 260ms · 180ms delay</td><td>opacity only</td></tr>
+          <tr><td class="k">win celebrate</td><td>winning MoveCard</td><td><code>TweenAnimationBuilder</code> scale 1.0 → 1.08 → 1.0 · easeOutBack</td><td>skip</td></tr>
+          <tr><td class="k">lose dim</td><td>losing MoveCard</td><td><code>AnimatedOpacity</code> 1.0 → 0.6 + <code>AnimatedSlide</code> 1px vibrate (3 cycles)</td><td>opacity only, no vibrate</td></tr>
+          <tr><td class="k">route push</td><td>any</td><td>go_router <code>CustomTransitionPage</code> with <code>FadeTransition</code> · 280ms</td><td>—</td></tr>
+          <tr><td class="k">bottom sheet</td><td>any sheet</td><td>Native <code>showModalBottomSheet</code> · <code>motion.sheet</code> curve</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Reduce-motion source of truth</h3>
+    <ul>
+      <li>Read <code>MediaQuery.disableAnimationsOf(context)</code> on every widget that animates.</li>
+      <li>Plus the in-app override in <code>settings.reduceMotion</code> — OR'd with system.</li>
+      <li>Expose as <code>ref.watch(reduceMotionProvider)</code> for non-widget consumers.</li>
+    </ul>
+
+    <h3>Custom painters — none</h3>
+    <p>MVP ships no <code>CustomPainter</code>. The Concept 3 ring is drawn with stacked <code>Container</code> + <code>Transform</code> + <code>CircularProgressIndicator</code>-style arcs via <code>flutter_svg</code> or simple <code>DecoratedBox</code>. If a beat genuinely requires it, Phase 12 polish can add one — never MVP.</p>
+  </section>
+
+  <!-- ─── 10 · HAPTIC + SOUND ─── -->
+  <section id="hapticsound">
+    <div class="s-head">
+      <div class="s-num">10 · Feel</div>
+      <h2>Haptics &amp; sound implementation</h2>
+      <div class="s-lede">One service per surface. Every call goes through the service so disabling them in settings is a single boolean flip.</div>
+    </div>
+
+    <h3>HapticsService</h3>
+    <pre><span class="kw">class</span> <span class="typ">HapticsService</span> {
+  <span class="kw">final</span> <span class="typ">SettingsRef</span> _settings;
+  HapticsService(<span class="kw">this</span>._settings);
+
+  <span class="kw">void</span> tap()     =&gt; _fire(() =&gt; HapticFeedback.lightImpact());
+  <span class="kw">void</span> lock()    =&gt; _fire(() =&gt; HapticFeedback.mediumImpact());
+  <span class="kw">void</span> reveal()  =&gt; _fire(() =&gt; HapticFeedback.selectionClick());
+  <span class="kw">void</span> win()     <span class="kw">async</span> {
+    <span class="kw">if</span> (!_enabled) <span class="kw">return</span>;
+    <span class="kw">await</span> HapticFeedback.heavyImpact();
+    <span class="kw">await</span> Future.delayed(Duration(milliseconds: <span class="num">80</span>));
+    <span class="kw">await</span> HapticFeedback.lightImpact();
+  }
+  <span class="kw">void</span> lose()  =&gt; _fire(() =&gt; HapticFeedback.heavyImpact());
+  <span class="kw">void</span> tie()   <span class="kw">async</span> {
+    <span class="kw">if</span> (!_enabled) <span class="kw">return</span>;
+    <span class="kw">await</span> HapticFeedback.lightImpact();
+    <span class="kw">await</span> Future.delayed(Duration(milliseconds: <span class="num">120</span>));
+    <span class="kw">await</span> HapticFeedback.lightImpact();
+  }
+  <span class="kw">void</span> error() =&gt; _fire(() =&gt; HapticFeedback.heavyImpact());
+
+  <span class="typ">bool</span> get _enabled =&gt; _settings.read().hapticsOn;
+  <span class="kw">void</span> _fire(VoidCallback fn) { <span class="kw">if</span> (_enabled) fn(); }
+}</pre>
+    <p>Safe no-op fallback: if the platform doesn't support a given haptic (older Androids), the call returns silently. <code>HapticFeedback</code> APIs are platform-aware.</p>
+
+    <h3>SoundService</h3>
+    <p>Plugin: <code>audioplayers</code> 6.x with a single shared <code>AudioPool</code> per theme. Pool warmup happens during Splash so the first <code>play()</code> is &lt; 16ms.</p>
+    <pre><span class="kw">class</span> <span class="typ">SoundService</span> {
+  <span class="kw">final</span> <span class="typ">SettingsRef</span> _settings;
+  <span class="kw">final</span> <span class="typ">ThemePackRef</span> _theme;
+  AudioPool? _pool;
+
+  <span class="kw">Future</span>&lt;<span class="kw">void</span>&gt; warmupForPack(ThemePack pack) <span class="kw">async</span> { ... }
+
+  <span class="kw">void</span> play(SoundEventId id) {
+    <span class="kw">if</span> (!_settings.read().soundOn) <span class="kw">return</span>;
+    <span class="kw">final</span> assetPath = _theme.read().sounds.assetFor(id);
+    _pool?.play(assetPath);
+  }
+}
+
+<span class="kw">enum</span> <span class="typ">SoundEventId</span> {
+  uiTap, lock, shuffleLoop, reveal, win, lose, tie,
+  achievement, reward, purchase, error,
+}</pre>
+
+    <h3>Settings toggle behaviour</h3>
+    <ul>
+      <li>Toggling "Sound" off cancels any in-flight loops (e.g. shuffle) immediately.</li>
+      <li>Toggling "Haptics" off has no in-flight cleanup; just blocks new calls.</li>
+      <li>If iOS / Android system "Reduce haptics" is on, we respect it — system overrides app.</li>
+    </ul>
+  </section>
+
+  <!-- ─── 11 · L10N ─── -->
+  <section id="l10n">
+    <div class="s-head">
+      <div class="s-num">11 · Feel</div>
+      <h2>Localization handoff</h2>
+      <div class="s-lede">All UI strings, three locales. Key naming follows <code>screen.section.role</code>. Turkish has the most expansion risk — every key has been kept short on purpose.</div>
+    </div>
+
+    <h3>Pluralisation</h3>
+    <p>Use ICU MessageFormat via <code>flutter_localizations</code>. Every count-bearing string has <code>{count, plural, ...}</code> form.</p>
+
+    <h3>Onboarding</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>en</th><th>tr</th><th>es</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">onb.lang.title</td><td>Choose your language.</td><td>Dilini seç.</td><td>Elige tu idioma.</td></tr>
+          <tr><td class="k mono">onb.lang.sub</td><td>You can change this any time in Settings.</td><td>Bunu istediğin zaman Ayarlar'dan değiştirebilirsin.</td><td>Puedes cambiarlo cuando quieras en Ajustes.</td></tr>
+          <tr><td class="k mono">onb.intro.title</td><td>A quiet game of three.</td><td>Üç hamleli sakin bir oyun.</td><td>Un juego tranquilo de tres.</td></tr>
+          <tr><td class="k mono">onb.intro.sub</td><td>Pick a card. We pick one back. The winner shows itself.</td><td>Bir kart seç. Biz de seçeriz. Kazananı birlikte görelim.</td><td>Elige una carta. Nosotros elegimos otra. El ganador aparece.</td></tr>
+          <tr><td class="k mono">onb.intro.cta</td><td>Get started</td><td>Başla</td><td>Comenzar</td></tr>
+          <tr><td class="k mono">onb.theme.title</td><td>Choose a theme</td><td>Bir tema seç</td><td>Elige un tema</td></tr>
+          <tr><td class="k mono">onb.theme.cta</td><td>Start playing</td><td>Oynamaya başla</td><td>Empezar a jugar</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Home &amp; modes</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>en</th><th>tr</th><th>es</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">home.welcome</td><td>Welcome back</td><td>Tekrar hoş geldin</td><td>Bienvenido de nuevo</td></tr>
+          <tr><td class="k mono">home.quickplay</td><td>Quick play</td><td>Hızlı oyna</td><td>Jugar rápido</td></tr>
+          <tr><td class="k mono">home.tiles.modes</td><td>Modes</td><td>Modlar</td><td>Modos</td></tr>
+          <tr><td class="k mono">home.tiles.themes</td><td>Themes</td><td>Temalar</td><td>Temas</td></tr>
+          <tr><td class="k mono">home.tiles.history</td><td>History</td><td>Geçmiş</td><td>Historial</td></tr>
+          <tr><td class="k mono">home.tiles.profile</td><td>Profile</td><td>Profil</td><td>Perfil</td></tr>
+          <tr><td class="k mono">mode.title</td><td>How would you like to play?</td><td>Nasıl oynamak istersin?</td><td>¿Cómo quieres jugar?</td></tr>
+          <tr><td class="k mono">mode.vsCpu</td><td>vs CPU</td><td>Bilgisayara karşı</td><td>vs CPU</td></tr>
+          <tr><td class="k mono">mode.passPlay</td><td>Pass &amp; play (2P)</td><td>Sırayla oyna (2 kişi)</td><td>Pásatela (2 jug.)</td></tr>
+          <tr><td class="k mono">mode.online</td><td>Online · quick match</td><td>Çevrimiçi · hızlı eşleşme</td><td>En línea · partida rápida</td></tr>
+          <tr><td class="k mono">mode.soon</td><td>Soon</td><td>Yakında</td><td>Pronto</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Duel &amp; result</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>en</th><th>tr</th><th>es</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">duel.you</td><td>You</td><td>Sen</td><td>Tú</td></tr>
+          <tr><td class="k mono">duel.cpu</td><td>CPU</td><td>CPU</td><td>CPU</td></tr>
+          <tr><td class="k mono">duel.vs</td><td>vs</td><td>vs</td><td>vs</td></tr>
+          <tr><td class="k mono">duel.move.rock</td><td>Rock</td><td>Taş</td><td>Piedra</td></tr>
+          <tr><td class="k mono">duel.move.paper</td><td>Paper</td><td>Kağıt</td><td>Papel</td></tr>
+          <tr><td class="k mono">duel.move.scissors</td><td>Scissors</td><td>Makas</td><td>Tijeras</td></tr>
+          <tr><td class="k mono">duel.idle</td><td>Make your move.</td><td>Hamleni yap.</td><td>Haz tu jugada.</td></tr>
+          <tr><td class="k mono">duel.locked</td><td>Choice locked. CPU choosing…</td><td>Seçim kilitlendi. CPU seçiyor…</td><td>Elección bloqueada. Eligiendo…</td></tr>
+          <tr><td class="k mono">duel.result.win</td><td>You win.</td><td>Kazandın.</td><td>Ganaste.</td></tr>
+          <tr><td class="k mono">duel.result.loss</td><td>You lose.</td><td>Kaybettin.</td><td>Perdiste.</td></tr>
+          <tr><td class="k mono">duel.result.tie</td><td>It's a tie.</td><td>Berabere.</td><td>Empate.</td></tr>
+          <tr><td class="k mono">duel.explain.rockBeatsScissors</td><td>Rock crushes Scissors.</td><td>Taş, Makas'ı ezer.</td><td>Piedra aplasta Tijeras.</td></tr>
+          <tr><td class="k mono">duel.explain.scissorsBeatsPaper</td><td>Scissors cut Paper.</td><td>Makas, Kağıt'ı keser.</td><td>Tijeras cortan Papel.</td></tr>
+          <tr><td class="k mono">duel.explain.paperBeatsRock</td><td>Paper covers Rock.</td><td>Kağıt, Taş'ı sarar.</td><td>Papel cubre Piedra.</td></tr>
+          <tr><td class="k mono">duel.replay</td><td>Tap any card for the next round</td><td>Sonraki tur için bir kart seç</td><td>Toca cualquier carta para la siguiente ronda</td></tr>
+          <tr><td class="k mono">duel.streak</td><td>{count, plural, =1 {streak of 1} other {streak of {count}}}</td><td>{count, plural, =1 {1 seri} other {{count} seri}}</td><td>{count, plural, =1 {racha de 1} other {racha de {count}}}</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>History, achievements, missions, settings, ads</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>en</th><th>tr</th><th>es</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">history.title</td><td>History</td><td>Geçmiş</td><td>Historial</td></tr>
+          <tr><td class="k mono">history.empty.title</td><td>No rounds yet.</td><td>Henüz tur yok.</td><td>Aún no hay rondas.</td></tr>
+          <tr><td class="k mono">history.empty.sub</td><td>Your first round will land here.</td><td>İlk turun burada olacak.</td><td>Tu primera ronda aparecerá aquí.</td></tr>
+          <tr><td class="k mono">history.empty.cta</td><td>Play a round</td><td>Bir tur oyna</td><td>Jugar una ronda</td></tr>
+          <tr><td class="k mono">history.tag.win</td><td>Win</td><td>Galibiyet</td><td>Victoria</td></tr>
+          <tr><td class="k mono">history.tag.loss</td><td>Loss</td><td>Mağlubiyet</td><td>Derrota</td></tr>
+          <tr><td class="k mono">history.tag.tie</td><td>Tie</td><td>Berabere</td><td>Empate</td></tr>
+          <tr><td class="k mono">achv.title</td><td>Achievements</td><td>Başarımlar</td><td>Logros</td></tr>
+          <tr><td class="k mono">achv.unlocked</td><td>Unlocked</td><td>Kazanıldı</td><td>Desbloqueado</td></tr>
+          <tr><td class="k mono">achv.progress</td><td>{p}/{t}</td><td>{p}/{t}</td><td>{p}/{t}</td></tr>
+          <tr><td class="k mono">achv.firstBlood.name</td><td>First blood</td><td>İlk kazanç</td><td>Primera sangre</td></tr>
+          <tr><td class="k mono">achv.firstBlood.desc</td><td>Win your first round</td><td>İlk tutunu kazan</td><td>Gana tu primera ronda</td></tr>
+          <tr><td class="k mono">achv.threeInARow.name</td><td>Three in a row</td><td>Üç sıralı</td><td>Tres seguidas</td></tr>
+          <tr><td class="k mono">mission.title</td><td>Today's mission</td><td>Bugünün görevi</td><td>Misión de hoy</td></tr>
+          <tr><td class="k mono">mission.template.winN</td><td>Win {n} rounds</td><td>{n} tur kazan</td><td>Gana {n} rondas</td></tr>
+          <tr><td class="k mono">mission.template.useMoveN</td><td>Win {n} with {move}</td><td>{move} ile {n} kazan</td><td>Gana {n} con {move}</td></tr>
+          <tr><td class="k mono">mission.template.streakN</td><td>Get a streak of {n}</td><td>{n}'lik seri yap</td><td>Consigue racha de {n}</td></tr>
+          <tr><td class="k mono">mission.complete</td><td>Mission complete!</td><td>Görev tamam!</td><td>¡Misión completada!</td></tr>
+          <tr><td class="k mono">set.title</td><td>Settings</td><td>Ayarlar</td><td>Ajustes</td></tr>
+          <tr><td class="k mono">set.feel</td><td>Feel</td><td>Hissiyat</td><td>Sensación</td></tr>
+          <tr><td class="k mono">set.sound</td><td>Sound</td><td>Ses</td><td>Sonido</td></tr>
+          <tr><td class="k mono">set.haptics</td><td>Haptics</td><td>Titreşim</td><td>Vibración</td></tr>
+          <tr><td class="k mono">set.language</td><td>Language</td><td>Dil</td><td>Idioma</td></tr>
+          <tr><td class="k mono">set.theme</td><td>Theme</td><td>Tema</td><td>Tema</td></tr>
+          <tr><td class="k mono">set.reset</td><td>Reset match</td><td>Maçı sıfırla</td><td>Reiniciar partida</td></tr>
+          <tr><td class="k mono">set.about</td><td>About</td><td>Hakkında</td><td>Acerca de</td></tr>
+          <tr><td class="k mono">set.reset.confirm</td><td>Clear score and history?</td><td>Skoru ve geçmişi temizle?</td><td>¿Borrar puntuación e historial?</td></tr>
+          <tr><td class="k mono">set.reset.cta</td><td>Start a new match</td><td>Yeni maç başlat</td><td>Iniciar nueva partida</td></tr>
+          <tr><td class="k mono">set.reset.cancel</td><td>Keep playing</td><td>Oynamaya devam</td><td>Seguir jugando</td></tr>
+          <tr><td class="k mono">ad.unlock.title</td><td>Unlock {theme}</td><td>{theme}'yı aç</td><td>Desbloquea {theme}</td></tr>
+          <tr><td class="k mono">ad.unlock.sub</td><td>Watch a short ad (≤ 30s) to unlock this theme permanently.</td><td>Bu temayı kalıcı açmak için kısa bir reklam izle (≤ 30s).</td><td>Mira un anuncio corto (≤ 30s) para desbloquear este tema.</td></tr>
+          <tr><td class="k mono">ad.unlock.cta</td><td>Watch ad to unlock</td><td>Reklamı izle ve aç</td><td>Ver anuncio</td></tr>
+          <tr><td class="k mono">store.removeAds</td><td>Remove ads</td><td>Reklamları kaldır</td><td>Quitar anuncios</td></tr>
+          <tr><td class="k mono">store.restore</td><td>Restore purchases</td><td>Satın almaları geri yükle</td><td>Restaurar compras</td></tr>
+          <tr><td class="k mono">err.title</td><td>Something tore.</td><td>Bir şeyler koptu.</td><td>Algo se rasgó.</td></tr>
+          <tr><td class="k mono">err.sub</td><td>We couldn't load the game. Your scores are safe.</td><td>Oyun yüklenemedi. Skorların güvende.</td><td>No pudimos cargar el juego. Tu puntuación está a salvo.</td></tr>
+          <tr><td class="k mono">err.retry</td><td>Try again</td><td>Tekrar dene</td><td>Reintentar</td></tr>
+          <tr><td class="k mono">offline.banner</td><td>You're offline. vs CPU still works.</td><td>Çevrimdışısın. CPU'ya karşı çalışıyor.</td><td>Sin conexión. vs CPU funciona.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Expansion-resilience checklist</h3>
+    <ul>
+      <li>Turkish strings are on average 15–25% longer than English — every button has at least 16dp horizontal padding.</li>
+      <li>No fixed-width text containers; every primary CTA is full-width or uses <code>FittedBox</code>.</li>
+      <li>Verdict line uses an explicit two-line wrap on small phones; we never letter-space the display strings.</li>
+      <li>Mission templates use ICU plural forms, not string concatenation.</li>
+    </ul>
+  </section>
+
+  <!-- ─── 12 · ADS + IAP ─── -->
+  <section id="ads">
+    <div class="s-head">
+      <div class="s-num">12 · Business</div>
+      <h2>Ads &amp; IAP implementation hooks</h2>
+      <div class="s-lede">Two ad formats. One IAP product. No banners. Every code path that touches money goes through a controller — never inline in a widget.</div>
+    </div>
+
+    <h3>AdMob unit IDs (env-injected)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Format</th><th>Use</th><th>Test unit (debug)</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Interstitial</td><td>Post-match, never mid-duel</td><td><code>ca-app-pub-3940256099942544/1033173712</code></td></tr>
+          <tr><td class="k">Rewarded</td><td>Theme unlock; extra-life boost (P2)</td><td><code>ca-app-pub-3940256099942544/5224354917</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Frequency rules (enforced in <code>adsController</code>)</h3>
+    <ul>
+      <li><strong>No interstitial in the first 5 minutes of first session.</strong></li>
+      <li><strong>No interstitial during onboarding or theme select.</strong></li>
+      <li><strong>No interstitial during active duel</strong> — only between matches.</li>
+      <li>Frequency cap: <strong>1 per 4 rounds</strong>, minimum <strong>90s</strong> between any two interstitials.</li>
+      <li>Players with <code>adsRemoved == true</code>: zero interstitials, ever. Rewarded ads remain available.</li>
+      <li>If ad fails to load &gt; 3× in a row, back off for 10 minutes.</li>
+    </ul>
+
+    <h3>Rewarded ad theme-unlock flow</h3>
+    <pre><span class="cm">// User taps "Watch ad to unlock" in RewardedAdUnlockSheet</span>
+<span class="kw">final</span> result = <span class="kw">await</span> ref.read(adsControllerProvider.notifier)
+    .showRewarded(placement: RewardedPlacement.themeUnlock);
+
+<span class="kw">if</span> (result.completed) {
+  <span class="kw">await</span> ref.read(themePackProvider.notifier).markOwned(themeId);
+  analytics.themeUnlocked(themeId, method: <span class="str">'rewarded_ad'</span>);
+  haptics.reward();
+  Navigator.pop(context);
+} <span class="kw">else if</span> (result.skipped) {
+  <span class="cm">// no unlock; sheet stays open</span>
+}</pre>
+
+    <h3>IAP products (MVP)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Product ID</th><th>Type</th><th>Status</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">com.roshambo.removeads</td><td>Non-consumable</td><td><span class="pill mvp">MVP (hook only)</span></td><td>UI present, product not active in app-store config</td></tr>
+          <tr><td class="k mono">com.roshambo.theme.futuristic</td><td>Non-consumable</td><td><span class="pill p2">P2</span></td><td>Alternative to rewarded ad unlock</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Restore purchases</strong> is a footer button on Store screen. Calls <code>purchaseController.restorePurchases()</code>; on success, applies entitlements and shows a SnackBar.</p>
+
+    <div class="callout warn"><div><strong>Hard rule</strong>Zero ad surface inside an active duel. If anyone proposes an ad mid-round, they are wrong. The duel is the product.</div></div>
+  </section>
+
+  <!-- ─── 13 · ANALYTICS ─── -->
+  <section id="analytics">
+    <div class="s-head">
+      <div class="s-num">13 · Business</div>
+      <h2>Analytics handoff</h2>
+      <div class="s-lede">18 events. All fire from controllers, never from widgets. Parameter names are snake_case. Strings only — no objects.</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Event</th><th>Params</th><th>Fired from</th></tr></thead>
+        <tbody>
+          <tr><td class="k mono">app_open</td><td>theme_id, locale, is_first_open</td><td>appBootstrap</td></tr>
+          <tr><td class="k mono">onboarding_started</td><td>—</td><td>OnboardingScreen.initState</td></tr>
+          <tr><td class="k mono">onboarding_completed</td><td>seconds_to_complete</td><td>OnboardingScreen onComplete</td></tr>
+          <tr><td class="k mono">language_selected</td><td>from, to</td><td>localeProvider.set</td></tr>
+          <tr><td class="k mono">theme_selected</td><td>theme_id, source ('onboarding'|'settings'|'store')</td><td>themePackProvider.apply</td></tr>
+          <tr><td class="k mono">game_started</td><td>mode, theme_id, round_idx</td><td>duelController.startMatch</td></tr>
+          <tr><td class="k mono">mode_selected</td><td>mode</td><td>ModeSelectScreen</td></tr>
+          <tr><td class="k mono">choice_selected</td><td>choice, round_idx</td><td>duelController.pick</td></tr>
+          <tr><td class="k mono">round_completed</td><td>you, cpu, outcome, streak, mode</td><td>duelController._resolve</td></tr>
+          <tr><td class="k mono">streak_updated</td><td>streak, best</td><td>statsController</td></tr>
+          <tr><td class="k mono">achievement_unlocked</td><td>achievement_id, total_unlocked</td><td>achievementsController</td></tr>
+          <tr><td class="k mono">daily_mission_completed</td><td>mission_template, target</td><td>dailyMissionProvider</td></tr>
+          <tr><td class="k mono">rewarded_ad_started</td><td>placement</td><td>adsController</td></tr>
+          <tr><td class="k mono">rewarded_ad_completed</td><td>placement, reward_id</td><td>adsController</td></tr>
+          <tr><td class="k mono">interstitial_shown</td><td>placement, after_rounds</td><td>adsController</td></tr>
+          <tr><td class="k mono">purchase_started</td><td>product_id</td><td>purchaseController</td></tr>
+          <tr><td class="k mono">purchase_completed</td><td>product_id, price_local</td><td>purchaseController</td></tr>
+          <tr><td class="k mono">settings_changed</td><td>key, value (string)</td><td>settingsProvider</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Service: <code>AnalyticsService</code> wraps <code>firebase_analytics</code> 11.x. In debug builds it logs to console only. Verbose logging gated by remote config.</p>
+  </section>
+
+  <!-- ─── 14 · PHASES ─── -->
+  <section id="phases">
+    <div class="s-head">
+      <div class="s-num">14 · Execute</div>
+      <h2>Implementation phases for Claude CLI</h2>
+      <div class="s-lede">13 phases. Each one is one Git commit. After each, run <code>flutter analyze &amp;&amp; flutter test</code>. Never move on with a red build.</div>
+    </div>
+
+    <h3>Phase 0 — Project bootstrap</h3>
+    <p><strong>Goal:</strong> a Flutter 3.27 app that runs the default counter screen, with our dependencies wired and analyze clean.</p>
+    <ul>
+      <li><strong>Files:</strong> <code>pubspec.yaml</code>, <code>analysis_options.yaml</code> (strict lint), <code>lib/main.dart</code>, <code>l10n.yaml</code>.</li>
+      <li><strong>Deps:</strong> <code>flutter_riverpod</code>, <code>riverpod_annotation</code>, <code>riverpod_generator</code>, <code>go_router</code>, <code>isar</code>, <code>isar_flutter_libs</code>, <code>flutter_svg</code>, <code>audioplayers</code>, <code>google_mobile_ads</code>, <code>in_app_purchase</code>, <code>firebase_core</code>, <code>firebase_analytics</code>, <code>connectivity_plus</code>, <code>freezed_annotation</code>, <code>json_annotation</code>, plus matching dev_deps.</li>
+      <li><strong>AC:</strong> <code>flutter run</code> shows the default counter; <code>flutter analyze</code> reports zero issues.</li>
+      <li><strong>Test:</strong> <code>flutter analyze &amp;&amp; flutter test</code></li>
+      <li><strong>Commit:</strong> <code>chore: bootstrap Flutter app with deps</code></li>
+    </ul>
+
+    <h3>Phase 1 — Domain models &amp; game engine</h3>
+    <p><strong>Goal:</strong> pure-Dart domain + a unit-tested <code>RpsEngine</code>.</p>
+    <ul>
+      <li><strong>Files:</strong> <code>lib/domain/move_choice.dart</code>, <code>round_outcome.dart</code>, <code>duel_phase.dart</code>, <code>game_mode.dart</code>, <code>theme_pack_id.dart</code>, <code>app_language.dart</code>, <code>cpu_difficulty.dart</code>, <code>round_record.dart</code>, <code>user_stats.dart</code>, <code>achievement.dart</code>, <code>daily_mission.dart</code>, <code>duel_state.dart</code>, <code>theme_entitlement.dart</code>, <code>app_settings.dart</code>, <code>rps_engine.dart</code>; tests under <code>test/domain/</code>.</li>
+      <li><strong>AC:</strong> <code>RpsEngine.resolve</code> passes 9 cases; <code>RpsEngine.cpuMove</code> returns a valid move in 100 random seeds; all Freezed unions serialise.</li>
+      <li><strong>Test:</strong> <code>flutter test test/domain/</code></li>
+      <li><strong>Commit:</strong> <code>feat(domain): add models + RpsEngine with unit tests</code></li>
+    </ul>
+
+    <h3>Phase 2 — Local persistence (Isar)</h3>
+    <p><strong>Goal:</strong> read/write <code>AppSettings</code>, <code>RoundRecord</code>, <code>Achievement</code>, <code>ThemeEntitlement</code> with Isar; capped history at 100.</p>
+    <ul>
+      <li><strong>Files:</strong> <code>lib/core/persistence/isar_*.dart</code> collections + repository classes.</li>
+      <li><strong>AC:</strong> repository roundtrip test — write 120 rounds, read back 100 newest.</li>
+      <li><strong>Test:</strong> <code>flutter test test/persistence/</code></li>
+      <li><strong>Commit:</strong> <code>feat(persistence): Isar collections + history cap</code></li>
+    </ul>
+
+    <h3>Phase 3 — Theme engine</h3>
+    <p><strong>Goal:</strong> <code>ThemePack</code> abstract class + <code>TactilePremiumPack</code> + <code>ModernFuturisticPack</code> + <code>ThemeScope</code>. Two more packs registered as <code>throw UnimplementedError</code> stubs so the registry list reflects the real catalog.</p>
+    <ul>
+      <li><strong>Files:</strong> <code>lib/ui/design_system/theme_pack.dart</code>, <code>app_*_tokens.dart</code>, <code>lib/ui/themes/tactile_premium.dart</code>, <code>lib/ui/themes/modern_futuristic.dart</code>, stubs for the other two.</li>
+      <li><strong>AC:</strong> a tiny demo widget renders the same DuelStage under both packs.</li>
+      <li><strong>Test:</strong> golden test of DuelStage in both packs (will need <code>--update-goldens</code> first time).</li>
+      <li><strong>Commit:</strong> <code>feat(theme): ThemePack contract + 2 MVP packs</code></li>
+    </ul>
+
+    <h3>Phase 4 — Core duel UI</h3>
+    <p><strong>Goal:</strong> the duel works end-to-end against the CPU, with full FSM + animation. No persistence yet (rounds are in-memory).</p>
+    <ul>
+      <li><strong>Files:</strong> <code>lib/ui/screens/play/duel_screen.dart</code>, <code>duel_stage.dart</code>, <code>move_card.dart</code>, <code>cpu_thinking_card.dart</code>, <code>vs_badge.dart</code>, <code>result_banner.dart</code>, <code>move_picker.dart</code>, <code>score_chip.dart</code>, <code>streak_chip.dart</code>, <code>lib/state/duel_controller.dart</code>.</li>
+      <li><strong>AC:</strong> a player can play 20 rounds without errors; both themes render correctly; reduce-motion path tested.</li>
+      <li><strong>Test:</strong> widget test that drives the picker and asserts state transitions.</li>
+      <li><strong>Commit:</strong> <code>feat(play): duel screen with FSM + animations</code></li>
+    </ul>
+
+    <h3>Phase 5 — Onboarding &amp; language</h3>
+    <p><strong>Goal:</strong> first-launch flow lands the user on /home with a chosen locale and theme.</p>
+    <ul>
+      <li><strong>Files:</strong> <code>lib/ui/screens/onboarding/*.dart</code>, <code>l10n/app_*.arb</code>, generated <code>app_localizations.dart</code>.</li>
+      <li><strong>AC:</strong> 14-second target — onboarding-to-first-round measured by an instrumentation test.</li>
+      <li><strong>Test:</strong> <code>flutter test test/ui/onboarding/</code> with golden checks for all 3 locales.</li>
+      <li><strong>Commit:</strong> <code>feat(onboarding): language + intro + theme select with l10n</code></li>
+    </ul>
+
+    <h3>Phase 6 — Home &amp; mode select</h3>
+    <p><strong>Files:</strong> <code>lib/ui/screens/home/*.dart</code>, <code>mode_select_screen.dart</code>.</p>
+    <ul>
+      <li><strong>AC:</strong> Quick Play CTA pushes /play with last-used mode; locked modes show a "Soon" badge and don't push.</li>
+      <li><strong>Commit:</strong> <code>feat(home): home dashboard + mode select</code></li>
+    </ul>
+
+    <h3>Phase 7 — History &amp; stats</h3>
+    <p><strong>Files:</strong> <code>history_screen.dart</code>, <code>stats_screen.dart</code>, <code>round_history_list.dart</code>, <code>empty_history_state.dart</code>, <code>stat_tile.dart</code>; controllers.</p>
+    <ul>
+      <li><strong>AC:</strong> 100-round seeded fixture renders without dropped frames on Pixel 6 (profile mode).</li>
+      <li><strong>Commit:</strong> <code>feat(history): list + stats + empty state</code></li>
+    </ul>
+
+    <h3>Phase 8 — Achievements &amp; daily mission</h3>
+    <p><strong>Files:</strong> <code>achievements_screen.dart</code>, <code>achievement_tile.dart</code>, <code>daily_mission_card.dart</code>, <code>achievements_controller.dart</code>, <code>daily_mission_provider.dart</code>; 8 MVP achievements seed.</p>
+    <ul>
+      <li><strong>AC:</strong> playing a designed scripted sequence unlocks the expected achievements; daily mission progresses.</li>
+      <li><strong>Commit:</strong> <code>feat(meta): achievements + daily mission</code></li>
+    </ul>
+
+    <h3>Phase 9 — Settings</h3>
+    <p><strong>Files:</strong> <code>settings_screen.dart</code>, <code>reset_confirm_sheet.dart</code>, <code>setting_row.dart</code>, <code>toggle_switch.dart</code>.</p>
+    <ul>
+      <li><strong>AC:</strong> every toggle persists across app restart; reset clears history + stats + streaks but not achievements.</li>
+      <li><strong>Commit:</strong> <code>feat(settings): all toggles + reset confirm</code></li>
+    </ul>
+
+    <h3>Phase 10 — Ads &amp; IAP hooks</h3>
+    <p><strong>Files:</strong> <code>lib/core/ads/ads_controller.dart</code>, <code>lib/core/iap/purchase_controller.dart</code>, <code>store_screen.dart</code>, <code>rewarded_ad_unlock_sheet.dart</code>.</p>
+    <ul>
+      <li><strong>AC:</strong> rewarded ad in test mode unlocks Modern Futuristic; interstitial fires at the right cadence; remove-ads UI is wired but the product is not yet active.</li>
+      <li><strong>Commit:</strong> <code>feat(money): AdMob + IAP hooks (test mode)</code></li>
+    </ul>
+
+    <h3>Phase 11 — Tests &amp; CI</h3>
+    <p>Add widget tests for every screen, integration test for the onboarding → first-round flow, GitHub Actions CI running <code>flutter analyze</code> + <code>flutter test</code>.</p>
+    <ul>
+      <li><strong>AC:</strong> &gt;80% line coverage in <code>lib/domain</code> and <code>lib/state</code>; CI green on PR.</li>
+      <li><strong>Commit:</strong> <code>test: widget + integration coverage; add CI</code></li>
+    </ul>
+
+    <h3>Phase 12 — Polish</h3>
+    <p>Final tuning pass: per-theme refinement fixes from spec §07, App Store metadata, screenshot generation, accessibility audit at 1.3× text scale.</p>
+    <ul>
+      <li><strong>AC:</strong> all DoD criteria from §01 pass; no console warnings on either platform.</li>
+      <li><strong>Commit:</strong> <code>chore: MVP polish — animation tuning, l10n QA, a11y</code></li>
+    </ul>
+
+    <div class="callout good"><div><strong>Cadence</strong>Aim for one phase per day, except Phase 4 (the duel — two days) and Phase 11 (CI — half a day). Whole MVP fits in ~3 weeks of focused implementation.</div></div>
+  </section>
+
+  <!-- ─── 15 · GUARDRAILS ─── -->
+  <section id="guardrails">
+    <div class="s-head">
+      <div class="s-num">15 · Execute</div>
+      <h2>Engineering guardrails</h2>
+      <div class="s-lede">Rules for Claude CLI. Violations get reverted. These are the things that will tempt anyone shipping fast — they're written down so we don't have to argue at PR review.</div>
+    </div>
+
+    <h3>Hard rules</h3>
+    <ol>
+      <li><strong>Do not overengineer.</strong> If a one-file solution exists, ship it. Defer abstractions until the second use.</li>
+      <li><strong>Do not build a backend in MVP.</strong> No HTTP. No Firestore reads. No Cloud Functions. Local Isar only.</li>
+      <li><strong>Do not implement realtime multiplayer.</strong> The schemas are PvP-shaped; the network code is not in this phase.</li>
+      <li><strong>Do not add login or account creation.</strong> Device-scoped anonymous play only. No SSO, no Apple Sign-in, no email/password.</li>
+      <li><strong>Keep the game engine pure Dart.</strong> Zero <code>flutter</code> imports in <code>lib/domain/</code>. If you can't unit test it without a widget, it doesn't belong there.</li>
+      <li><strong>Keep the theme system runtime-swappable.</strong> No <code>const</code> Material themes. No hardcoded colours in widgets. Every visual constant flows from <code>ThemePack</code>.</li>
+      <li><strong>Localization from day one.</strong> No raw strings in widgets — always go through generated l10n. CI fails if a hardcoded string is detected.</li>
+      <li><strong>Preserve compile health.</strong> Every commit passes <code>flutter analyze</code>. No <code>// ignore: ...</code> blanket disables.</li>
+      <li><strong>Run analyze + test after each phase.</strong> If a phase is described as "done" without proof of green analyze/test, it isn't done.</li>
+      <li><strong>Small commits.</strong> One phase per commit. No "WIP" or squash-prevention. Each commit is buildable and runnable on its own.</li>
+    </ol>
+
+    <h3>Soft rules</h3>
+    <ul>
+      <li><strong>Prefer composition over inheritance</strong> for widgets. The only abstract class we use is <code>ThemePack</code>; everything else is composed.</li>
+      <li><strong>One controller, one responsibility.</strong> If you find yourself reaching across providers in a notifier, the boundary is wrong.</li>
+      <li><strong>SVGs over PNGs</strong> for all icons. PNGs only for raster art (App Store screenshots, splash logo if needed).</li>
+      <li><strong>No dependency upgrades</strong> mid-phase. Lock <code>pubspec.lock</code> and only bump in dedicated dependency-update PRs.</li>
+      <li><strong>Comments explain why, not what.</strong> The code says <em>what</em>. If a comment restates a variable name, delete it.</li>
+    </ul>
+
+    <h3>Anti-patterns to refuse on sight</h3>
+    <ul>
+      <li>Banners ads in MVP. Refused.</li>
+      <li>Cloud Firestore "to be safe". Refused.</li>
+      <li>"Just one quick state-management library swap". Refused.</li>
+      <li>Custom painters for the picker or duel stage. Refused (use composition).</li>
+      <li>String concatenation for localized copy. Refused (use ICU).</li>
+      <li>Ads during onboarding, first-session, or any duel phase. Refused.</li>
+      <li>Login screen "even just as a stub". Refused — anonymous device-id is the contract.</li>
+    </ul>
+
+    <div class="callout warn"><div><strong>If in doubt, leave it out</strong>The point of the scope lock in §01 is that anything not listed is a "no". A great feature outside the scope of MVP is still a "no". Write it down for Phase 2 and move on.</div></div>
+  </section>
+
+  <footer style="margin-top: 80px; padding-top: 32px; border-top: 1px solid var(--hairlineSoft); color: var(--inkMuted); font-size: 12.5px; display: flex; justify-content: space-between;">
+    <div>Roshambo Duel · handoff v1.0 · May 2026</div>
+    <div><a href="index.html">visual canvas →</a> &nbsp; · &nbsp; <a href="spec.html">product spec →</a></div>
+  </footer>
+
+  </main>
+</div>
+
+</body>
+</html>

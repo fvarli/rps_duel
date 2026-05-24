@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RPS — four concepts · production inventory</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  html, body { margin: 0; padding: 0; background: #f0eee9; }
+  * { box-sizing: border-box; }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="../components/design-canvas.jsx"></script>
+<script type="text/babel" src="../concepts/icons.jsx"></script>
+<script type="text/babel" src="../concepts/shared.jsx"></script>
+<script type="text/babel" src="../concepts/concept1.jsx"></script>
+<script type="text/babel" src="../concepts/concept2.jsx"></script>
+<script type="text/babel" src="../concepts/concept3.jsx"></script>
+<script type="text/babel" src="../concepts/concept4.jsx"></script>
+<script type="text/babel" src="../concepts/concept4_extra.jsx"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const W = 360, H = 780;
+
+function Rationale({ headline, palette, pros, tradeoffs, emotion, font }) {
+  return (
+    <div style={{
+      width: '100%', height: '100%', background: '#fffdf9',
+      padding: '32px 28px', fontFamily: '"DM Sans", system-ui, sans-serif',
+      color: '#1c1a17', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 16,
+    }}>
+      <div>
+        <div style={{ fontSize: 11, letterSpacing: 1.6, textTransform: 'uppercase', color: '#8a857c', fontWeight: 600 }}>Rationale</div>
+        <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: -0.4, marginTop: 6, lineHeight: 1.15 }}>{headline}</div>
+      </div>
+      <div>
+        <div style={{ fontSize: 11, letterSpacing: 1.4, textTransform: 'uppercase', color: '#8a857c', fontWeight: 600, marginBottom: 6 }}>Emotion</div>
+        <div style={{ fontSize: 13.5, lineHeight: 1.5, color: '#3a352e' }}>{emotion}</div>
+      </div>
+      <div>
+        <div style={{ fontSize: 11, letterSpacing: 1.4, textTransform: 'uppercase', color: '#8a857c', fontWeight: 600, marginBottom: 6 }}>Palette &amp; type</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+          {palette.map((c, i) => (
+            <div key={i} style={{ flex: 1, height: 24, background: c, borderRadius: 3, border: '1px solid rgba(0,0,0,0.05)' }} />
+          ))}
+        </div>
+        <div style={{ fontSize: 12.5, color: '#3a352e' }}>{font}</div>
+      </div>
+      <div>
+        <div style={{ fontSize: 11, letterSpacing: 1.4, textTransform: 'uppercase', color: '#2a7a4c', fontWeight: 600, marginBottom: 4 }}>Pros</div>
+        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, lineHeight: 1.55, color: '#3a352e' }}>
+          {pros.map((p, i) => <li key={i} style={{ marginBottom: 2 }}>{p}</li>)}
+        </ul>
+      </div>
+      <div>
+        <div style={{ fontSize: 11, letterSpacing: 1.4, textTransform: 'uppercase', color: '#b85c38', fontWeight: 600, marginBottom: 4 }}>Tradeoffs</div>
+        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, lineHeight: 1.55, color: '#3a352e' }}>
+          {tradeoffs.map((p, i) => <li key={i} style={{ marginBottom: 2 }}>{p}</li>)}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <DesignCanvas>
+
+      <DCSection id="intro" title="Roshambo Duel · visual canvas" subtitle={(<>Four production-fidelity themes · full screen inventory for one (Concept&nbsp;4) · 360 × 780 portrait · see <a href="spec.html" style={{color: '#b85c38'}}>product spec</a> &amp; <a href="handoff.html" style={{color: '#b85c38'}}>Flutter engineering handoff</a></>)}>
+        <DCArtboard id="brief" label="Brief & system" width={520} height={780}>
+          <div style={{ width: '100%', height: '100%', background: '#fffdf9', padding: '40px 36px', fontFamily: '"DM Sans", system-ui, sans-serif', color: '#1c1a17', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 22 }}>
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: 1.8, textTransform: 'uppercase', color: '#8a857c', fontWeight: 600 }}>Working brief</div>
+              <div style={{ fontSize: 28, fontWeight: 600, letterSpacing: -0.5, marginTop: 8, lineHeight: 1.15 }}>A production spec for the duel <span style={{ fontStyle: 'italic', fontFamily: '"Instrument Serif", serif', fontWeight: 400 }}>itself</span>.</div>
+            </div>
+            <div style={{ fontSize: 14, lineHeight: 1.55, color: '#3a352e' }}>
+              Four directions. Each one designed across the full real screen inventory a Flutter implementation needs — not just the win moment, but onboarding, idle, lose, tie, empty state, settings, reset. Real iconography (rock, paper, scissors as recognisable objects), not abstract glyphs.
+            </div>
+            <div style={{ height: 1, background: '#e6e1d8' }} />
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: 1.6, textTransform: 'uppercase', color: '#8a857c', fontWeight: 600, marginBottom: 10 }}>The five-beat duel loop, identical across all four</div>
+              <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.6, color: '#3a352e' }}>
+                <li><strong>Commit</strong> — three buttons in the thumb zone, always one tap away.</li>
+                <li><strong>Lock</strong> — picked button fills in; the other two dim.</li>
+                <li><strong>Anticipate</strong> — CPU side shows a thinking placeholder (~500ms).</li>
+                <li><strong>Reveal</strong> — CPU's icon snaps in; verdict lands hard.</li>
+                <li><strong>Replay</strong> — buttons re-light. Tapping any one starts beat 1 again.</li>
+              </ol>
+            </div>
+            <div style={{ height: 1, background: '#e6e1d8' }} />
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: 1.6, textTransform: 'uppercase', color: '#8a857c', fontWeight: 600, marginBottom: 10 }}>Ten screens per concept</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 24px', fontSize: 12.5, lineHeight: 1.55, color: '#3a352e' }}>
+                <div>01 · Onboarding</div><div>06 · History</div>
+                <div>02 · Idle</div><div>07 · Empty history</div>
+                <div>03 · Anticipation</div><div>08 · Settings</div>
+                <div>04 · Win reveal</div><div>09 · Reset confirm</div>
+                <div>05 · Lose reveal</div><div>10 · Tie reveal</div>
+              </div>
+            </div>
+            <div style={{ height: 1, background: '#e6e1d8' }} />
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: 1.6, textTransform: 'uppercase', color: '#8a857c', fontWeight: 600, marginBottom: 8 }}>Iconography</div>
+              <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                  <RPSIcon kind="rock" size={36} color="#1c1a17" variant="solid" />
+                  <div style={{ fontSize: 11, color: '#8a857c' }}>Rock</div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                  <RPSIcon kind="paper" size={36} color="#1c1a17" variant="solid" />
+                  <div style={{ fontSize: 11, color: '#8a857c' }}>Paper</div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                  <RPSIcon kind="scissors" size={36} color="#1c1a17" variant="solid" />
+                  <div style={{ fontSize: 11, color: '#8a857c' }}>Scissors</div>
+                </div>
+                <div style={{ flex: 1, fontSize: 12.5, lineHeight: 1.55, color: '#3a352e' }}>
+                  Recognizable objects, not abstract shapes. Each renders cleanly at 16–120px, in solid and outline variants. Defined once in <code style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11.5 }}>concepts/icons.jsx</code> and shared across all four concepts.
+                </div>
+              </div>
+            </div>
+            <div style={{ marginTop: 'auto', fontSize: 12, color: '#8a857c', lineHeight: 1.5 }}>
+              <strong style={{ color: '#1c1a17' }}>Tip:</strong> click any artboard label to open it fullscreen. ← / → flip frames, ↑ / ↓ jump between concepts.
+            </div>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      {/* ───── CONCEPT 1 ───── */}
+      <DCSection id="c1" title="Concept 1 — Premium Minimal" subtitle="Restraint as the headline. The duel lands in serif italic. Adult, calm, lifestyle-app calibre.">
+        <DCArtboard id="c1-onboard" label="01 · Onboarding" width={W} height={H}><C1Onboarding /></DCArtboard>
+        <DCArtboard id="c1-idle" label="02 · Idle" width={W} height={H}><C1Idle /></DCArtboard>
+        <DCArtboard id="c1-antic" label="03 · Anticipation" width={W} height={H}><C1Anticipation /></DCArtboard>
+        <DCArtboard id="c1-win" label="04 · Win" width={W} height={H}><C1Gameplay /></DCArtboard>
+        <DCArtboard id="c1-lose" label="05 · Lose" width={W} height={H}><C1LoseReveal /></DCArtboard>
+        <DCArtboard id="c1-tie" label="06 · Tie" width={W} height={H}><C1TieReveal /></DCArtboard>
+        <DCArtboard id="c1-history" label="07 · History" width={W} height={H}><C1History /></DCArtboard>
+        <DCArtboard id="c1-empty" label="08 · Empty history" width={W} height={H}><C1EmptyHistory /></DCArtboard>
+        <DCArtboard id="c1-settings" label="09 · Settings" width={W} height={H}><C1Settings /></DCArtboard>
+        <DCArtboard id="c1-reset" label="10 · Reset" width={W} height={H}><C1Reset /></DCArtboard>
+        <DCArtboard id="c1-notes" label="Rationale" width={400} height={H}>
+          <Rationale
+            headline="The reveal as a quiet, confident sentence."
+            emotion="Symmetric, unhurried. Two icons face each other; a single serif sentence calls it. Wins don't celebrate, they confirm — the satisfaction is in tapping again immediately and seeing how fast the cycle resets."
+            palette={['#f4f1eb', '#1c1a17', '#b85c38', '#f0d9cd']}
+            font='"DM Sans" + "Instrument Serif" italic for the verdict'
+            pros={[
+              'Verdict line is the biggest thing on the screen — zero ambiguity at reveal.',
+              'Reads as adult and confident in App Store screenshots.',
+              'Restraint scales: streaks, themes, achievements bolt on without redesign.',
+              'Lowest accessibility & localization risk of all four.',
+            ]}
+            tradeoffs={[
+              "Wins don't celebrate hard — needs subtle haptic + icon nudge to feel rewarding.",
+              'Lower visual energy than the loud directions; depends on confident motion to feel alive.',
+              "Less self-explanatory for a player who's never seen a 'no chrome' game.",
+            ]}
+          />
+        </DCArtboard>
+      </DCSection>
+
+      {/* ───── CONCEPT 2 ───── */}
+      <DCSection id="c2" title="Concept 2 — Competitive Arena" subtitle="Bold, kinetic. The winner half floods with colour; a stamp lands across the middle.">
+        <DCArtboard id="c2-onboard" label="01 · Onboarding" width={W} height={H}><C2Onboarding /></DCArtboard>
+        <DCArtboard id="c2-idle" label="02 · Idle" width={W} height={H}><C2Idle /></DCArtboard>
+        <DCArtboard id="c2-antic" label="03 · Anticipation" width={W} height={H}><C2Anticipation /></DCArtboard>
+        <DCArtboard id="c2-win" label="04 · Win" width={W} height={H}><C2Gameplay /></DCArtboard>
+        <DCArtboard id="c2-lose" label="05 · Lose" width={W} height={H}><C2LoseReveal /></DCArtboard>
+        <DCArtboard id="c2-tie" label="06 · Tie" width={W} height={H}><C2TieReveal /></DCArtboard>
+        <DCArtboard id="c2-history" label="07 · History" width={W} height={H}><C2History /></DCArtboard>
+        <DCArtboard id="c2-empty" label="08 · Empty history" width={W} height={H}><C2EmptyHistory /></DCArtboard>
+        <DCArtboard id="c2-settings" label="09 · Settings" width={W} height={H}><C2Settings /></DCArtboard>
+        <DCArtboard id="c2-reset" label="10 · Reset" width={W} height={H}><C2Reset /></DCArtboard>
+        <DCArtboard id="c2-notes" label="Rationale" width={400} height={H}>
+          <Rationale
+            headline="Each round is a tiny knockout."
+            emotion="The screen splits and one side wins. A stamp lands across the middle. Streak chip whispers 'don't stop'. This is the concept that makes players say 'one more' out loud — loud, immediate dopamine."
+            palette={['#0c1117', '#161e2a', '#f0f4fa', '#ff6b35']}
+            font='"Space Grotesk" 700/800 + "JetBrains Mono" for score chips'
+            pros={[
+              'Highest dopamine-per-tap of the four — the half-screen flood is a real reward.',
+              'Score chip + streak chip are tiny; the duel owns the canvas.',
+              'Dark mode by default — better evening play, less battery on OLED.',
+              'Extends to future ranked / multiplayer without changing the gameplay shell.',
+            ]}
+            tradeoffs={[
+              'Loud aesthetic may push away the calm, mid-meeting player.',
+              'Half-screen colour flood needs a careful colour-blind alternate state.',
+              "Esports-adjacent visuals can read 'kids gaming' if not carefully restrained.",
+            ]}
+          />
+        </DCArtboard>
+      </DCSection>
+
+      {/* ───── CONCEPT 3 ───── */}
+      <DCSection id="c3" title="Concept 3 — Modern Futuristic" subtitle="The duel inside a HUD ring. Tactile, glowing, sci-fi calm.">
+        <DCArtboard id="c3-onboard" label="01 · Onboarding" width={W} height={H}><C3Onboarding /></DCArtboard>
+        <DCArtboard id="c3-idle" label="02 · Idle" width={W} height={H}><C3Idle /></DCArtboard>
+        <DCArtboard id="c3-antic" label="03 · Anticipation" width={W} height={H}><C3Anticipation /></DCArtboard>
+        <DCArtboard id="c3-win" label="04 · Win" width={W} height={H}><C3Gameplay /></DCArtboard>
+        <DCArtboard id="c3-lose" label="05 · Lose" width={W} height={H}><C3LoseReveal /></DCArtboard>
+        <DCArtboard id="c3-tie" label="06 · Tie" width={W} height={H}><C3TieReveal /></DCArtboard>
+        <DCArtboard id="c3-history" label="07 · History" width={W} height={H}><C3History /></DCArtboard>
+        <DCArtboard id="c3-empty" label="08 · Empty history" width={W} height={H}><C3EmptyHistory /></DCArtboard>
+        <DCArtboard id="c3-settings" label="09 · Settings" width={W} height={H}><C3Settings /></DCArtboard>
+        <DCArtboard id="c3-reset" label="10 · Reset" width={W} height={H}><C3Reset /></DCArtboard>
+        <DCArtboard id="c3-notes" label="Rationale" width={400} height={H}>
+          <Rationale
+            headline="A small machine in your pocket."
+            emotion="The ring locks during anticipation, both halves light up at reveal, the centre verdict glows. Doesn't shout, but rewards every commit with a satisfying piece of equipment-feel."
+            palette={['#060912', '#0a1326', '#7df9ff', '#ff5fb4']}
+            font='"Space Grotesk" + "Space Mono" for HUD readouts'
+            pros={[
+              "Anticipation state is genuinely tense — the locked-arc effect is the strongest of all four.",
+              'Single hero element (the ring) keeps the screen calm despite the dark aesthetic.',
+              'Distinct in App Store screenshots vs. any other RPS clone.',
+              'Themes / skins ship naturally as HUD palettes.',
+            ]}
+            tradeoffs={[
+              'Neon aesthetic dates faster than the other three — refresh in 18–24mo.',
+              'Glow + low-contrast HUD needs careful accessibility tuning.',
+              "Reads less 'casual game' — may alienate the truly mass-market player.",
+              'Real-time glow in Flutter has cost; needs Impeller-aware tuning.',
+            ]}
+          />
+        </DCArtboard>
+      </DCSection>
+
+      {/* ───── CONCEPT 4 — CORE 10 ───── */}
+      <DCSection id="c4" title="Concept 4 — Tactile Premium · core 10" subtitle="Apple Arcade calibre. Cream paper, cards, real objects, soft shadows. The duel proper.">
+        <DCArtboard id="c4-onboard" label="01 · Onboarding" width={W} height={H}><C4Onboarding /></DCArtboard>
+        <DCArtboard id="c4-idle" label="02 · Idle" width={W} height={H}><C4Idle /></DCArtboard>
+        <DCArtboard id="c4-antic" label="03 · Anticipation" width={W} height={H}><C4Anticipation /></DCArtboard>
+        <DCArtboard id="c4-win" label="04 · Win" width={W} height={H}><C4WinReveal /></DCArtboard>
+        <DCArtboard id="c4-lose" label="05 · Lose" width={W} height={H}><C4LoseReveal /></DCArtboard>
+        <DCArtboard id="c4-tie" label="06 · Tie" width={W} height={H}><C4TieReveal /></DCArtboard>
+        <DCArtboard id="c4-history" label="07 · History" width={W} height={H}><C4History /></DCArtboard>
+        <DCArtboard id="c4-empty" label="08 · Empty history" width={W} height={H}><C4EmptyHistory /></DCArtboard>
+        <DCArtboard id="c4-settings" label="09 · Settings" width={W} height={H}><C4Settings /></DCArtboard>
+        <DCArtboard id="c4-reset" label="10 · Reset" width={W} height={H}><C4Reset /></DCArtboard>
+        <DCArtboard id="c4-notes" label="Rationale" width={400} height={H}>
+          <Rationale
+            headline="Rock-paper-scissors as a delightful object."
+            emotion="Cream paper, soft shadows, every glyph is a card you 'pick up'. The CPU's card flips face-down during anticipation and lands face-up at reveal. The whole game feels like something you'd find on a designer's coffee table — tactile, calm, replayable forever."
+            palette={['#f0e9d8', '#fbf7ec', '#a85a3b', '#5c7d44']}
+            font='"Geist" sans + "Newsreader" italic for warmth'
+            pros={[
+              'The card metaphor reads instantly as physical — premium without being precious.',
+              'Cards are a real Flutter primitive (Card widget + Material elevation); high-fidelity match.',
+              'Accent-light: the cream + clay palette feels native on both iOS and Android.',
+              "Future themes ship as 'card backs' or 'card stocks' — a meaningful monetisation hook.",
+              "Onboarding writes itself — the three cards ARE the lesson.",
+            ]}
+            tradeoffs={[
+              'Card-flip animation needs polish; janky flips will undermine the entire metaphor.',
+              "Paper texture is a static asset — caching + colour-managed export matters.",
+              "Reads quieter than Concept 2; may underwhelm the player wanting esports energy.",
+              "Italics localise badly into CJK / RTL — needs a sans display fallback per locale.",
+            ]}
+          />
+        </DCArtboard>
+      </DCSection>
+
+      {/* ───── CONCEPT 4 — PRODUCTION INVENTORY (extended) ───── */}
+      <DCSection id="c4-prod" title="Concept 4 — production screen inventory" subtitle="The full app around the duel: splash, lang/theme/mode select, home, profile, achievements, monetization, multiplayer-ready lobby, offline & error states.">
+        <DCArtboard id="c4-splash" label="11 · Splash" width={W} height={H}><C4Splash /></DCArtboard>
+        <DCArtboard id="c4-lang" label="12 · Language select" width={W} height={H}><C4LanguageSelect /></DCArtboard>
+        <DCArtboard id="c4-themesel" label="13 · Theme select" width={W} height={H}><C4ThemeSelect /></DCArtboard>
+        <DCArtboard id="c4-home" label="14 · Home" width={W} height={H}><C4Home /></DCArtboard>
+        <DCArtboard id="c4-modes" label="15 · Mode select" width={W} height={H}><C4ModeSelect /></DCArtboard>
+        <DCArtboard id="c4-profile" label="16 · Profile · Stats" width={W} height={H}><C4Profile /></DCArtboard>
+        <DCArtboard id="c4-achv" label="17 · Achievements" width={W} height={H}><C4Achievements /></DCArtboard>
+        <DCArtboard id="c4-adreward" label="18 · Ad reward modal" width={W} height={H}><C4AdReward /></DCArtboard>
+        <DCArtboard id="c4-store" label="19 · Store · Remove ads" width={W} height={H}><C4Store /></DCArtboard>
+        <DCArtboard id="c4-mp" label="20 · MP lobby (P3 preview)" width={W} height={H}><C4MPLobby /></DCArtboard>
+        <DCArtboard id="c4-offline" label="21 · Offline state" width={W} height={H}><C4Offline /></DCArtboard>
+        <DCArtboard id="c4-error" label="22 · Error fallback" width={W} height={H}><C4Error /></DCArtboard>
+        <DCArtboard id="c4-prod-notes" label="Implementation" width={420} height={H}>
+          <div style={{ width: '100%', height: '100%', background: '#fffdf9', padding: '32px 28px', fontFamily: '"DM Sans", system-ui, sans-serif', color: '#1c1a17', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 18 }}>
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: 1.6, textTransform: 'uppercase', color: '#8a857c', fontWeight: 600 }}>Implementation map</div>
+              <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: -0.4, marginTop: 6, lineHeight: 1.15 }}>Where these land in the codebase.</div>
+            </div>
+            <div style={{ fontSize: 13.5, lineHeight: 1.55, color: '#3a352e' }}>
+              The full implementation contract — tokens, state machine, theme engine, animation, haptics, sound, monetization, analytics, multiplayer, app-store — lives in the <a href="spec.html" style={{ color: '#b85c38' }}>master spec doc</a>. Highlights:
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, lineHeight: 1.6, color: '#3a352e' }}>
+              <li><strong>11 · Splash</strong> — async warmup; theme assets + locale before route push.</li>
+              <li><strong>12 · Language</strong> — one of three locales; defaults to device. Skippable.</li>
+              <li><strong>13 · Theme select</strong> — entitlement model (1 default · 2 ad-unlock · 1 IAP).</li>
+              <li><strong>14 · Home</strong> — single Quick Play CTA; tiles defer to push routes.</li>
+              <li><strong>15 · Modes</strong> — vs CPU + Pass &amp; Play in MVP. Online stubs lock until Phase 3.</li>
+              <li><strong>16–17 · Profile + Achievements</strong> — Phase 2. Stats render from local Isar collection.</li>
+              <li><strong>18 · Ad reward modal</strong> — initiated from Theme detail or extra-life CTA only. Never interrupts gameplay.</li>
+              <li><strong>19 · Store</strong> — Remove Ads is the hero. Theme packs below. Restore footer always present.</li>
+              <li><strong>20 · MP lobby</strong> — Phase 3. Schema-shaped so MVP local rounds upgrade without migration.</li>
+              <li><strong>21–22 · Offline + Error</strong> — vs CPU is the offline-allowed path. Errors recover, never crash.</li>
+            </ul>
+            <div style={{ marginTop: 'auto', padding: '14px 16px', background: '#f4f1eb', borderRadius: 10, fontSize: 12.5, lineHeight: 1.55, color: '#3a352e' }}>
+              <strong style={{ color: '#1c1a17', display: 'block', marginBottom: 4 }}>What's still to draw</strong>
+              Phase 2 round detail · Phase 3 friends list · invite friend · create/join room · matchmaking · ranked overview · leaderboard · reconnect · update required · maintenance. Inventory + contract are defined in the spec.
+            </div>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      {/* ───── RECOMMENDATION ───── */}
+      <DCSection id="rec" title="Recommendation for MVP launch" subtitle="One concept to ship. Three to keep warm.">
+        <DCArtboard id="rec-card" label="MVP recommendation" width={800} height={560}>
+          <div style={{ width: '100%', height: '100%', background: '#1c1a17', color: '#fdfbf6', padding: '44px 48px', fontFamily: '"DM Sans", system-ui, sans-serif', overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: 22 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 14 }}>
+              <div style={{ fontSize: 11, letterSpacing: 2, textTransform: 'uppercase', color: '#a85a3b', fontWeight: 600 }}>Ship</div>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.12)' }} />
+            </div>
+            <div style={{ fontSize: 44, fontWeight: 600, letterSpacing: -0.8, lineHeight: 1.05 }}>
+              Concept 4 — <span style={{ fontFamily: '"Newsreader", serif', fontStyle: 'italic', fontWeight: 400 }}>Tactile Premium</span>
+            </div>
+            <div style={{ fontSize: 16, lineHeight: 1.55, color: 'rgba(253,251,246,0.78)', maxWidth: 660 }}>
+              The card metaphor is the only one of the four that gives a real-world handle on what's otherwise an abstract game of probability. <strong style={{ color: '#fdfbf6' }}>Players don't pick "rock", they pick up a card</strong> — and that's the difference between a tap-game and a thing you want to keep on your home screen. It also has the cleanest path to Flutter implementation (Material Cards + Hero transitions + AnimatedSwitcher do most of the work natively).
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginTop: 'auto' }}>
+              <div>
+                <div style={{ fontSize: 10, letterSpacing: 1.6, textTransform: 'uppercase', color: 'rgba(253,251,246,0.55)', fontWeight: 600, marginBottom: 6 }}>Why for the duel</div>
+                <div style={{ fontSize: 13.5, lineHeight: 1.5, color: 'rgba(253,251,246,0.85)' }}>Card flip is the perfect mechanical metaphor for "lock → reveal". The wait feels physical.</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, letterSpacing: 1.6, textTransform: 'uppercase', color: 'rgba(253,251,246,0.55)', fontWeight: 600, marginBottom: 6 }}>Why for this team</div>
+                <div style={{ fontSize: 13.5, lineHeight: 1.5, color: 'rgba(253,251,246,0.85)' }}>Card, Material elevation, Hero, Rive — all first-class Flutter. No custom shaders needed.</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, letterSpacing: 1.6, textTransform: 'uppercase', color: 'rgba(253,251,246,0.55)', fontWeight: 600, marginBottom: 6 }}>Hold for v2</div>
+                <div style={{ fontSize: 13.5, lineHeight: 1.5, color: 'rgba(253,251,246,0.85)' }}>C1 ships as the "Quiet" theme · C2 as the "Arena" theme tied to ranked · C3 as a seasonal HUD skin.</div>
+              </div>
+            </div>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

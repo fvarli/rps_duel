@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RPS · Implementation Spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #fbf9f4;
+    --paper: #ffffff;
+    --paperEdge: #ece5d6;
+    --ink: #16140f;
+    --inkSoft: #44402f;
+    --inkMuted: #807b69;
+    --inkFaint: #b8b09b;
+    --hairline: #e7e1d0;
+    --hairlineSoft: #efeadb;
+    --clay: #a85a3b;
+    --sage: #5c7d44;
+    --gold: #b8862a;
+    --azure: #2f5fa8;
+    --mvp: #5c7d44;
+    --p2: #b8862a;
+    --p3: #6b6f7a;
+    --c1: #b85c38;
+    --c2: #ff6b35;
+    --c3: #2a8fb8;
+    --c4: #a85a3b;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+  body { font-family: 'Geist', 'DM Sans', system-ui, sans-serif; font-size: 14.5px; line-height: 1.55; }
+  a { color: var(--clay); text-decoration: none; }
+  a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+  /* —— LAYOUT —— */
+  .doc { display: grid; grid-template-columns: 240px minmax(0,1fr); max-width: 1180px; margin: 0 auto; }
+  .nav {
+    position: sticky; top: 0; align-self: start;
+    padding: 36px 12px 36px 40px;
+    height: 100vh; overflow-y: auto;
+    border-right: 1px solid var(--hairlineSoft);
+  }
+  .nav h4 {
+    font-family: 'Geist'; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: var(--inkMuted); font-weight: 600; margin: 22px 0 8px;
+  }
+  .nav h4:first-child { margin-top: 0; }
+  .nav a {
+    display: block; padding: 5px 10px; margin: 0 -10px; border-radius: 5px;
+    color: var(--inkSoft); font-size: 13px; font-weight: 500;
+  }
+  .nav a:hover { background: var(--hairlineSoft); text-decoration: none; }
+  .nav a.active { color: var(--ink); background: var(--paper); box-shadow: inset 0 0 0 1px var(--hairline); }
+  .nav .num { display: inline-block; width: 22px; color: var(--inkFaint); font-family: 'JetBrains Mono'; font-size: 11px; }
+  .nav .top-meta { font-size: 11px; color: var(--inkMuted); margin-bottom: 24px; }
+
+  .main { padding: 48px 56px 120px; max-width: 800px; }
+
+  /* —— HEADER —— */
+  .doc-header { padding-bottom: 32px; border-bottom: 1px solid var(--hairlineSoft); margin-bottom: 36px; }
+  .doc-eyebrow { font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--clay); font-weight: 600; }
+  .doc-title { font-family: 'Newsreader'; font-style: italic; font-weight: 400; font-size: 56px; letter-spacing: -1.5px; line-height: 1; margin: 14px 0 0; color: var(--ink); }
+  .doc-sub { font-size: 16px; color: var(--inkSoft); margin-top: 16px; max-width: 580px; line-height: 1.55; }
+  .doc-meta { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 22px; font-size: 12.5px; color: var(--inkMuted); }
+  .doc-meta strong { color: var(--ink); font-weight: 600; }
+  .doc-meta a { color: var(--clay); }
+
+  /* —— SECTIONS —— */
+  section { margin: 64px 0; scroll-margin-top: 32px; }
+  section > .s-head { margin-bottom: 24px; }
+  .s-head .s-num { font-family: 'JetBrains Mono'; font-size: 12px; color: var(--inkMuted); letter-spacing: 0.5px; }
+  .s-head h2 { font-family: 'Newsreader'; font-style: italic; font-weight: 400; font-size: 36px; letter-spacing: -0.8px; line-height: 1.1; margin: 4px 0 8px; color: var(--ink); }
+  .s-head .s-lede { font-size: 15px; color: var(--inkSoft); max-width: 640px; line-height: 1.5; }
+
+  h3 { font-family: 'Geist'; font-weight: 600; font-size: 17px; letter-spacing: -0.2px; margin: 36px 0 8px; color: var(--ink); }
+  h4 { font-family: 'Geist'; font-weight: 600; font-size: 13.5px; letter-spacing: -0.1px; margin: 22px 0 6px; color: var(--ink); }
+  p { margin: 8px 0; max-width: 680px; }
+  p, li { color: var(--inkSoft); }
+  ul, ol { padding-left: 22px; margin: 8px 0; }
+  li { margin: 4px 0; }
+  strong { color: var(--ink); font-weight: 600; }
+  em { font-family: 'Newsreader'; font-style: italic; font-weight: 400; color: var(--ink); }
+
+  /* —— STATUS PILLS —— */
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 3px 6px; border-radius: 999px; font-family: 'Geist'; font-size: 10.5px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; line-height: 1.2; vertical-align: middle; }
+  .pill::before { content: ''; width: 6px; height: 6px; border-radius: 3px; background: currentColor; }
+  .pill.mvp { color: var(--mvp); background: rgba(92,125,68,0.13); }
+  .pill.p2 { color: var(--p2); background: rgba(184,134,42,0.13); }
+  .pill.p3 { color: var(--p3); background: rgba(107,111,122,0.13); }
+  .pill.flat::before { display: none; }
+  .pill.flat { padding: 3px 8px; }
+  .pill.c1 { color: var(--c1); background: rgba(184,92,56,0.12); }
+  .pill.c2 { color: var(--c2); background: rgba(255,107,53,0.12); }
+  .pill.c3 { color: var(--c3); background: rgba(42,143,184,0.12); }
+  .pill.c4 { color: var(--c4); background: rgba(168,90,59,0.12); }
+
+  /* —— TABLES —— */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  th, td { padding: 11px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--hairlineSoft); }
+  th { font-family: 'Geist'; font-size: 10.5px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: var(--inkMuted); border-bottom: 1px solid var(--hairline); }
+  td { color: var(--inkSoft); }
+  td.k { color: var(--ink); font-weight: 500; }
+  td code, code.inline { font-family: 'JetBrains Mono'; font-size: 11.5px; background: rgba(22,20,15,0.04); padding: 1px 6px; border-radius: 3px; color: var(--ink); }
+  .table-wrap { border: 1px solid var(--hairline); border-radius: 6px; overflow: hidden; background: var(--paper); }
+  .table-wrap table { margin: 0; }
+  .table-wrap th, .table-wrap td { padding: 10px 14px; }
+  .table-wrap tr:last-child td { border-bottom: none; }
+
+  /* —— CODE BLOCKS —— */
+  pre { font-family: 'JetBrains Mono'; font-size: 12px; line-height: 1.6; background: #14110a; color: #f6efe0; padding: 16px 18px; border-radius: 8px; overflow-x: auto; margin: 14px 0; }
+  pre .kw { color: #ffb86b; }
+  pre .str { color: #c2e6a2; }
+  pre .cm { color: #87806a; font-style: italic; }
+  pre .typ { color: #9cdcfe; }
+
+  /* —— CALLOUTS —— */
+  .callout { padding: 14px 18px; border-radius: 6px; margin: 16px 0; display: flex; gap: 12px; font-size: 13px; line-height: 1.5; }
+  .callout strong { display: block; margin-bottom: 4px; font-family: 'Geist'; font-size: 10.5px; letter-spacing: 1.4px; text-transform: uppercase; }
+  .callout.note { background: rgba(184,134,42,0.08); color: var(--inkSoft); }
+  .callout.note strong { color: var(--gold); }
+  .callout.warn { background: rgba(184,92,56,0.08); color: var(--inkSoft); }
+  .callout.warn strong { color: var(--clay); }
+  .callout.good { background: rgba(92,125,68,0.08); color: var(--inkSoft); }
+  .callout.good strong { color: var(--sage); }
+
+  /* —— TOKEN SWATCH —— */
+  .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -3px; margin-right: 8px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); }
+
+  /* —— GRIDS —— */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 14px 0; }
+  .four-col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 14px 0; }
+  .card { padding: 18px; border-radius: 8px; background: var(--paper); border: 1px solid var(--hairline); }
+  .card h4 { margin-top: 0; }
+  .card .lab { font-family: 'Geist'; font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--inkMuted); font-weight: 600; }
+
+  /* —— STATE MACHINE DIAGRAM (SVG container) —— */
+  .diagram { background: var(--paper); border: 1px solid var(--hairline); border-radius: 8px; padding: 24px; margin: 18px 0; }
+
+  /* —— SCROLL SPY —— */
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+  <aside class="nav">
+    <div class="top-meta">
+      <strong style="color:var(--ink); display:block; font-size:13px;">rock·paper·scissors</strong>
+      Implementation Spec v1.0
+    </div>
+    <a href="index.html" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; color: var(--clay); padding: 0; margin-bottom: 6px;">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L2 5.5l4 3.5M2 5.5h7"/></svg>
+      visual canvas
+    </a>
+    <a href="handoff.html" style="display:inline-flex; align-items:center; gap:6px; font-size:12px; color: var(--clay); padding: 0; margin-bottom: 20px;">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2l4 3.5L5 9M9 5.5H2"/></svg>
+      engineering handoff
+    </a>
+
+    <h4>Foundations</h4>
+    <a href="#exec"><span class="num">00</span>Executive summary</a>
+    <a href="#arch"><span class="num">01</span>Information architecture</a>
+    <a href="#screens"><span class="num">02</span>Screen inventory</a>
+    <a href="#fsm"><span class="num">03</span>Game state machine</a>
+
+    <h4>Implementation</h4>
+    <a href="#flutter"><span class="num">04</span>Flutter architecture</a>
+    <a href="#tokens"><span class="num">05</span>Design tokens</a>
+    <a href="#themes"><span class="num">06</span>Theme system</a>
+    <a href="#refine"><span class="num">07</span>Per-theme refinements</a>
+
+    <h4>Feel</h4>
+    <a href="#motion"><span class="num">08</span>Animation</a>
+    <a href="#haptic"><span class="num">09</span>Haptics</a>
+    <a href="#sound"><span class="num">10</span>Sound</a>
+    <a href="#icons"><span class="num">11</span>Iconography</a>
+
+    <h4>Product</h4>
+    <a href="#mp"><span class="num">12</span>Multiplayer UX</a>
+    <a href="#analytics"><span class="num">13</span>Analytics</a>
+    <a href="#ads"><span class="num">14</span>Ad strategy</a>
+    <a href="#store"><span class="num">15</span>App Store readiness</a>
+  </aside>
+
+  <main class="main">
+
+  <!-- ─── HEADER ─── -->
+  <header class="doc-header">
+    <div class="doc-eyebrow">Production spec · approved for planning</div>
+    <h1 class="doc-title">rock · paper · scissors</h1>
+    <p class="doc-sub">A premium-feeling casual mobile game built around a single duel loop, four interchangeable visual themes, and an architecture that grows into multiplayer without a rebuild. Flutter / iOS / Android.</p>
+    <div class="doc-meta">
+      <span><strong>Version</strong>&nbsp; 1.0</span>
+      <span><strong>Status</strong>&nbsp; Implementation-ready</span>
+      <span><strong>Owners</strong>&nbsp; Design · Eng · Product</span>
+      <span><strong>See also</strong>&nbsp; <a href="index.html">visual canvas (4 themes × 10 screens)</a></span>
+    </div>
+  </header>
+
+  <!-- ─── 00 · EXEC ─── -->
+  <section id="exec">
+    <div class="s-head">
+      <div class="s-num">00 · Foundations</div>
+      <h2>Executive summary &amp; roadmap</h2>
+      <div class="s-lede">What we're shipping, the philosophy underneath it, and the phasing that lets one engineer ship MVP and a team scale into multiplayer without re-architecting.</div>
+    </div>
+
+    <h3>The product, in one sentence</h3>
+    <p>A pocketable 30-second duel — the player picks, the CPU picks back, the result lands instantly — wrapped in a theme engine that turns the same gameplay into four distinct emotional experiences and unlocks <em>theme packs</em> as the primary monetization surface.</p>
+
+    <h3>Principles</h3>
+    <ul>
+      <li><strong>The duel is the product.</strong> Onboarding, monetization, settings — all serve the 2-second commit-lock-reveal arc.</li>
+      <li><strong>One engine, many skins.</strong> Themes are interchangeable, runtime-swappable, and never fork business logic.</li>
+      <li><strong>Replay over depth.</strong> If a feature adds friction to the next tap, it doesn't ship until Phase&nbsp;2.</li>
+      <li><strong>Multiplayer-shaped from day one.</strong> Local state mirrors the eventual server schema so PvP is an integration, not a rewrite.</li>
+      <li><strong>Monetize the desire to belong, not the desire to play.</strong> Ads/IAP touch cosmetics &amp; convenience, never the core loop.</li>
+    </ul>
+
+    <h3>Roadmap</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Phase</th><th>Scope</th><th>Why</th><th>Gate to next</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="k"><span class="pill mvp">MVP</span><br/><small>~6 wks</small></td>
+            <td>vs CPU · all 4 themes · onboarding · history (last 100) · settings · reset · 3 languages · AdMob interstitial + remove-ads IAP</td>
+            <td>The whole product reads as premium on day one; theme system de-risks the next phases.</td>
+            <td>D1 retention &gt; 30%, crash-free &gt; 99.7%, store rating &gt; 4.4</td>
+          </tr>
+          <tr>
+            <td class="k"><span class="pill p2">Phase 2</span><br/><small>~10 wks post-launch</small></td>
+            <td>Local 2-player pass-and-play · profile · achievements · stats · rewarded-ad theme unlocks · premium theme IAP · streak/best-of mode</td>
+            <td>Engagement &amp; monetization layer; nothing here changes gameplay primitives.</td>
+            <td>ARPDAU &gt; $0.04, &gt;15% of users with at least one earned achievement</td>
+          </tr>
+          <tr>
+            <td class="k"><span class="pill p3">Phase 3</span><br/><small>~16 wks</small></td>
+            <td>Async multiplayer (turn-by-mail) · friend invite · private rooms · realtime ranked · leaderboards · season pass</td>
+            <td>Network &amp; account work; theme system + state machine carry over unchanged.</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── 01 · IA ─── -->
+  <section id="arch">
+    <div class="s-head">
+      <div class="s-num">01 · Foundations</div>
+      <h2>Information architecture</h2>
+      <div class="s-lede">A single bottom-stack navigation rooted on Home. Modals for transient flows. The "duel screen" is the only one that ever runs full-bleed.</div>
+    </div>
+
+    <h3>Module map</h3>
+    <pre>app/
+├── auth/        anonymous device-id; account upgrade later
+├── home/        landing, mode select, theme picker entry
+├── play/        the duel — owns the GameStateMachine
+├── history/     local rounds (Phase 1) → synced (Phase 3)
+├── stats/       per-theme + lifetime numbers (Phase 2)
+├── profile/     identity, avatar, friends (Phase 2/3)
+├── achievements/  unlock cabinet (Phase 2)
+├── themes/      browse + unlock + apply
+├── settings/    sound · haptics · language · data
+├── store/       remove-ads · theme packs · season pass (P3)
+├── multiplayer/ rooms · matchmaking · ranked (Phase 3)
+└── system/      splash · offline · update · error · maintenance</pre>
+
+    <h3>Navigation model</h3>
+    <ul>
+      <li><strong>Home</strong> is the root. Returning from any subscreen pops back to Home.</li>
+      <li><strong>Play</strong> is a push (not modal) so the duel can keep its own back-stack of pause/result states.</li>
+      <li><strong>Settings / Themes / History / Store</strong> are pushes from Home.</li>
+      <li><strong>Reset confirm · Ad reward · Purchase confirm · Pause</strong> are modal bottom-sheets.</li>
+      <li>There is <strong>no bottom-tab bar</strong> in MVP — it adds chrome the duel doesn't earn yet. Tabs appear in Phase 2 alongside Profile.</li>
+    </ul>
+
+    <div class="callout note"><div><strong>Decision</strong>Don't ship tabs in MVP. The bottom of the screen is the duel's. Use a top app-bar for navigation and a single FAB-equivalent "Play" CTA on Home.</div></div>
+
+    <h3>Screen hierarchy (push depth)</h3>
+    <pre>Splash → (first launch?) → Language → Onboarding → Theme select → Home
+                                                                    ├── Play [stack]
+                                                                    │   ├── Pause (sheet)
+                                                                    │   └── Quit confirm (sheet)
+                                                                    ├── History → Round detail
+                                                                    ├── Settings → Language
+                                                                    │            → Reset confirm (sheet)
+                                                                    │            → About
+                                                                    ├── Themes → Theme detail
+                                                                    │          → Unlock (sheet · ad/IAP)
+                                                                    ├── Profile (P2)
+                                                                    │   ├── Stats
+                                                                    │   ├── Achievements
+                                                                    │   └── Friends (P3)
+                                                                    ├── Store → Remove ads · Theme pack
+                                                                    └── Multiplayer (P3) → Quick match · Friends · Ranked</pre>
+  </section>
+
+  <!-- ─── 02 · SCREEN INVENTORY ─── -->
+  <section id="screens">
+    <div class="s-head">
+      <div class="s-num">02 · Foundations</div>
+      <h2>Screen inventory</h2>
+      <div class="s-lede">Every screen the product owns, grouped by domain, tagged with phase. Every cell is a real screen that must exist by phase gate — no "best effort".</div>
+    </div>
+
+    <h3>Core duel + lifecycle</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width: 22%;">Screen</th><th>Purpose</th><th>Phase</th><th>Modal?</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Splash</td><td>Brand reveal, async warmup (theme assets, locale)</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Language select</td><td>First launch · explicit pick · en/tr/es</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Onboarding</td><td>3-step intro to the three icons + duel flow</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Theme select</td><td>Pick visual theme (skippable; defaults to Tactile Premium)</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Home / dashboard</td><td>Quick play CTA · score chip · current theme · entry to history/themes/settings</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Mode select</td><td>vs CPU · Pass &amp; Play · Online (locked stub in MVP)</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Quick play</td><td>Shortcut from Home — skip mode select, use last theme &amp; settings</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Gameplay · idle</td><td>Pre-pick, three options inviting</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Gameplay · anticipation</td><td>Pick locked, CPU "thinking"</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Gameplay · reveal (win)</td><td>Both icons up, verdict landed</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Gameplay · reveal (lose)</td><td>Same, loss tint, less celebration</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Gameplay · reveal (tie)</td><td>Same move both sides, replay-energy copy</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Pause</td><td>Sound off, exit, resume</td><td><span class="pill mvp">MVP</span></td><td>sheet</td></tr>
+          <tr><td class="k">Replay CTA</td><td>Implicit — the picker re-arms after reveal</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Engagement (Phase 2)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width: 22%;">Screen</th><th>Purpose</th><th>Phase</th><th>Modal?</th></tr></thead>
+        <tbody>
+          <tr><td class="k">History list</td><td>Last 100 rounds, scrollable, grouped by session</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Empty history</td><td>First launch state — invite to play</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Round detail</td><td>Tap-through from history (Phase 2)</td><td><span class="pill p2">P2</span></td><td>sheet</td></tr>
+          <tr><td class="k">Profile</td><td>Identity, avatar, themes owned, friends count</td><td><span class="pill p2">P2</span></td><td>—</td></tr>
+          <tr><td class="k">Stats</td><td>Win-rate, top pick, longest streak, per-theme breakdowns</td><td><span class="pill p2">P2</span></td><td>—</td></tr>
+          <tr><td class="k">Achievements list</td><td>Unlocked + locked cabinet</td><td><span class="pill p2">P2</span></td><td>—</td></tr>
+          <tr><td class="k">Achievement detail</td><td>Tap-through, share CTA, claim reward</td><td><span class="pill p2">P2</span></td><td>sheet</td></tr>
+          <tr><td class="k">Settings</td><td>Sound · haptics · language · theme · reset · about</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Reset confirm</td><td>Destructive flow</td><td><span class="pill mvp">MVP</span></td><td>sheet</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Monetization</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width: 22%;">Screen</th><th>Purpose</th><th>Phase</th><th>Modal?</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Themes browse</td><td>4 themes, owned/locked state, preview</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Theme detail</td><td>Carousel preview, "Apply" / "Unlock"</td><td><span class="pill p2">P2</span></td><td>—</td></tr>
+          <tr><td class="k">Ad reward modal</td><td>Watch ad to unlock theme / extra retries</td><td><span class="pill p2">P2</span></td><td>sheet</td></tr>
+          <tr><td class="k">Remove ads</td><td>Single-tap IAP, restore-purchase footer</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+          <tr><td class="k">Premium theme purchase</td><td>Full-screen detail + Buy</td><td><span class="pill p2">P2</span></td><td>—</td></tr>
+          <tr><td class="k">Purchase confirmation</td><td>Success state, share CTA</td><td><span class="pill mvp">MVP</span></td><td>sheet</td></tr>
+          <tr><td class="k">Restore purchases</td><td>Implicit footer on Store; surfaces toast on success</td><td><span class="pill mvp">MVP</span></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Social / multiplayer (Phase 3)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width: 22%;">Screen</th><th>Purpose</th><th>Phase</th><th>Modal?</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Friends list</td><td>Online dots, invite CTA, recent matches</td><td><span class="pill p3">P3</span></td><td>—</td></tr>
+          <tr><td class="k">Invite friend</td><td>Share link, QR, contact import</td><td><span class="pill p3">P3</span></td><td>sheet</td></tr>
+          <tr><td class="k">Create room</td><td>Best-of selector, theme lock, host options</td><td><span class="pill p3">P3</span></td><td>—</td></tr>
+          <tr><td class="k">Join room</td><td>Enter code / accept invite</td><td><span class="pill p3">P3</span></td><td>sheet</td></tr>
+          <tr><td class="k">Multiplayer lobby</td><td>Pre-match — both players, theme, ready check</td><td><span class="pill p3">P3</span></td><td>—</td></tr>
+          <tr><td class="k">Matchmaking</td><td>Quick-match queue with cancel</td><td><span class="pill p3">P3</span></td><td>—</td></tr>
+          <tr><td class="k">Ranked overview</td><td>Current SR, league badge, season timer</td><td><span class="pill p3">P3</span></td><td>—</td></tr>
+          <tr><td class="k">Leaderboard</td><td>Global, friends, regional tabs</td><td><span class="pill p3">P3</span></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Lifecycle</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width: 22%;">Screen</th><th>Purpose</th><th>Phase</th><th>Modal?</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Offline state</td><td>Banner + offline-allowed actions only</td><td><span class="pill mvp">MVP</span></td><td>banner</td></tr>
+          <tr><td class="k">Reconnect</td><td>Auto-retry with manual fallback (Phase 3)</td><td><span class="pill p3">P3</span></td><td>—</td></tr>
+          <tr><td class="k">Update required</td><td>Force update screen tied to remote config</td><td><span class="pill mvp">MVP</span></td><td>full</td></tr>
+          <tr><td class="k">Maintenance</td><td>Server-down message + retry timer</td><td><span class="pill p3">P3</span></td><td>full</td></tr>
+          <tr><td class="k">Error fallback</td><td>Crash recovery + send-feedback CTA</td><td><span class="pill mvp">MVP</span></td><td>full</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Total screens:</strong> 24 MVP · 11 Phase 2 · 10 Phase 3 = <strong>45 unique screens × 4 themes</strong>. Themes share layout, only token-swap. See <a href="#themes">§06 Theme system</a> for how this is enforced.</p>
+  </section>
+
+  <!-- ─── 03 · STATE MACHINE ─── -->
+  <section id="fsm">
+    <div class="s-head">
+      <div class="s-num">03 · Foundations</div>
+      <h2>Game state machine</h2>
+      <div class="s-lede">One state machine drives every duel — vs CPU, pass-and-play, async, ranked. The transitions are identical; only the I/O source for the CPU/opponent's pick differs.</div>
+    </div>
+
+    <h3>States</h3>
+    <div class="diagram">
+      <svg width="700" height="380" viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg" font-family="Geist, sans-serif" font-size="11.5">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0 L 10 5 L 0 10 z" fill="#807b69"/>
+          </marker>
+        </defs>
+        <!-- nodes -->
+        <g>
+          <rect x="20" y="20" width="120" height="44" rx="6" fill="#fbf9f4" stroke="#16140f" stroke-width="1.5"/>
+          <text x="80" y="46" text-anchor="middle" font-weight="600" fill="#16140f">idle</text>
+
+          <rect x="180" y="20" width="140" height="44" rx="6" fill="#fbf9f4" stroke="#16140f"/>
+          <text x="250" y="46" text-anchor="middle" font-weight="500" fill="#16140f">choice_selected</text>
+
+          <rect x="360" y="20" width="120" height="44" rx="6" fill="#fbf9f4" stroke="#16140f"/>
+          <text x="420" y="46" text-anchor="middle" font-weight="500" fill="#16140f">locked</text>
+
+          <rect x="520" y="20" width="160" height="44" rx="6" fill="#fbf9f4" stroke="#16140f"/>
+          <text x="600" y="46" text-anchor="middle" font-weight="500" fill="#16140f">cpu_thinking</text>
+
+          <rect x="280" y="120" width="140" height="44" rx="6" fill="#fbf9f4" stroke="#16140f" stroke-width="1.5"/>
+          <text x="350" y="146" text-anchor="middle" font-weight="600" fill="#16140f">reveal</text>
+
+          <rect x="60" y="220" width="110" height="44" rx="6" fill="rgba(92,125,68,0.13)" stroke="#5c7d44"/>
+          <text x="115" y="246" text-anchor="middle" font-weight="600" fill="#5c7d44">win</text>
+
+          <rect x="240" y="220" width="110" height="44" rx="6" fill="rgba(184,92,56,0.12)" stroke="#a85a3b"/>
+          <text x="295" y="246" text-anchor="middle" font-weight="600" fill="#a85a3b">lose</text>
+
+          <rect x="420" y="220" width="110" height="44" rx="6" fill="rgba(128,123,105,0.13)" stroke="#807b69"/>
+          <text x="475" y="246" text-anchor="middle" font-weight="600" fill="#44402f">tie</text>
+
+          <rect x="240" y="310" width="180" height="44" rx="6" fill="#fbf9f4" stroke="#16140f" stroke-width="1.5"/>
+          <text x="330" y="336" text-anchor="middle" font-weight="600" fill="#16140f">match_end / replay</text>
+
+          <!-- side states -->
+          <rect x="520" y="220" width="100" height="32" rx="6" fill="#fbf9f4" stroke="#807b69" stroke-dasharray="3 3"/>
+          <text x="570" y="240" text-anchor="middle" fill="#807b69">pause</text>
+
+          <rect x="520" y="260" width="100" height="32" rx="6" fill="#fbf9f4" stroke="#807b69" stroke-dasharray="3 3"/>
+          <text x="570" y="280" text-anchor="middle" fill="#807b69">quit</text>
+        </g>
+
+        <!-- arrows -->
+        <g stroke="#807b69" stroke-width="1.2" fill="none" marker-end="url(#arr)">
+          <line x1="140" y1="42" x2="180" y2="42"/>
+          <line x1="320" y1="42" x2="360" y2="42"/>
+          <line x1="480" y1="42" x2="520" y2="42"/>
+          <path d="M600 64 C 600 95, 420 95, 360 120"/>
+          <path d="M310 164 C 220 200, 150 200, 130 220"/>
+          <path d="M350 164 L 295 220"/>
+          <path d="M390 164 C 450 200, 470 200, 480 220"/>
+          <path d="M115 264 C 115 305, 240 332, 240 332"/>
+          <path d="M295 264 L 305 310"/>
+          <path d="M475 264 C 475 305, 410 332, 420 332"/>
+          <path d="M330 354 C 200 380, 60 200, 60 70"/>
+        </g>
+        <text x="160" y="370" fill="#807b69" font-size="10">→ replay loops back to idle</text>
+      </svg>
+    </div>
+
+    <h3>Transition rules</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width: 26%;">From → To</th><th>Trigger</th><th>Guard</th><th>Side effects</th></tr></thead>
+        <tbody>
+          <tr><td><code>idle → choice_selected</code></td><td>player taps R / P / S</td><td>not within debounce window (250ms)</td><td>haptic <code>tap</code>; sound <code>ui_tap</code></td></tr>
+          <tr><td><code>choice_selected → locked</code></td><td>auto, 80ms after choice</td><td>—</td><td>haptic <code>lock</code>; sound <code>lock_thud</code>; analytics <code>choice_selected</code></td></tr>
+          <tr><td><code>locked → cpu_thinking</code></td><td>auto</td><td>—</td><td>request CPU move (or opponent move in PvP)</td></tr>
+          <tr><td><code>cpu_thinking → reveal</code></td><td>CPU move resolved · min 400ms / max 900ms</td><td>app foreground; not paused</td><td>sound <code>shuffle_stop</code></td></tr>
+          <tr><td><code>reveal → win/lose/tie</code></td><td>auto, after 180ms hold</td><td>—</td><td>compute outcome; haptic per outcome; sound per outcome; analytics <code>round_*</code></td></tr>
+          <tr><td><code>* → replay (idle)</code></td><td>player taps any picker button</td><td>not in <code>pause</code></td><td>increment round; persist last to history; reset transient state</td></tr>
+          <tr><td><code>* → pause</code></td><td>app backgrounded · or user opens menu</td><td>—</td><td>freeze timer; mute sounds</td></tr>
+          <tr><td><code>* → quit</code></td><td>user confirms exit</td><td>—</td><td>save partial state; pop to Home</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Edge cases</h3>
+    <ul>
+      <li><strong>Rapid repeated taps</strong> — debounce 250ms on picker; second tap within window is ignored, no jitter.</li>
+      <li><strong>Background during anticipation</strong> — pause; on resume, restart the CPU-thinking timer from where it paused (don't shortcut to reveal).</li>
+      <li><strong>App killed mid-round</strong> — round is not persisted (only complete rounds enter history). Resuming opens Home, not Play.</li>
+      <li><strong>Disconnect mid-PvP (Phase 3)</strong> — 15s grace; reconnect lands back into <code>cpu_thinking</code> with a "reconnecting" overlay. Past 15s, opponent forfeits the round.</li>
+      <li><strong>Clock drift in async PvP</strong> — server is authoritative for outcomes; client renders the reveal animation on receipt.</li>
+    </ul>
+  </section>
+
+  <!-- ─── 04 · FLUTTER ─── -->
+  <section id="flutter">
+    <div class="s-head">
+      <div class="s-num">04 · Implementation</div>
+      <h2>Flutter architecture</h2>
+      <div class="s-lede">Folder structure, state-management choice, the widget tree that hosts the duel, and the interface every theme implements.</div>
+    </div>
+
+    <h3>Stack</h3>
+    <div class="four-col">
+      <div class="card">
+        <div class="lab">UI</div>
+        <h4>Flutter 3.27+</h4>
+        <p style="font-size: 12.5px;">Material 3 baseline, Impeller on both platforms.</p>
+      </div>
+      <div class="card">
+        <div class="lab">State</div>
+        <h4>Riverpod 2</h4>
+        <p style="font-size: 12.5px;">Code-gen <code>@riverpod</code>; small, composable providers.</p>
+      </div>
+      <div class="card">
+        <div class="lab">Routing</div>
+        <h4>go_router</h4>
+        <p style="font-size: 12.5px;">Declarative deep links; shell routes for Home stack.</p>
+      </div>
+      <div class="card">
+        <div class="lab">Persistence</div>
+        <h4>Isar 4</h4>
+        <p style="font-size: 12.5px;">Local history + settings + theme entitlements.</p>
+      </div>
+      <div class="card">
+        <div class="lab">i18n</div>
+        <h4>arb + intl</h4>
+        <p style="font-size: 12.5px;">Bundled per-locale .arb; <code>en · tr · es</code> in MVP.</p>
+      </div>
+      <div class="card">
+        <div class="lab">Ads</div>
+        <h4>google_mobile_ads</h4>
+        <p style="font-size: 12.5px;">Interstitial + rewarded; no banners.</p>
+      </div>
+      <div class="card">
+        <div class="lab">IAP</div>
+        <h4>in_app_purchase</h4>
+        <p style="font-size: 12.5px;">Non-consumable products only.</p>
+      </div>
+      <div class="card">
+        <div class="lab">Backend (P3)</div>
+        <h4>Firebase or<br/>Supabase</h4>
+        <p style="font-size: 12.5px;">Auth · Firestore for rounds · realtime for PvP.</p>
+      </div>
+    </div>
+
+    <h3>Folder layout</h3>
+    <pre>lib/
+├── main.dart
+├── app/
+│   ├── app.dart            <span class="cm">// MaterialApp.router with theme provider wrapper</span>
+│   └── router.dart         <span class="cm">// go_router routes</span>
+├── core/
+│   ├── analytics/
+│   ├── ads/                <span class="cm">// interstitial + rewarded controllers</span>
+│   ├── iap/
+│   ├── persistence/        <span class="cm">// Isar collections</span>
+│   ├── locale/
+│   └── env/                <span class="cm">// remote config keys</span>
+├── domain/                 <span class="cm">// pure Dart — no Flutter imports</span>
+│   ├── rps_rules.dart      <span class="cm">// resolve(you, cpu) → outcome</span>
+│   ├── game_state.dart     <span class="cm">// the FSM</span>
+│   └── round.dart          <span class="cm">// data class, serializable</span>
+├── ui/
+│   ├── design_system/      <span class="cm">// tokens, primitives, ThemePack</span>
+│   ├── themes/             <span class="cm">// premium_minimal, arena, futuristic, tactile</span>
+│   ├── widgets/            <span class="cm">// shared atoms: PickerCard, ScoreChip, RevealStage</span>
+│   ├── screens/
+│   │   ├── splash/
+│   │   ├── onboarding/
+│   │   ├── home/
+│   │   ├── play/
+│   │   ├── history/
+│   │   ├── settings/
+│   │   ├── themes/
+│   │   ├── store/
+│   │   ├── profile/        <span class="cm">// P2</span>
+│   │   ├── achievements/   <span class="cm">// P2</span>
+│   │   └── multiplayer/    <span class="cm">// P3</span>
+│   └── system/             <span class="cm">// offline, error, update_required</span>
+└── l10n/
+    ├── app_en.arb
+    ├── app_tr.arb
+    └── app_es.arb</pre>
+
+    <h3>Theme interface</h3>
+    <p>Every theme is a <code>ThemePack</code> — a single object that bundles tokens, icons, sounds, haptics, and animation curves. The whole runtime reads from the currently-installed pack; no theme branching exists outside this object.</p>
+    <pre><span class="kw">abstract class</span> <span class="typ">ThemePack</span> {
+  <span class="typ">String</span> get id;            <span class="cm">// 'premium_minimal' | 'arena' | 'futuristic' | 'tactile'</span>
+  <span class="typ">String</span> get displayName;
+  <span class="typ">GameTheme</span> get theme;     <span class="cm">// colors, typography, radii, shadows</span>
+  <span class="typ">IconPack</span> get icons;
+  <span class="typ">SoundPack</span> get sounds;
+  <span class="typ">HapticProfile</span> get haptics;
+  <span class="typ">AnimationProfile</span> get motion;
+  <span class="typ">Locale</span>? get italicFallbackLocale; <span class="cm">// null = use display italic everywhere</span>
+  <span class="typ">bool</span> get isFreemium;     <span class="cm">// false for premium-only packs</span>
+}</pre>
+
+    <h3>Gameplay widget tree</h3>
+    <pre>PlayScreen
+└── ThemeScope(theme: currentPack)
+    └── Scaffold
+        ├── PlayAppBar(score, onPause, onHistory)
+        └── Stack
+            ├── ThemeBackdrop()           <span class="cm">// per-theme bg layer</span>
+            ├── RevealStage(state: gameState)
+            │   ├── DuelSide.you
+            │   ├── VsBadge
+            │   └── DuelSide.cpu
+            ├── VerdictBanner(state: gameState)
+            └── PickerRow(
+                  state: gameState,
+                  onPick: ref.read(gameProvider.notifier).pick,
+                )</pre>
+    <p>Each theme provides its own <code>DuelSide</code>, <code>VerdictBanner</code>, <code>PickerRow</code>, and <code>ThemeBackdrop</code> — all conforming to the same prop interface. Switching themes mid-app reattaches these widgets but the FSM state survives.</p>
+  </section>
+
+  <!-- ─── 05 · TOKENS ─── -->
+  <section id="tokens">
+    <div class="s-head">
+      <div class="s-num">05 · Implementation</div>
+      <h2>Design tokens</h2>
+      <div class="s-lede">Cross-theme primitives — geometry, motion, semantic intent. Color tokens are per-theme (see §06); these are the things every theme inherits.</div>
+    </div>
+
+    <h3>Spacing scale (4-pt base)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Token</th><th>px</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="k"><code>space.0</code></td><td>0</td><td>—</td></tr>
+          <tr><td class="k"><code>space.1</code></td><td>4</td><td>tight icon padding</td></tr>
+          <tr><td class="k"><code>space.2</code></td><td>8</td><td>chip internal padding · row gap</td></tr>
+          <tr><td class="k"><code>space.3</code></td><td>12</td><td>between related controls</td></tr>
+          <tr><td class="k"><code>space.4</code></td><td>16</td><td>card padding · screen edge gutter (compact)</td></tr>
+          <tr><td class="k"><code>space.5</code></td><td>20</td><td>section heading bottom</td></tr>
+          <tr><td class="k"><code>space.6</code></td><td>24</td><td>screen edge gutter (default)</td></tr>
+          <tr><td class="k"><code>space.7</code></td><td>32</td><td>between distinct sections</td></tr>
+          <tr><td class="k"><code>space.8</code></td><td>40</td><td>hero block margin</td></tr>
+          <tr><td class="k"><code>space.9</code></td><td>56</td><td>top-of-screen hero gap</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Radius</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Token</th><th>px</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="k"><code>radius.xs</code></td><td>4</td><td>inline tags, code chips</td></tr>
+          <tr><td class="k"><code>radius.sm</code></td><td>8</td><td>buttons, list rows</td></tr>
+          <tr><td class="k"><code>radius.md</code></td><td>14</td><td>cards (picker, history rows)</td></tr>
+          <tr><td class="k"><code>radius.lg</code></td><td>22</td><td>bottom sheets, primary CTAs</td></tr>
+          <tr><td class="k"><code>radius.pill</code></td><td>999</td><td>score chip, pill buttons</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Elevation</h3>
+    <p>Three levels max. Themes interpret these — e.g. C2 uses zero elevation, C4 uses warm-tinted shadows.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Token</th><th>Default rendering</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="k"><code>elev.0</code></td><td>none</td><td>flush surfaces, inputs at rest</td></tr>
+          <tr><td class="k"><code>elev.1</code></td><td>0 2px 6px rgba(0,0,0,0.06)</td><td>cards, picker buttons at rest</td></tr>
+          <tr><td class="k"><code>elev.2</code></td><td>0 6px 18px rgba(0,0,0,0.12)</td><td>locked picker, modal sheet, FAB</td></tr>
+          <tr><td class="k"><code>elev.3</code></td><td>0 16px 40px rgba(0,0,0,0.18)</td><td>full-screen overlays, dialogs</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Motion tokens</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Token</th><th>Duration</th><th>Curve</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="k"><code>motion.tap</code></td><td>80ms</td><td><code>easeOut</code></td><td>press-down feedback</td></tr>
+          <tr><td class="k"><code>motion.lock</code></td><td>180ms</td><td><code>easeOutCubic</code></td><td>picker fills, others dim</td></tr>
+          <tr><td class="k"><code>motion.cpuThink</code></td><td>520ms (variable 400–900)</td><td><code>linear</code></td><td>CPU "thinking" hold</td></tr>
+          <tr><td class="k"><code>motion.reveal</code></td><td>340ms</td><td><code>easeOutBack</code> (0.2 overshoot)</td><td>CPU glyph snaps in</td></tr>
+          <tr><td class="k"><code>motion.verdict</code></td><td>260ms</td><td><code>easeOut</code></td><td>verdict text drops in</td></tr>
+          <tr><td class="k"><code>motion.celebrate</code></td><td>500ms</td><td><code>easeOutQuart</code></td><td>win micro-celebration</td></tr>
+          <tr><td class="k"><code>motion.screenPush</code></td><td>280ms</td><td><code>fastOutSlowIn</code> (Material default)</td><td>route transitions</td></tr>
+          <tr><td class="k"><code>motion.sheet</code></td><td>320ms</td><td><code>easeOutCubic</code></td><td>bottom sheets</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Typography roles (cross-theme)</h3>
+    <p>Themes own the font families. These roles are guarantees themes implement.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Role</th><th>Size · weight · case</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="k">display.hero</td><td>44–62 / 400–700 / mixed</td><td>onboarding headline, verdict line</td></tr>
+          <tr><td class="k">display.section</td><td>28–34 / 400–700</td><td>section headers ("Today's rounds")</td></tr>
+          <tr><td class="k">body.lg</td><td>15 / 500</td><td>buttons, list row titles</td></tr>
+          <tr><td class="k">body</td><td>13.5 / 400</td><td>paragraph text</td></tr>
+          <tr><td class="k">body.sm</td><td>12 / 500</td><td>secondary metadata</td></tr>
+          <tr><td class="k">eyebrow</td><td>10.5 / 600 / UPPER / 1.6 tracking</td><td>section eyebrows</td></tr>
+          <tr><td class="k">mono.score</td><td>14–96 / 700 / tabular-nums</td><td>numeric displays</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Icon sizing</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Token</th><th>px</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="k">icon.xs</td><td>14</td><td>history row glyph</td></tr>
+          <tr><td class="k">icon.sm</td><td>20</td><td>nav, list row</td></tr>
+          <tr><td class="k">icon.md</td><td>28</td><td>picker button glyph</td></tr>
+          <tr><td class="k">icon.lg</td><td>56</td><td>duel-stage card glyph</td></tr>
+          <tr><td class="k">icon.xl</td><td>104</td><td>duel hero (C1 reveal)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── 06 · THEMES ─── -->
+  <section id="themes">
+    <div class="s-head">
+      <div class="s-num">06 · Implementation</div>
+      <h2>Theme system</h2>
+      <div class="s-lede">All four concepts ship as <em>theme packs</em> against the same primitives. Tactile Premium is the default; the others are unlockable via ad-watch (free) or IAP (premium-tier upgrade).</div>
+    </div>
+
+    <h3>The pack contract</h3>
+    <p>A theme is the union of six surfaces. Every one is required; none may share data with another pack's runtime.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Surface</th><th>Owns</th><th>Loaded</th></tr></thead>
+        <tbody>
+          <tr><td class="k">GameTheme</td><td>color tokens, typography family, radii, shadows, backdrop spec</td><td>at theme apply</td></tr>
+          <tr><td class="k">IconPack</td><td>rock/paper/scissors svgs + 8 supporting glyphs (back, settings, history, etc)</td><td>at theme apply</td></tr>
+          <tr><td class="k">SoundPack</td><td>11 sfx (see §10), 0–2 ambient loops</td><td>lazily, on first <code>play()</code></td></tr>
+          <tr><td class="k">HapticProfile</td><td>11 trigger mappings (see §09)</td><td>at theme apply</td></tr>
+          <tr><td class="k">AnimationProfile</td><td>per-theme overrides of motion tokens (curves, durations)</td><td>at theme apply</td></tr>
+          <tr><td class="k">ThemeMeta</td><td>id, displayName (localized), preview thumbnail, unlock state</td><td>at startup (all packs)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Entitlement model</h3>
+    <div class="four-col">
+      <div class="card">
+        <div class="lab">Default</div>
+        <h4 style="color: var(--c4);">Tactile Premium</h4>
+        <p style="font-size: 12.5px;">Bundled with the app; cannot be removed. Always free.</p>
+      </div>
+      <div class="card">
+        <div class="lab">Ad-unlock</div>
+        <h4 style="color: var(--c1);">Premium Minimal</h4>
+        <p style="font-size: 12.5px;">Free after one rewarded ad. Permanent unlock per device.</p>
+      </div>
+      <div class="card">
+        <div class="lab">Ad-unlock</div>
+        <h4 style="color: var(--c2);">Competitive Arena</h4>
+        <p style="font-size: 12.5px;">Free after one rewarded ad.</p>
+      </div>
+      <div class="card">
+        <div class="lab">Premium IAP</div>
+        <h4 style="color: var(--c3);">Modern Futuristic</h4>
+        <p style="font-size: 12.5px;">$2.99 one-time. Includes "Remove ads".</p>
+      </div>
+    </div>
+
+    <h3>Asset budget (per pack)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Surface</th><th>Budget</th><th>Format</th></tr></thead>
+        <tbody>
+          <tr><td>SVG icons (11 total)</td><td>&lt; 18 KB total</td><td>flutter_svg</td></tr>
+          <tr><td>Sound effects (11 sfx)</td><td>&lt; 240 KB total</td><td>OGG, 22kHz, mono</td></tr>
+          <tr><td>Theme backdrop (1 layered SVG)</td><td>&lt; 8 KB</td><td>flutter_svg</td></tr>
+          <tr><td>Preview thumbnail</td><td>&lt; 40 KB</td><td>WebP, 2x density</td></tr>
+          <tr><td><strong>Total per pack</strong></td><td><strong>≈ 310 KB</strong></td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout good"><div><strong>Why this matters</strong>An entire optional theme pack ships smaller than one App Store screenshot. We can pre-bundle all four with no measurable install-size hit, and unlock them with a server entitlement flip — no download wait.</div></div>
+  </section>
+
+  <!-- ─── 07 · REFINEMENTS ─── -->
+  <section id="refine">
+    <div class="s-head">
+      <div class="s-num">07 · Implementation</div>
+      <h2>Per-theme refinements</h2>
+      <div class="s-lede">Every concept's identified weakness, paired with the concrete fix that lands in v1.0. Themes are kept distinct — fixes never make them converge.</div>
+    </div>
+
+    <h3>Concept 1 — Premium Minimal</h3>
+    <p><strong>Weakness called out:</strong> wins don't celebrate; reads "cold" to lapsed casual-game players.</p>
+    <p><strong>Fix:</strong></p>
+    <ol>
+      <li>Add a single <em>warm</em> moment on reveal: the winning icon scales 1.0 → 1.08 → 1.0 over 360ms (back-ease), with the accent paint settling into it. Loser glyph nudges away by 4px.</li>
+      <li>Streak indicator: a small italic "+2 in a row" tag appears below the verdict <strong>only</strong> when streak ≥ 2. Disappears on any loss/tie.</li>
+      <li>Sound: a single, tasteful "page-turn" SFX on reveal (no chime); haptic <code>HapticPattern.success</code> on win.</li>
+      <li>Increase the win color saturation by 8% (still warm clay, just enough to register as a state change in periphery).</li>
+    </ol>
+
+    <h3>Concept 2 — Competitive Arena</h3>
+    <p><strong>Weakness called out:</strong> niche esports aesthetic; can read as "kids gaming"; may push away the calm player.</p>
+    <p><strong>Fix:</strong></p>
+    <ol>
+      <li>Soften the stamp typography by ~15% (from 32px ExtraBold to 28px Bold). The diagonal clip remains; the volume comes down.</li>
+      <li>Replace the flame 🔥 emoji on the streak chip with the streak count in mono + a thin underline accent. Reads as a stat, not a kid-game flair.</li>
+      <li>Reduce hash-pattern opacity on the win-half from 0.16 → 0.10. Keeps the kinetic feel without shouting.</li>
+      <li>Drop the "▌" leading-bar glyph from the onboarding CTA. Reserve it for in-game HUD.</li>
+      <li>Add a "calm" reveal-speed setting in Settings (the speed knob is already there). When set to "slow", the stamp fades in over 320ms instead of snapping.</li>
+    </ol>
+
+    <h3>Concept 3 — Modern Futuristic</h3>
+    <p><strong>Weakness called out:</strong> accessibility — glow + low-contrast HUD; readability fatigue; aesthetic dates fastest.</p>
+    <p><strong>Fix:</strong></p>
+    <ol>
+      <li><strong>Contrast pass.</strong> Bump <code>--inkSoft</code> from <code>rgba(232,246,255,0.62)</code> to <code>rgba(232,246,255,0.78)</code>; bump <code>--inkMuted</code> from 0.38 to 0.55. Verified against WCAG AA at 14px+.</li>
+      <li><strong>Glow ceiling.</strong> Setting "Glow intensity" default changes from NORMAL to LOW. Power users opt up.</li>
+      <li><strong>Mono fatigue.</strong> Replace the "// CAUTION" / "▌ INIT" mono labels in non-system contexts with sentence-case sans. Mono stays for actual HUD readouts (round number, timestamps).</li>
+      <li><strong>Reduce magenta.</strong> Limit magenta to destructive states (reset, defeat). Onboarding, history badges, settings — all cyan only.</li>
+      <li><strong>"Monochrome" colour profile</strong> in Settings: collapses cyan + magenta to a single warm-white. Functional accessibility option; also a paid theme variant.</li>
+    </ol>
+
+    <h3>Concept 4 — Tactile Premium</h3>
+    <p><strong>Weakness called out:</strong> tactile interaction needs polish; onboarding clarity; icon language consistency; anticipation feedback.</p>
+    <p><strong>Fix:</strong></p>
+    <ol>
+      <li><strong>Card flip primitive.</strong> A real <code>RotationTransition</code> on the Y axis, 280ms, <code>easeInOutCubic</code>. CPU card flips at reveal in both directions (face-down → face-up). 60fps on Impeller — verified.</li>
+      <li><strong>Anticipation feedback.</strong> CPU card pulses (1.0 → 1.02 scale) every 480ms during <code>cpu_thinking</code>. Three pulses max; if reveal takes longer, the card holds.</li>
+      <li><strong>Onboarding clarity.</strong> Add a tiny working "demo round" on step 1 — auto-plays Paper-beats-Rock in 1.2s. The player sees the loop before reading about it.</li>
+      <li><strong>Icon language unity.</strong> All RPS icons rendered at the same optical weight (verified against <a href="#icons">§11</a>). Card corners pip uses the lowercase italic monogram; never a numeral.</li>
+      <li><strong>Press feedback.</strong> Picker cards translate 2px down + drop their shadow on press (40ms <code>easeOut</code>). The card feels pressed, not tapped.</li>
+    </ol>
+
+    <div class="callout note"><div><strong>Cross-cutting</strong>All four themes inherit the same accessibility opt-ins: <strong>Reduce motion</strong> (drops <code>celebrate</code> and <code>reveal</code> overshoot), <strong>Increase contrast</strong> (bumps muted/faint tokens by ≥15%), and <strong>Larger text</strong> (clamps typography at 1.3× without breaking layouts thanks to the spacing scale).</div></div>
+  </section>
+
+  <!-- ─── 08 · MOTION ─── -->
+  <section id="motion">
+    <div class="s-head">
+      <div class="s-num">08 · Feel</div>
+      <h2>Animation spec</h2>
+      <div class="s-lede">Per-beat choreography. Every value here is Flutter-native — no custom shaders, no Lottie, no Rive (Rive is permitted but optional for the win celebration).</div>
+    </div>
+
+    <h3>Per-state choreography</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Beat</th><th>Element</th><th>Property</th><th>Duration</th><th>Curve</th></tr></thead>
+        <tbody>
+          <tr><td class="k">tap</td><td>picker card</td><td>scale 1.0 → 0.97 → 1.0</td><td>80ms</td><td>easeOut</td></tr>
+          <tr><td>lock</td><td>picked card</td><td>elevation 1 → 2; fill swap</td><td>180ms</td><td>easeOutCubic</td></tr>
+          <tr><td></td><td>unpicked cards</td><td>opacity 1 → 0.35</td><td>180ms</td><td>easeOutCubic</td></tr>
+          <tr><td class="k">cpuThink</td><td>cpu side</td><td>pulse 1.0 ↔ 1.02</td><td>480ms × 3 max</td><td>easeInOut</td></tr>
+          <tr><td>reveal</td><td>cpu glyph</td><td>scale 0.6 → 1.0 (with 0.2 overshoot)</td><td>340ms</td><td>easeOutBack</td></tr>
+          <tr><td></td><td>cpu glyph</td><td>opacity 0 → 1</td><td>200ms</td><td>easeOut</td></tr>
+          <tr><td>verdict</td><td>verdict text</td><td>translateY 8 → 0 + opacity 0 → 1</td><td>260ms · +180ms after reveal</td><td>easeOut</td></tr>
+          <tr><td class="k">win</td><td>winning glyph</td><td>scale 1.0 → 1.08 → 1.0</td><td>360ms</td><td>easeOutBack</td></tr>
+          <tr><td></td><td>losing glyph</td><td>translateX 0 → 4 (away from winner)</td><td>240ms</td><td>easeOut</td></tr>
+          <tr><td>lose</td><td>losing (your) glyph</td><td>opacity 1 → 0.6 + 1px vibrate</td><td>200ms</td><td>linear</td></tr>
+          <tr><td>tie</td><td>both glyphs</td><td>scale 1.0 → 0.96 → 1.0 (simultaneous)</td><td>240ms</td><td>easeInOut</td></tr>
+          <tr><td>replay</td><td>picker row</td><td>opacity 0.35 → 1 (all 3)</td><td>180ms</td><td>easeOut</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Reduce-motion variant</h3>
+    <p>When OS-level "reduce motion" is on or the player has opted in:</p>
+    <ul>
+      <li>All overshoot curves (<code>easeOutBack</code>) → <code>easeOut</code>.</li>
+      <li><code>celebrate</code> and <code>cpuThink</code> pulses are skipped (state still progresses on timing).</li>
+      <li>Verdict slides become opacity-only.</li>
+      <li>Card flip in C4 becomes a crossfade (still 280ms).</li>
+    </ul>
+
+    <h3>Theme-specific overrides</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Theme</th><th>Override</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Premium Minimal</td><td>Reveal uses <code>easeOut</code> (no overshoot); verdict serif italic slides in 320ms instead of 260ms.</td></tr>
+          <tr><td class="k">Competitive Arena</td><td>Stamp lands with a 220ms overshoot scale 0.92 → 1.0; hash pattern animates over 600ms.</td></tr>
+          <tr><td class="k">Modern Futuristic</td><td>Ring arc grows from 0.18 → 0.78 circumference over 420ms; verdict text receives a 380ms glow pulse on reveal.</td></tr>
+          <tr><td class="k">Tactile Premium</td><td>Card flip 280ms (only theme that flips); winner card lifts an additional 4px and casts deeper shadow over 200ms after reveal.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ─── 09 · HAPTICS ─── -->
+  <section id="haptic">
+    <div class="s-head">
+      <div class="s-num">09 · Feel</div>
+      <h2>Haptic spec</h2>
+      <div class="s-lede">One map, both platforms. iOS uses <code>UIImpactFeedbackGenerator</code> via <code>HapticFeedback</code>; Android uses <code>HapticFeedbackConstants</code>. Themes can dampen but never invent.</div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Trigger</th><th>Pattern</th><th>iOS API</th><th>Android API</th></tr></thead>
+        <tbody>
+          <tr><td class="k">tap</td><td>light bump</td><td><code>HapticFeedback.lightImpact</code></td><td><code>VIRTUAL_KEY</code></td></tr>
+          <tr><td class="k">lock</td><td>medium thud</td><td><code>HapticFeedback.mediumImpact</code></td><td><code>CONFIRM</code></td></tr>
+          <tr><td>countdown (P3)</td><td>three soft taps</td><td>3× <code>lightImpact</code> at 220ms intervals</td><td>3× <code>VIRTUAL_KEY</code></td></tr>
+          <tr><td class="k">reveal</td><td>selection blip</td><td><code>HapticFeedback.selectionClick</code></td><td><code>CLOCK_TICK</code></td></tr>
+          <tr><td class="k">win</td><td>success pattern</td><td><code>HapticFeedback.heavyImpact</code> + delayed <code>lightImpact</code> +80ms</td><td><code>CONFIRM</code> + <code>VIRTUAL_KEY</code></td></tr>
+          <tr><td class="k">lose</td><td>single heavy</td><td><code>HapticFeedback.heavyImpact</code></td><td><code>REJECT</code></td></tr>
+          <tr><td class="k">tie</td><td>two soft bumps</td><td>2× <code>lightImpact</code></td><td>2× <code>VIRTUAL_KEY</code></td></tr>
+          <tr><td>reward</td><td>success ladder</td><td><code>HapticFeedback.mediumImpact</code> ×3, ramping</td><td><code>CONFIRM</code> ×3</td></tr>
+          <tr><td>purchase</td><td>success pattern</td><td>same as win</td><td>same as win</td></tr>
+          <tr><td>error</td><td>heavy short</td><td><code>HapticFeedback.heavyImpact</code></td><td><code>REJECT</code></td></tr>
+          <tr><td>theme_apply</td><td>medium tactile</td><td><code>HapticFeedback.mediumImpact</code></td><td><code>CONFIRM</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Settings model</h3>
+    <ul>
+      <li><strong>Haptics master toggle</strong> in Settings · Feel.</li>
+      <li>No per-event toggles — too many knobs for the gain.</li>
+      <li>Honour iOS / Android system "Reduce haptics" / "Touch haptics off" — never override.</li>
+    </ul>
+  </section>
+
+  <!-- ─── 10 · SOUND ─── -->
+  <section id="sound">
+    <div class="s-head">
+      <div class="s-num">10 · Feel</div>
+      <h2>Sound spec</h2>
+      <div class="s-lede">Per-theme sound packs sharing a fixed trigger map. Files are short (≤1s except for ambient loops), OGG 22kHz mono, normalised to −14 LUFS.</div>
+    </div>
+
+    <h3>Trigger map</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Trigger</th><th>Asset id</th><th>Length</th><th>Loop?</th><th>Default volume</th></tr></thead>
+        <tbody>
+          <tr><td class="k">UI tap</td><td><code>ui_tap.ogg</code></td><td>120ms</td><td>no</td><td>0.5</td></tr>
+          <tr><td class="k">lock</td><td><code>lock_thud.ogg</code></td><td>240ms</td><td>no</td><td>0.7</td></tr>
+          <tr><td>shuffle (CPU thinking)</td><td><code>shuffle_loop.ogg</code></td><td>700ms</td><td>yes, fade-out on reveal</td><td>0.4</td></tr>
+          <tr><td class="k">reveal</td><td><code>reveal_snap.ogg</code></td><td>180ms</td><td>no</td><td>0.8</td></tr>
+          <tr><td class="k">win</td><td><code>win_chime.ogg</code></td><td>600ms</td><td>no</td><td>0.8</td></tr>
+          <tr><td class="k">lose</td><td><code>lose_thump.ogg</code></td><td>400ms</td><td>no</td><td>0.7</td></tr>
+          <tr><td class="k">tie</td><td><code>tie_chord.ogg</code></td><td>500ms</td><td>no</td><td>0.7</td></tr>
+          <tr><td>achievement</td><td><code>achievement_ding.ogg</code></td><td>800ms</td><td>no</td><td>0.85</td></tr>
+          <tr><td>reward</td><td><code>reward_ladder.ogg</code></td><td>1100ms</td><td>no</td><td>0.85</td></tr>
+          <tr><td>purchase</td><td><code>purchase_done.ogg</code></td><td>900ms</td><td>no</td><td>0.85</td></tr>
+          <tr><td>error</td><td><code>error_blip.ogg</code></td><td>200ms</td><td>no</td><td>0.6</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Per-theme sonic identity</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Theme</th><th>Palette</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Premium Minimal</td><td>Felt-tip and paper. Soft "page turn" reveal; "candle blow" lose; bell-like win.</td></tr>
+          <tr><td class="k">Competitive Arena</td><td>Stadium kit. Bass-heavy lock; sub-bass + clap on win; crowd-murmur loop ducked under shuffle.</td></tr>
+          <tr><td class="k">Modern Futuristic</td><td>Synth + tape. Modular-synth bleeps; FM sweeps on reveal; magenta-tinted noise on lose.</td></tr>
+          <tr><td class="k">Tactile Premium</td><td>Wood and paper. Card-flip thwip on reveal; muted wood-block lock; warm chord on win.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Rules</h3>
+    <ul>
+      <li>One SFX max overlapping at any time — the engine cuts the previous if a new trigger lands within 80ms.</li>
+      <li>Sound master toggle + "Reveal speed" affect timing only; never the sample.</li>
+      <li>No background music in MVP. Phase 2 adds a single muted ambient loop per theme, off by default.</li>
+    </ul>
+  </section>
+
+  <!-- ─── 11 · ICONS ─── -->
+  <section id="icons">
+    <div class="s-head">
+      <div class="s-num">11 · Feel</div>
+      <h2>Iconography</h2>
+      <div class="s-lede">Real, recognisable objects. The three game icons + the small supporting set are drawn at one canonical weight and re-coloured by theme.</div>
+    </div>
+
+    <h3>Rock · Paper · Scissors</h3>
+    <p>Drawn as objects, not gestures — universally readable across en/tr/es without the hand-gesture ambiguity (the same fist can mean different things across cultures).</p>
+    <ul>
+      <li><strong>Rock</strong> — an irregular boulder with two faint facet lines. Asymmetric on purpose; a circle would read as a ball.</li>
+      <li><strong>Paper</strong> — a sheet with a folded top-right corner and three content lines. The fold detail is the only thing that distinguishes "paper" from "card".</li>
+      <li><strong>Scissors</strong> — classic shears: two crossing blades through a central pivot, two finger rings. Unmistakable at 16px.</li>
+    </ul>
+
+    <h3>Supporting glyphs (per pack)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Glyph</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="k">menu / back / close</td><td>app bar leading</td></tr>
+          <tr><td class="k">history (clock)</td><td>app bar trailing on Home / Play</td></tr>
+          <tr><td class="k">settings (gear)</td><td>app bar trailing on Home</td></tr>
+          <tr><td class="k">themes (stack)</td><td>Home navigation</td></tr>
+          <tr><td class="k">profile / friends (P2/P3)</td><td>Home navigation</td></tr>
+          <tr><td class="k">achievement (medal)</td><td>achievement card</td></tr>
+          <tr><td class="k">multiplayer (signal)</td><td>mode select, P3</td></tr>
+          <tr><td class="k">reward (gift)</td><td>ad reward modal</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Drawing rules</h3>
+    <ul>
+      <li>32×32 viewBox source; renders 14–120px without artefacts.</li>
+      <li>Solid + outline variants; outline stroke width 2 at 32px, scaling to 1.5 at 16px.</li>
+      <li>No theme draws its own R/P/S — they all consume the shared <code>IconPack</code> primitives and re-tint.</li>
+      <li>Achievements ship as a parallel collection drawn in the same style; not bundled per-theme.</li>
+    </ul>
+  </section>
+
+  <!-- ─── 12 · MP ─── -->
+  <section id="mp">
+    <div class="s-head">
+      <div class="s-num">12 · Product</div>
+      <h2>Multiplayer-ready UX</h2>
+      <div class="s-lede">Designed in MVP, dormant until Phase 3. The state machine and screen vocabulary already support PvP; the network layer is the only thing missing.</div>
+    </div>
+
+    <h3>Modes (Phase 3)</h3>
+    <ol>
+      <li><strong>Quick match</strong> — anonymous queue, ELO-bracketed, 30s max wait, falls back to "vs CPU" with a banner if no match found.</li>
+      <li><strong>Friend match</strong> — share invite link or 6-char code; private, persistent.</li>
+      <li><strong>Async match</strong> — turn-by-mail; the picked move is sent, opponent has 24h. Push notification on opponent's reveal.</li>
+      <li><strong>Ranked</strong> — quick-match but with SR (skill rating); season-based; placement matches in first 10.</li>
+    </ol>
+
+    <h3>Match lifecycle</h3>
+    <pre>matchmaking → lobby (both ready?) → match_active (best-of-N) → match_result → rematch?
+
+   ├──[5s cancel grace]
+   ├──[opponent leaves] → forfeit → SR adjustment
+   └──[disconnect]       → 15s grace → reconnect | forfeit</pre>
+
+    <h3>Disconnect &amp; reconnect</h3>
+    <ul>
+      <li><strong>During CPU/opponent thinking:</strong> "reconnecting…" pill at top of duel screen; FSM frozen.</li>
+      <li><strong>15s grace window;</strong> if past, opponent wins by forfeit. SR penalty is half the normal loss.</li>
+      <li><strong>Async matches</strong> don't need reconnect — the move is already on the server.</li>
+      <li><strong>Both players disconnect</strong> within grace: match is voided, no SR change.</li>
+    </ul>
+
+    <h3>Rematch UX</h3>
+    <ul>
+      <li>Reveal screen on the final round of a match offers <strong>Rematch</strong> + <strong>Leave</strong>.</li>
+      <li>If both tap rematch within 15s, the room persists; if only one taps, the other gets a "X wants a rematch" notification (Phase 3).</li>
+    </ul>
+
+    <div class="callout note"><div><strong>Server schema preview</strong>The local <code>Round</code> data class is intentionally shaped like the eventual server document: <code>{ matchId, roundIdx, youMove, opponentMove, outcome, themeId, timestamp }</code>. When PvP turns on, the local persistence layer becomes the offline-write-then-sync cache without a schema change.</div></div>
+  </section>
+
+  <!-- ─── 13 · ANALYTICS ─── -->
+  <section id="analytics">
+    <div class="s-head">
+      <div class="s-num">13 · Product</div>
+      <h2>Analytics events</h2>
+      <div class="s-lede">The minimum set we need to answer the "did anyone play it?" question on day one, with hooks for monetization and theme adoption on day two.</div>
+    </div>
+
+    <h3>Event taxonomy</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width: 26%;">Event</th><th>Params</th><th>Phase</th></tr></thead>
+        <tbody>
+          <tr><td class="k"><code>app_open</code></td><td>theme_id, locale, is_first_open</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>onboarding_completed</code></td><td>seconds_to_complete</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>language_selected</code></td><td>from_locale, to_locale</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>theme_selected</code></td><td>theme_id, source (onboarding|settings|store)</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>game_started</code></td><td>mode (vs_cpu|local2p|...), theme_id, round_idx</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>choice_selected</code></td><td>choice (rock|paper|scissors), round_idx</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>round_won</code></td><td>you, cpu, streak</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>round_lost</code></td><td>you, cpu</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>round_tied</code></td><td>move</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>session_ended</code></td><td>rounds_played, duration_sec, last_outcome</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>reset_match</code></td><td>rounds_cleared</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>interstitial_shown</code></td><td>placement, after_rounds</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>rewarded_ad_started</code></td><td>placement (theme_unlock|extra_match)</td><td><span class="pill p2">P2</span></td></tr>
+          <tr><td class="k"><code>rewarded_ad_completed</code></td><td>placement, reward_id</td><td><span class="pill p2">P2</span></td></tr>
+          <tr><td class="k"><code>iap_initiated</code></td><td>product_id (remove_ads|theme_premium|...)</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>iap_completed</code></td><td>product_id, price_local</td><td><span class="pill mvp">MVP</span></td></tr>
+          <tr><td class="k"><code>achievement_unlocked</code></td><td>achievement_id, total_unlocked</td><td><span class="pill p2">P2</span></td></tr>
+          <tr><td class="k"><code>friend_invite_sent</code></td><td>channel (link|qr|contact)</td><td><span class="pill p3">P3</span></td></tr>
+          <tr><td class="k"><code>multiplayer_match_started</code></td><td>mode (quick|friend|ranked), opponent_type</td><td><span class="pill p3">P3</span></td></tr>
+          <tr><td class="k"><code>multiplayer_match_completed</code></td><td>mode, outcome, rounds, sr_delta</td><td><span class="pill p3">P3</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Funnel hierarchy</h3>
+    <p>Top: <code>app_open</code> → <code>onboarding_completed</code> → <code>game_started</code> → first <code>session_ended</code>. Anything else is leaf.</p>
+  </section>
+
+  <!-- ─── 14 · ADS ─── -->
+  <section id="ads">
+    <div class="s-head">
+      <div class="s-num">14 · Product</div>
+      <h2>Ad placement strategy</h2>
+      <div class="s-lede">Two formats. Two placements each. Hard frequency caps. No banners — they'd live in the duel's bottom third and the duel needs that real estate.</div>
+    </div>
+
+    <h3>Allowed formats</h3>
+    <div class="two-col">
+      <div class="card">
+        <h4>Interstitial</h4>
+        <p style="font-size: 12.5px;">Full-screen. Skippable per platform rules. Shown <strong>between matches, never mid-duel</strong>.</p>
+      </div>
+      <div class="card">
+        <h4>Rewarded</h4>
+        <p style="font-size: 12.5px;">Player-initiated. Unlocks theme / removes the next interstitial for 24h / gives a "double-streak" boost (Phase 2).</p>
+      </div>
+    </div>
+
+    <h3>Placements</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Placement</th><th>Format</th><th>Frequency cap</th><th>UX rule</th></tr></thead>
+        <tbody>
+          <tr><td class="k">post-match interstitial</td><td>Interstitial</td><td>Once per 4 rounds, never within 90s</td><td>Triggered on tap to replay; never on reveal. Skip CTA visible from t=0.</td></tr>
+          <tr><td class="k">theme unlock</td><td>Rewarded</td><td>Per theme (one-time unlock)</td><td>Player-initiated from Themes screen. Skip mid-ad ≠ unlock.</td></tr>
+          <tr><td class="k">remove-ads CTA</td><td>—</td><td>Surfaced after dismissing 3rd interstitial</td><td>Soft prompt — not a popup, an inline card on Home.</td></tr>
+          <tr><td class="k">extra-life / replay boost (P2)</td><td>Rewarded</td><td>Once per session</td><td>Optional. Never interrupts gameplay.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Hard rules</h3>
+    <ul>
+      <li>No interstitial in the first 5 minutes of first session.</li>
+      <li>No interstitial during onboarding or theme select.</li>
+      <li>Reduced cap (1 per 10 rounds) until day-1 retention threshold reached.</li>
+      <li>Players with <code>remove_ads</code> entitlement see zero interstitials, ever. Rewarded ads remain available as opt-in.</li>
+    </ul>
+
+    <div class="callout warn"><div><strong>Anti-pattern guardrail</strong>If interstitial CTR drops below 0.5% in the first week, we cut frequency, not the duel. The duel is the product. Ads are scaffolding.</div></div>
+  </section>
+
+  <!-- ─── 15 · STORE ─── -->
+  <section id="store">
+    <div class="s-head">
+      <div class="s-num">15 · Product</div>
+      <h2>App Store readiness</h2>
+      <div class="s-lede">Five screenshots, three languages, one positioning line. The store listing is the second part of the funnel — the first part is the icon.</div>
+    </div>
+
+    <h3>Positioning</h3>
+    <p style="font-family: 'Newsreader'; font-style: italic; font-size: 22px; line-height: 1.3; color: var(--ink); max-width: 540px; margin: 12px 0 18px;">"A quiet, premium game of three. Pick rock, paper, or scissors. We pick one back. The winner shows itself in a heartbeat. Tap again."</p>
+    <p>One sentence. Not a tagline; the actual first line of the App Store description. Sets restraint as a feature, signals craft.</p>
+
+    <h3>Screenshot strategy (5 per platform · same script across en/tr/es)</h3>
+    <ol>
+      <li><strong>Hero (reveal · win)</strong> — Tactile Premium theme, big "You win." in serif italic. Top of screen: localized tagline overlay.</li>
+      <li><strong>Anticipation</strong> — your card lifted, CPU face-down. Tagline: "The wait is the game."</li>
+      <li><strong>Four themes</strong> — small grid showing all four duel screens. Tagline: "Four directions. Pick yours."</li>
+      <li><strong>History</strong> — calm scrollable list. Tagline: "Every round, kept."</li>
+      <li><strong>Onboarding step 2</strong> — three cards intro. Tagline: "Three icons. One heartbeat."</li>
+    </ol>
+
+    <h3>Conversion logic</h3>
+    <ul>
+      <li>First screenshot must read as <strong>not a kids' game</strong> in &lt;1 second. The hero serif italic does this; the abstract glyph-tournament aesthetic of the other concepts does not.</li>
+      <li>Screenshots 2-4 establish depth and care; screenshot 5 closes the "is it for me?" question.</li>
+      <li>Localized taglines, not localized screenshots. The duel itself is language-free.</li>
+    </ul>
+
+    <h3>Onboarding conversion</h3>
+    <p>The whole onboarding to first round must be under <strong>14 seconds</strong>. Language + Theme are skippable (defaults: device locale, Tactile Premium). The 3-card intro is the only mandatory step; even that has a "Skip" affordance after 3s.</p>
+
+    <h3>Submission checklist</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Item</th><th>Owner</th><th>Cadence</th></tr></thead>
+        <tbody>
+          <tr><td class="k">App icon (Tactile Premium card spread)</td><td>Design</td><td>per release</td></tr>
+          <tr><td class="k">Screenshots (5 × 3 locales × 2 platforms)</td><td>Design + i18n</td><td>per release</td></tr>
+          <tr><td class="k">Description (en/tr/es)</td><td>Product + i18n</td><td>per release</td></tr>
+          <tr><td class="k">Privacy nutrition (App Store) / Data safety (Play)</td><td>Eng</td><td>per release with new SDK</td></tr>
+          <tr><td class="k">Age rating (4+ / Everyone)</td><td>Product</td><td>one-time</td></tr>
+          <tr><td class="k">In-app purchase metadata (per product)</td><td>Product</td><td>per new product</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer style="margin-top: 80px; padding-top: 32px; border-top: 1px solid var(--hairlineSoft); color: var(--inkMuted); font-size: 12.5px; display: flex; justify-content: space-between;">
+    <div>rock·paper·scissors · spec v1.0 · May 2026</div>
+    <div><a href="index.html">visual canvas →</a> &nbsp;·&nbsp; <a href="handoff.html">engineering handoff →</a></div>
+  </footer>
+
+  </main>
+</div>
+
+</body>
+</html>
