@@ -3,11 +3,33 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rps_duel/app/locale_scope.dart';
 import 'package:rps_duel/data/local_difficulty_storage.dart';
 import 'package:rps_duel/domain/cpu_difficulty.dart';
+import 'package:rps_duel/domain/move_choice.dart';
+import 'package:rps_duel/domain/rps_engine.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
 import 'package:rps_duel/ui/game/game_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Widget _buildApp({Locale? locale, Duration delay = Duration.zero}) {
+class _FixedCpuEngine extends RpsEngine {
+  _FixedCpuEngine(this._cpu);
+
+  final MoveChoice _cpu;
+
+  @override
+  MoveChoice cpuMove() => _cpu;
+
+  @override
+  MoveChoice cpuMoveFor({
+    required MoveChoice playerMove,
+    required CpuDifficulty difficulty,
+  }) =>
+      _cpu;
+}
+
+Widget _buildApp({
+  Locale? locale,
+  Duration delay = Duration.zero,
+  RpsEngine? engine,
+}) {
   final controller = ValueNotifier<Locale?>(locale);
   return LocaleScope(
     controller: controller,
@@ -17,7 +39,7 @@ Widget _buildApp({Locale? locale, Duration delay = Duration.zero}) {
         locale: current,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        home: GameScreen(cpuThinkingDelay: delay),
+        home: GameScreen(cpuThinkingDelay: delay, engine: engine),
       ),
     ),
   );
@@ -269,5 +291,33 @@ void main() {
     // mock-vs-runtime key-prefix ambiguity).
     final storage = await DifficultyStorage.open();
     expect(storage.load(), CpuDifficulty.easy);
+  });
+
+  testWidgets(
+      'Daily Challenge card visible with 0/3 progress on initial render',
+      (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Daily Challenge'), findsOneWidget);
+    expect(find.text('Win 3 rounds with Scissors'), findsOneWidget);
+    expect(find.text('0/3'), findsOneWidget);
+  });
+
+  testWidgets(
+      'winning a round with Scissors advances the daily challenge to 1/3',
+      (tester) async {
+    // CPU plays paper → scissors wins.
+    await tester.pumpWidget(
+      _buildApp(engine: _FixedCpuEngine(MoveChoice.paper)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('0/3'), findsOneWidget);
+
+    await tester.tap(find.text('Scissors'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1/3'), findsOneWidget);
   });
 }

@@ -43,6 +43,10 @@
   "aboutDescription": "Un duelo de piedra-papel-tijera de 30 segundos para llevar en el bolsillo.",
   "aboutClose": "Cerrar",
 
+  "dailyChallengeTitle": "Reto diario",
+  "dailyChallengeDescription": "Gana 3 rondas con Tijera",
+  "dailyChallengeCompleted": "Completado",
+
   "difficultyPickerTitle": "Dificultad",
   "difficultyEasy": "Fácil",
   "difficultyNormal": "Normal",

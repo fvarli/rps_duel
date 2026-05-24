@@ -3,16 +3,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:rps_duel/app/locale_scope.dart';
+import 'package:rps_duel/data/local_daily_challenge_storage.dart';
 import 'package:rps_duel/data/local_difficulty_storage.dart';
 import 'package:rps_duel/data/local_game_storage.dart';
 import 'package:rps_duel/domain/cpu_difficulty.dart';
+import 'package:rps_duel/domain/daily_challenge.dart';
 import 'package:rps_duel/domain/duel_controller.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
 import 'package:rps_duel/domain/duel_state.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
+import 'package:rps_duel/domain/rps_engine.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/game/daily_challenge_card.dart';
 import 'package:rps_duel/ui/game/difficulty_picker_sheet.dart';
 import 'package:rps_duel/ui/game/language_picker_sheet.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
@@ -22,9 +26,11 @@ class GameScreen extends StatefulWidget {
   const GameScreen({
     super.key,
     this.cpuThinkingDelay = const Duration(milliseconds: 500),
+    this.engine,
   });
 
   final Duration cpuThinkingDelay;
+  final RpsEngine? engine;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -34,11 +40,16 @@ class _GameScreenState extends State<GameScreen> {
   late final DuelController _controller;
   LocalGameStorage? _storage;
   DifficultyStorage? _difficultyStorage;
+  DailyChallengeStorage? _challengeStorage;
+  DailyChallenge _challenge = DailyChallenge.initialFor(DateTime.now());
 
   @override
   void initState() {
     super.initState();
-    _controller = DuelController(cpuThinkingDelay: widget.cpuThinkingDelay);
+    _controller = DuelController(
+      cpuThinkingDelay: widget.cpuThinkingDelay,
+      engine: widget.engine,
+    );
     _controller.onStateChanged = _handleStateChanged;
     unawaited(_loadAndApply());
   }
@@ -82,10 +93,22 @@ class _GameScreenState extends State<GameScreen> {
   Future<void> _loadAndApply() async {
     final storage = await LocalGameStorage.open();
     final difficultyStorage = await DifficultyStorage.open();
+    final challengeStorage = await DailyChallengeStorage.open();
     if (!mounted) return;
     _storage = storage;
     _difficultyStorage = difficultyStorage;
+    _challengeStorage = challengeStorage;
     _controller.setDifficulty(difficultyStorage.load());
+
+    final loadedChallenge = challengeStorage.load();
+    final today = DateTime.now();
+    if (loadedChallenge != null && loadedChallenge.isToday(today)) {
+      setState(() => _challenge = loadedChallenge);
+    } else {
+      final fresh = DailyChallenge.initialFor(today);
+      setState(() => _challenge = fresh);
+      unawaited(challengeStorage.save(fresh));
+    }
 
     final s = _controller.state;
     final pristine = s.playerScore == 0 &&
@@ -106,6 +129,16 @@ class _GameScreenState extends State<GameScreen> {
     await _difficultyStorage?.save(difficulty);
   }
 
+  void _updateChallenge() {
+    final history = _controller.state.history;
+    if (history.isEmpty) return;
+    final last = history.last;
+    final next = _challenge.advanceFor(last.playerMove, last.outcome);
+    if (next.progress != _challenge.progress) {
+      setState(() => _challenge = next);
+    }
+  }
+
   void _select(MoveChoice move) {
     unawaited(_runRound(move));
   }
@@ -113,7 +146,9 @@ class _GameScreenState extends State<GameScreen> {
   Future<void> _runRound(MoveChoice move) async {
     await _controller.selectMoveWithDelay(move);
     if (!mounted) return;
+    _updateChallenge();
     await _storage?.save(_controller.state);
+    await _challengeStorage?.save(_challenge);
   }
 
   void _next() {
@@ -264,6 +299,8 @@ class _GameScreenState extends State<GameScreen> {
                           ),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  DailyChallengeCard(challenge: _challenge),
                   const SizedBox(height: 16),
                   _DuelSurface(
                     child: AnimatedSize(

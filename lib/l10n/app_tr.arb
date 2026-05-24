@@ -43,6 +43,10 @@
   "aboutDescription": "Cebine sığan 30 saniyelik taş-kağıt-makas düellosu.",
   "aboutClose": "Kapat",
 
+  "dailyChallengeTitle": "Günlük Görev",
+  "dailyChallengeDescription": "Makasla 3 el kazan",
+  "dailyChallengeCompleted": "Tamamlandı",
+
   "difficultyPickerTitle": "Zorluk",
   "difficultyEasy": "Kolay",
   "difficultyNormal": "Normal",

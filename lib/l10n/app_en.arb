@@ -81,6 +81,13 @@
   "@aboutDescription": { "description": "Short tagline shown in the About dialog body." },
   "@aboutClose": { "description": "Close button on the About dialog." },
 
+  "dailyChallengeTitle": "Daily Challenge",
+  "dailyChallengeDescription": "Win 3 rounds with Scissors",
+  "dailyChallengeCompleted": "Completed",
+  "@dailyChallengeTitle": { "description": "Header for the daily challenge card." },
+  "@dailyChallengeDescription": { "description": "Short description of today's MVP challenge. The number 3 mirrors DailyChallenge.target." },
+  "@dailyChallengeCompleted": { "description": "Label shown when today's challenge is finished." },
+
   "difficultyPickerTitle": "Difficulty",
   "difficultyEasy": "Easy",
   "difficultyNormal": "Normal",
