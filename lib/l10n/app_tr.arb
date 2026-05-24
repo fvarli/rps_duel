@@ -33,5 +33,7 @@
   "resetConfirm": "Sıfırla",
 
   "recentRounds": "Son eller",
-  "noRoundsYet": "Henüz hiç el oynanmadı."
+  "noRoundsYet": "Henüz hiç el oynanmadı.",
+
+  "languagePickerTitle": "Dil"
 }

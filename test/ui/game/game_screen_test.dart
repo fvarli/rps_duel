@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rps_duel/app/locale_scope.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
 import 'package:rps_duel/ui/game/game_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Widget _buildApp({Locale? locale, Duration delay = Duration.zero}) {
-  return MaterialApp(
-    locale: locale,
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: GameScreen(cpuThinkingDelay: delay),
+  final controller = ValueNotifier<Locale?>(locale);
+  return LocaleScope(
+    controller: controller,
+    child: ValueListenableBuilder<Locale?>(
+      valueListenable: controller,
+      builder: (ctx, current, _) => MaterialApp(
+        locale: current,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: GameScreen(cpuThinkingDelay: delay),
+      ),
+    ),
   );
 }
 
@@ -121,5 +129,44 @@ void main() {
     expect(find.text('Hamleni seç'), findsOneWidget);
     expect(find.text('Taş'), findsAtLeastNWidgets(1));
     expect(find.text('Oyunu Sıfırla'), findsOneWidget);
+  });
+
+  testWidgets('language button opens the picker sheet', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.language));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Language'), findsOneWidget);
+    expect(find.text('English'), findsOneWidget);
+    expect(find.text('Türkçe'), findsOneWidget);
+    expect(find.text('Español'), findsOneWidget);
+  });
+
+  testWidgets('picking Türkçe switches UI to Turkish', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.language));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Türkçe'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hamleni seç'), findsOneWidget);
+    expect(find.text('Taş'), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('picking Español switches UI to Spanish', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.language));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Español'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Elige tu jugada'), findsOneWidget);
+    expect(find.text('Piedra'), findsAtLeastNWidgets(1));
   });
 }

@@ -33,5 +33,7 @@
   "resetConfirm": "Reiniciar",
 
   "recentRounds": "Rondas recientes",
-  "noRoundsYet": "Aún no hay rondas."
+  "noRoundsYet": "Aún no hay rondas.",
+
+  "languagePickerTitle": "Idioma"
 }

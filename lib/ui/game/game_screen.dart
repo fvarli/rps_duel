@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:rps_duel/app/locale_scope.dart';
 import 'package:rps_duel/data/local_game_storage.dart';
 import 'package:rps_duel/domain/duel_controller.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
@@ -10,6 +11,7 @@ import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/game/language_picker_sheet.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
 
 class GameScreen extends StatefulWidget {
@@ -139,7 +141,20 @@ class _GameScreenState extends State<GameScreen> {
     final isReveal = phase == DuelPhase.reveal;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.appName)),
+      appBar: AppBar(
+        title: Text(l10n.appName),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.language),
+            tooltip: l10n.languagePickerTitle,
+            onPressed: () {
+              unawaited(
+                showLanguagePicker(context, LocaleScope.of(context)),
+              );
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(

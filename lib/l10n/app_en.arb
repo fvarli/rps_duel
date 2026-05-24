@@ -65,5 +65,8 @@
   "recentRounds": "Recent rounds",
   "noRoundsYet": "No rounds yet.",
   "@recentRounds": { "description": "Header above the history list section." },
-  "@noRoundsYet": { "description": "Empty-state shown when history is empty." }
+  "@noRoundsYet": { "description": "Empty-state shown when history is empty." },
+
+  "languagePickerTitle": "Language",
+  "@languagePickerTitle": { "description": "Header / tooltip for the in-app language switcher." }
 }
