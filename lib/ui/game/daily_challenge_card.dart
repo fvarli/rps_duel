@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:rps_duel/domain/daily_challenge.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/theme/tactile_theme.dart';
 
 class DailyChallengeCard extends StatelessWidget {
   const DailyChallengeCard({super.key, required this.challenge});
@@ -13,9 +14,6 @@ class DailyChallengeCard extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
     return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: theme.colorScheme.surfaceContainerHighest,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Row(
@@ -23,7 +21,7 @@ class DailyChallengeCard extends StatelessWidget {
             Icon(
               challenge.completed ? Icons.emoji_events : Icons.flag,
               color: challenge.completed
-                  ? theme.colorScheme.primary
+                  ? TactileColors.sage
                   : theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 12),
@@ -53,7 +51,7 @@ class DailyChallengeCard extends StatelessWidget {
                   : '${challenge.progress}/${DailyChallenge.target}',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: challenge.completed ? theme.colorScheme.primary : null,
+                color: challenge.completed ? TactileColors.sage : null,
               ),
             ),
           ],

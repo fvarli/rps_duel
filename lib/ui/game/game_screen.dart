@@ -24,6 +24,7 @@ import 'package:rps_duel/ui/game/difficulty_picker_sheet.dart';
 import 'package:rps_duel/ui/game/language_picker_sheet.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
 import 'package:rps_duel/ui/game/settings_sheet.dart';
+import 'package:rps_duel/ui/theme/tactile_theme.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({
@@ -280,25 +281,17 @@ class _GameScreenState extends State<GameScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      Expanded(
-                        child: _ScoreCard(
-                          label: l10n.scoreLabelPlayer,
-                          value: state.playerScore,
-                        ),
+                      _ScoreCard(
+                        label: l10n.scoreLabelPlayer,
+                        value: state.playerScore,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _ScoreCard(
-                          label: l10n.scoreLabelCpu,
-                          value: state.cpuScore,
-                        ),
+                      _ScoreCard(
+                        label: l10n.scoreLabelCpu,
+                        value: state.cpuScore,
                       ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _ScoreCard(
-                          label: l10n.scoreLabelTies,
-                          value: state.ties,
-                        ),
+                      _ScoreCard(
+                        label: l10n.scoreLabelTies,
+                        value: state.ties,
                       ),
                     ],
                   ),
@@ -413,32 +406,43 @@ class _ScoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: theme.colorScheme.surfaceContainerHighest,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(label, style: theme.textTheme.labelMedium),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: theme.colorScheme.outline),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: TactileColors.paperEdge,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              letterSpacing: 0.5,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 2),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 180),
-              child: Text(
-                '$value',
-                key: ValueKey<int>(value),
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+          ),
+          const SizedBox(width: 6),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 180),
+            child: Text(
+              '$value',
+              key: ValueKey<int>(value),
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -454,8 +458,16 @@ class _DuelSurface extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: theme.colorScheme.outline),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: TactileColors.shadowInk10,
+            blurRadius: 12,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: child,
@@ -501,7 +513,9 @@ class _RevealArea extends StatelessWidget {
         Text(
           _outcomeText(l10n, outcome),
           style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontFamily: 'serif',
+            fontStyle: FontStyle.italic,
+            fontWeight: FontWeight.w400,
             color: _outcomeColor(theme, outcome),
           ),
           textAlign: TextAlign.center,
@@ -596,11 +610,18 @@ class _HistoryRow extends StatelessWidget {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
+              color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: theme.colorScheme.outline),
             ),
             alignment: Alignment.center,
-            child: Text('$roundNumber', style: theme.textTheme.labelSmall),
+            child: Text(
+              '$roundNumber',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(

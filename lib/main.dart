@@ -7,6 +7,7 @@ import 'package:rps_duel/app/locale_scope.dart';
 import 'package:rps_duel/app/router.dart';
 import 'package:rps_duel/data/local_locale_storage.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/theme/tactile_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,10 +36,7 @@ class RpsDuelApp extends ConsumerWidget {
       builder: (context, locale, _) => MaterialApp.router(
         title: 'RPS Duel',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-          useMaterial3: true,
-        ),
+        theme: tactileTheme(),
         locale: locale,
         routerConfig: appRouter,
         supportedLocales: AppLocalizations.supportedLocales,

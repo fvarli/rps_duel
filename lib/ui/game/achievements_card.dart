@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:rps_duel/domain/achievement.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/theme/tactile_theme.dart';
 
 String achievementTitle(AppLocalizations l10n, AchievementId id) {
   return switch (id) {
@@ -23,9 +24,6 @@ class AchievementsCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final total = AchievementId.values.length;
     return Card(
-      elevation: 0,
-      margin: EdgeInsets.zero,
-      color: theme.colorScheme.surfaceContainerHighest,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
@@ -70,6 +68,13 @@ class AchievementsCard extends StatelessWidget {
                     if (unlocked.contains(id))
                       Chip(
                         label: Text(achievementTitle(l10n, id)),
+                        labelStyle: const TextStyle(
+                          color: TactileColors.sage,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        backgroundColor:
+                            const Color.fromRGBO(92, 125, 68, 0.12),
+                        side: BorderSide.none,
                         visualDensity: VisualDensity.compact,
                       ),
                 ],
