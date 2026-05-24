@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:rps_duel/data/local_game_storage.dart';
 import 'package:rps_duel/domain/duel_controller.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
+import 'package:rps_duel/domain/duel_state.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
@@ -44,6 +45,30 @@ class _GameScreenState extends State<GameScreen> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  Widget _phaseChild(DuelState state) {
+    final theme = Theme.of(context);
+    return switch (state.phase) {
+      DuelPhase.reveal => _RevealArea(
+          key: const ValueKey<String>('reveal'),
+          playerMove: state.playerMove!,
+          cpuMove: state.cpuMove!,
+          outcome: state.outcome!,
+        ),
+      DuelPhase.playerSelected || DuelPhase.cpuThinking => Text(
+          'CPU is choosing…',
+          key: const ValueKey<String>('thinking'),
+          style: theme.textTheme.titleLarge,
+          textAlign: TextAlign.center,
+        ),
+      DuelPhase.idle => Text(
+          'Choose your move',
+          key: const ValueKey<String>('idle'),
+          style: theme.textTheme.titleLarge,
+          textAlign: TextAlign.center,
+        ),
+    };
   }
 
   Future<void> _loadAndApply() async {
@@ -108,8 +133,6 @@ class _GameScreenState extends State<GameScreen> {
     final state = _controller.state;
     final phase = state.phase;
     final isIdle = phase == DuelPhase.idle;
-    final isThinking =
-        phase == DuelPhase.playerSelected || phase == DuelPhase.cpuThinking;
     final isReveal = phase == DuelPhase.reveal;
     final historyCount = state.history.length;
     final historyWord = historyCount == 1 ? 'round' : 'rounds';
@@ -159,23 +182,16 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                   const SizedBox(height: 16),
                   _DuelSurface(
-                    child: isReveal
-                        ? _RevealArea(
-                            playerMove: state.playerMove!,
-                            cpuMove: state.cpuMove!,
-                            outcome: state.outcome!,
-                          )
-                        : isThinking
-                            ? Text(
-                                'CPU is choosing…',
-                                style:
-                                    Theme.of(context).textTheme.titleLarge,
-                              )
-                            : Text(
-                                'Choose your move',
-                                style:
-                                    Theme.of(context).textTheme.titleLarge,
-                              ),
+                    child: AnimatedSize(
+                      duration: const Duration(milliseconds: 220),
+                      alignment: Alignment.topCenter,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 220),
+                        switchInCurve: Curves.easeOut,
+                        switchOutCurve: Curves.easeIn,
+                        child: _phaseChild(state),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -266,10 +282,14 @@ class _ScoreCard extends StatelessWidget {
               child: Text(label, style: theme.textTheme.labelMedium),
             ),
             const SizedBox(height: 2),
-            Text(
-              '$value',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 180),
+              child: Text(
+                '$value',
+                key: ValueKey<int>(value),
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -300,6 +320,7 @@ class _DuelSurface extends StatelessWidget {
 
 class _RevealArea extends StatelessWidget {
   const _RevealArea({
+    super.key,
     required this.playerMove,
     required this.cpuMove,
     required this.outcome,

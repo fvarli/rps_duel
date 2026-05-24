@@ -11,7 +11,7 @@ void main() {
   testWidgets('Rock walks idle → cpuThinking → reveal', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: GameScreen(cpuThinkingDelay: Duration(milliseconds: 200)),
+        home: GameScreen(cpuThinkingDelay: Duration(milliseconds: 500)),
       ),
     );
     await tester.pumpAndSettle();
@@ -21,6 +21,7 @@ void main() {
 
     await tester.tap(find.text('Rock'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
 
     expect(find.text('Choose your move'), findsNothing);
     expect(find.text('CPU is choosing…'), findsOneWidget);
