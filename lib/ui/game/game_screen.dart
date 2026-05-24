@@ -35,53 +35,70 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     final state = _controller.state;
     final isReveal = state.phase == DuelPhase.reveal;
+    final historyCount = state.history.length;
+    final historyWord = historyCount == 1 ? 'round' : 'rounds';
 
     return Scaffold(
       appBar: AppBar(title: const Text('RPS Duel')),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              _ScoresRow(
-                playerScore: state.playerScore,
-                cpuScore: state.cpuScore,
-                ties: state.ties,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  _ScoreCard(label: 'Player', value: state.playerScore),
+                  _ScoreCard(label: 'CPU', value: state.cpuScore),
+                  _ScoreCard(label: 'Ties', value: state.ties),
+                ],
               ),
-              Text(
-                'Round ${state.roundCount}',
-                style: Theme.of(context).textTheme.titleMedium,
+              const SizedBox(height: 20),
+              Center(
+                child: Text(
+                  'Round ${state.roundCount} · History: $historyCount $historyWord',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
               ),
+              const SizedBox(height: 32),
               if (isReveal)
-                _RevealPanel(
+                _RevealArea(
                   playerMove: state.playerMove!,
                   cpuMove: state.cpuMove!,
                   outcome: state.outcome!,
                 )
               else
-                Text(
-                  'Choose your move',
-                  style: Theme.of(context).textTheme.titleLarge,
+                Center(
+                  child: Text(
+                    'Choose your move',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                 ),
+              const SizedBox(height: 40),
               Row(
                 children: <Widget>[
                   Expanded(
                     child: MoveButton(
+                      emoji: '🪨',
                       label: 'Rock',
-                      onPressed: isReveal ? null : () => _select(MoveChoice.rock),
+                      onPressed:
+                          isReveal ? null : () => _select(MoveChoice.rock),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: MoveButton(
+                      emoji: '📄',
                       label: 'Paper',
-                      onPressed: isReveal ? null : () => _select(MoveChoice.paper),
+                      onPressed:
+                          isReveal ? null : () => _select(MoveChoice.paper),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: MoveButton(
+                      emoji: '✂️',
                       label: 'Scissors',
                       onPressed:
                           isReveal ? null : () => _select(MoveChoice.scissors),
@@ -89,27 +106,23 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                 ],
               ),
-              Column(
-                children: <Widget>[
-                  if (isReveal)
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: FilledButton.tonal(
-                        onPressed: _next,
-                        child: const Text('Next Round'),
-                      ),
-                    ),
-                  if (isReveal) const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: OutlinedButton(
-                      onPressed: _reset,
-                      child: const Text('Reset Game'),
-                    ),
+              const SizedBox(height: 20),
+              if (isReveal) ...<Widget>[
+                SizedBox(
+                  height: 48,
+                  child: FilledButton.tonal(
+                    onPressed: _next,
+                    child: const Text('Next Round'),
                   ),
-                ],
+                ),
+                const SizedBox(height: 8),
+              ],
+              SizedBox(
+                height: 48,
+                child: OutlinedButton(
+                  onPressed: _reset,
+                  child: const Text('Reset Game'),
+                ),
               ),
             ],
           ),
@@ -119,32 +132,8 @@ class _GameScreenState extends State<GameScreen> {
   }
 }
 
-class _ScoresRow extends StatelessWidget {
-  const _ScoresRow({
-    required this.playerScore,
-    required this.cpuScore,
-    required this.ties,
-  });
-
-  final int playerScore;
-  final int cpuScore;
-  final int ties;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        _ScoreCell(label: 'Player', value: playerScore),
-        _ScoreCell(label: 'CPU', value: cpuScore),
-        _ScoreCell(label: 'Ties', value: ties),
-      ],
-    );
-  }
-}
-
-class _ScoreCell extends StatelessWidget {
-  const _ScoreCell({required this.label, required this.value});
+class _ScoreCard extends StatelessWidget {
+  const _ScoreCard({required this.label, required this.value});
 
   final String label;
   final int value;
@@ -152,18 +141,31 @@ class _ScoreCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      children: <Widget>[
-        Text(label, style: theme.textTheme.labelLarge),
-        const SizedBox(height: 4),
-        Text('$value', style: theme.textTheme.headlineMedium),
-      ],
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(label, style: theme.textTheme.labelMedium),
+            const SizedBox(height: 4),
+            Text(
+              '$value',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _RevealPanel extends StatelessWidget {
-  const _RevealPanel({
+class _RevealArea extends StatelessWidget {
+  const _RevealArea({
     required this.playerMove,
     required this.cpuMove,
     required this.outcome,
@@ -173,28 +175,81 @@ class _RevealPanel extends StatelessWidget {
   final MoveChoice cpuMove;
   final RoundOutcome outcome;
 
-  String _outcomeText() {
-    return switch (outcome) {
-      RoundOutcome.playerWin => 'You win!',
-      RoundOutcome.cpuWin => 'CPU wins!',
-      RoundOutcome.tie => 'Tie',
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Column(
       children: <Widget>[
-        Text('You: ${playerMove.name}', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 4),
-        Text('CPU: ${cpuMove.name}', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 12),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            _MoveDisplay(sideLabel: 'You', move: playerMove),
+            Text(
+              'VS',
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            _MoveDisplay(sideLabel: 'CPU', move: cpuMove),
+          ],
+        ),
+        const SizedBox(height: 20),
         Text(
-          _outcomeText(),
-          style: theme.textTheme.headlineSmall,
+          _outcomeText(outcome),
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.center,
         ),
       ],
     );
   }
+}
+
+class _MoveDisplay extends StatelessWidget {
+  const _MoveDisplay({required this.sideLabel, required this.move});
+
+  final String sideLabel;
+  final MoveChoice move;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(sideLabel, style: theme.textTheme.labelLarge),
+        const SizedBox(height: 8),
+        Text(_emojiFor(move), style: const TextStyle(fontSize: 56)),
+        const SizedBox(height: 4),
+        Text(_labelFor(move), style: theme.textTheme.titleMedium),
+      ],
+    );
+  }
+}
+
+String _emojiFor(MoveChoice move) {
+  return switch (move) {
+    MoveChoice.rock => '🪨',
+    MoveChoice.paper => '📄',
+    MoveChoice.scissors => '✂️',
+  };
+}
+
+String _labelFor(MoveChoice move) {
+  return switch (move) {
+    MoveChoice.rock => 'Rock',
+    MoveChoice.paper => 'Paper',
+    MoveChoice.scissors => 'Scissors',
+  };
+}
+
+String _outcomeText(RoundOutcome outcome) {
+  return switch (outcome) {
+    RoundOutcome.playerWin => 'You win!',
+    RoundOutcome.cpuWin => 'CPU wins!',
+    RoundOutcome.tie => "It's a tie!",
+  };
 }
