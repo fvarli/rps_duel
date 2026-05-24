@@ -1,4 +1,37 @@
 {
   "@@locale": "es",
-  "appName": "RPS Duel"
+
+  "appName": "RPS Duel",
+
+  "scoreLabelPlayer": "Jugador",
+  "scoreLabelCpu": "CPU",
+  "scoreLabelTies": "Empates",
+
+  "summaryLine": "Ronda {round} · Historial: {count, plural, one{1 ronda} other{{count} rondas}}",
+
+  "phaseIdle": "Elige tu jugada",
+  "phaseThinking": "La CPU está eligiendo…",
+
+  "moveRock": "Piedra",
+  "movePaper": "Papel",
+  "moveScissors": "Tijera",
+
+  "sideYou": "Tú",
+  "sideCpu": "CPU",
+  "vsLabel": "VS",
+
+  "outcomePlayerWin": "¡Ganaste!",
+  "outcomeCpuWin": "¡Gana la CPU!",
+  "outcomeTie": "¡Empate!",
+
+  "nextRound": "Siguiente ronda",
+  "resetGame": "Reiniciar juego",
+
+  "resetDialogTitle": "¿Reiniciar el juego?",
+  "resetDialogBody": "Se borrarán las puntuaciones y el historial.",
+  "cancel": "Cancelar",
+  "resetConfirm": "Reiniciar",
+
+  "recentRounds": "Rondas recientes",
+  "noRoundsYet": "Aún no hay rondas."
 }

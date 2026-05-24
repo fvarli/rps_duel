@@ -1,4 +1,37 @@
 {
   "@@locale": "tr",
-  "appName": "RPS Duel"
+
+  "appName": "RPS Duel",
+
+  "scoreLabelPlayer": "Oyuncu",
+  "scoreLabelCpu": "CPU",
+  "scoreLabelTies": "Beraberlik",
+
+  "summaryLine": "El {round} · Geçmiş: {count, plural, other{{count} el}}",
+
+  "phaseIdle": "Hamleni seç",
+  "phaseThinking": "CPU seçiyor…",
+
+  "moveRock": "Taş",
+  "movePaper": "Kağıt",
+  "moveScissors": "Makas",
+
+  "sideYou": "Sen",
+  "sideCpu": "CPU",
+  "vsLabel": "VS",
+
+  "outcomePlayerWin": "Kazandın!",
+  "outcomeCpuWin": "CPU kazandı!",
+  "outcomeTie": "Beraberlik!",
+
+  "nextRound": "Sonraki El",
+  "resetGame": "Oyunu Sıfırla",
+
+  "resetDialogTitle": "Oyun sıfırlansın mı?",
+  "resetDialogBody": "Skor ve el geçmişi silinecek.",
+  "cancel": "İptal",
+  "resetConfirm": "Sıfırla",
+
+  "recentRounds": "Son eller",
+  "noRoundsYet": "Henüz hiç el oynanmadı."
 }

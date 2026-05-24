@@ -9,6 +9,7 @@ import 'package:rps_duel/domain/duel_state.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
+import 'package:rps_duel/generated/l10n/app_localizations.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
 
 class GameScreen extends StatefulWidget {
@@ -47,7 +48,7 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
-  Widget _phaseChild(DuelState state) {
+  Widget _phaseChild(DuelState state, AppLocalizations l10n) {
     final theme = Theme.of(context);
     return switch (state.phase) {
       DuelPhase.reveal => _RevealArea(
@@ -57,13 +58,13 @@ class _GameScreenState extends State<GameScreen> {
           outcome: state.outcome!,
         ),
       DuelPhase.playerSelected || DuelPhase.cpuThinking => Text(
-          'CPU is choosing…',
+          l10n.phaseThinking,
           key: const ValueKey<String>('thinking'),
           style: theme.textTheme.titleLarge,
           textAlign: TextAlign.center,
         ),
       DuelPhase.idle => Text(
-          'Choose your move',
+          l10n.phaseIdle,
           key: const ValueKey<String>('idle'),
           style: theme.textTheme.titleLarge,
           textAlign: TextAlign.center,
@@ -104,19 +105,20 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   Future<void> _confirmReset() async {
+    final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reset game?'),
-        content: const Text('Scores and round history will be cleared.'),
+        title: Text(l10n.resetDialogTitle),
+        content: Text(l10n.resetDialogBody),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Reset'),
+            child: Text(l10n.resetConfirm),
           ),
         ],
       ),
@@ -130,15 +132,14 @@ class _GameScreenState extends State<GameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final state = _controller.state;
     final phase = state.phase;
     final isIdle = phase == DuelPhase.idle;
     final isReveal = phase == DuelPhase.reveal;
-    final historyCount = state.history.length;
-    final historyWord = historyCount == 1 ? 'round' : 'rounds';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('RPS Duel')),
+      appBar: AppBar(title: Text(l10n.appName)),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -153,21 +154,21 @@ class _GameScreenState extends State<GameScreen> {
                     children: <Widget>[
                       Expanded(
                         child: _ScoreCard(
-                          label: 'Player',
+                          label: l10n.scoreLabelPlayer,
                           value: state.playerScore,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: _ScoreCard(
-                          label: 'CPU',
+                          label: l10n.scoreLabelCpu,
                           value: state.cpuScore,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: _ScoreCard(
-                          label: 'Ties',
+                          label: l10n.scoreLabelTies,
                           value: state.ties,
                         ),
                       ),
@@ -176,7 +177,7 @@ class _GameScreenState extends State<GameScreen> {
                   const SizedBox(height: 16),
                   Center(
                     child: Text(
-                      'Round ${state.roundCount} · History: $historyCount $historyWord',
+                      l10n.summaryLine(state.roundCount, state.history.length),
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                   ),
@@ -189,7 +190,7 @@ class _GameScreenState extends State<GameScreen> {
                         duration: const Duration(milliseconds: 220),
                         switchInCurve: Curves.easeOut,
                         switchOutCurve: Curves.easeIn,
-                        child: _phaseChild(state),
+                        child: _phaseChild(state, l10n),
                       ),
                     ),
                   ),
@@ -199,7 +200,7 @@ class _GameScreenState extends State<GameScreen> {
                       Expanded(
                         child: MoveButton(
                           emoji: '🪨',
-                          label: 'Rock',
+                          label: l10n.moveRock,
                           onPressed: isIdle
                               ? () => _select(MoveChoice.rock)
                               : null,
@@ -209,7 +210,7 @@ class _GameScreenState extends State<GameScreen> {
                       Expanded(
                         child: MoveButton(
                           emoji: '📄',
-                          label: 'Paper',
+                          label: l10n.movePaper,
                           onPressed: isIdle
                               ? () => _select(MoveChoice.paper)
                               : null,
@@ -219,7 +220,7 @@ class _GameScreenState extends State<GameScreen> {
                       Expanded(
                         child: MoveButton(
                           emoji: '✂️',
-                          label: 'Scissors',
+                          label: l10n.moveScissors,
                           onPressed: isIdle
                               ? () => _select(MoveChoice.scissors)
                               : null,
@@ -233,7 +234,7 @@ class _GameScreenState extends State<GameScreen> {
                       height: 48,
                       child: FilledButton.tonal(
                         onPressed: _next,
-                        child: const Text('Next Round'),
+                        child: Text(l10n.nextRound),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -244,10 +245,9 @@ class _GameScreenState extends State<GameScreen> {
                       onPressed: () {
                         unawaited(_confirmReset());
                       },
-                      child: const Text('Reset Game'),
+                      child: Text(l10n.resetGame),
                     ),
                   ),
-                  const SizedBox(height: 16),
                   _HistorySection(history: state.history),
                 ],
               ),
@@ -333,6 +333,7 @@ class _RevealArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -340,20 +341,20 @@ class _RevealArea extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            _MoveDisplay(sideLabel: 'You', move: playerMove),
+            _MoveDisplay(sideLabel: l10n.sideYou, move: playerMove),
             Text(
-              'VS',
+              l10n.vsLabel,
               style: theme.textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            _MoveDisplay(sideLabel: 'CPU', move: cpuMove),
+            _MoveDisplay(sideLabel: l10n.sideCpu, move: cpuMove),
           ],
         ),
         const SizedBox(height: 16),
         Text(
-          _outcomeText(outcome),
+          _outcomeText(l10n, outcome),
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w600,
             color: _outcomeColor(theme, outcome),
@@ -374,6 +375,7 @@ class _MoveDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -381,7 +383,7 @@ class _MoveDisplay extends StatelessWidget {
         const SizedBox(height: 8),
         Text(_emojiFor(move), style: const TextStyle(fontSize: 56)),
         const SizedBox(height: 4),
-        Text(_labelFor(move), style: theme.textTheme.titleMedium),
+        Text(_labelFor(l10n, move), style: theme.textTheme.titleMedium),
       ],
     );
   }
@@ -395,6 +397,7 @@ class _HistorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final total = history.length;
     final visible = history.reversed.take(5).toList();
 
@@ -402,13 +405,13 @@ class _HistorySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         const Divider(height: 32),
-        Text('Recent rounds', style: theme.textTheme.titleSmall),
+        Text(l10n.recentRounds, style: theme.textTheme.titleSmall),
         const SizedBox(height: 8),
         if (visible.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
-              'No rounds yet.',
+              l10n.noRoundsYet,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -438,6 +441,7 @@ class _HistoryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -456,15 +460,15 @@ class _HistoryRow extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              '${_emojiFor(record.playerMove)} ${_labelFor(record.playerMove)}'
+              '${_emojiFor(record.playerMove)} ${_labelFor(l10n, record.playerMove)}'
               '  vs  '
-              '${_emojiFor(record.cpuMove)} ${_labelFor(record.cpuMove)}',
+              '${_emojiFor(record.cpuMove)} ${_labelFor(l10n, record.cpuMove)}',
               style: theme.textTheme.bodySmall,
             ),
           ),
           const SizedBox(width: 8),
           Text(
-            _outcomeText(record.outcome),
+            _outcomeText(l10n, record.outcome),
             style: theme.textTheme.bodySmall?.copyWith(
               color: _outcomeColor(theme, record.outcome),
               fontWeight: FontWeight.w600,
@@ -484,19 +488,19 @@ String _emojiFor(MoveChoice move) {
   };
 }
 
-String _labelFor(MoveChoice move) {
+String _labelFor(AppLocalizations l10n, MoveChoice move) {
   return switch (move) {
-    MoveChoice.rock => 'Rock',
-    MoveChoice.paper => 'Paper',
-    MoveChoice.scissors => 'Scissors',
+    MoveChoice.rock => l10n.moveRock,
+    MoveChoice.paper => l10n.movePaper,
+    MoveChoice.scissors => l10n.moveScissors,
   };
 }
 
-String _outcomeText(RoundOutcome outcome) {
+String _outcomeText(AppLocalizations l10n, RoundOutcome outcome) {
   return switch (outcome) {
-    RoundOutcome.playerWin => 'You win!',
-    RoundOutcome.cpuWin => 'CPU wins!',
-    RoundOutcome.tie => "It's a tie!",
+    RoundOutcome.playerWin => l10n.outcomePlayerWin,
+    RoundOutcome.cpuWin => l10n.outcomeCpuWin,
+    RoundOutcome.tie => l10n.outcomeTie,
   };
 }
 

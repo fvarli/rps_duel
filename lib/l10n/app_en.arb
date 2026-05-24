@@ -1,7 +1,69 @@
 {
   "@@locale": "en",
+
   "appName": "RPS Duel",
   "@appName": {
-    "description": "User-facing app name shown on the home placeholder."
-  }
+    "description": "Brand / app name shown in the AppBar. Not localized."
+  },
+
+  "scoreLabelPlayer": "Player",
+  "scoreLabelCpu": "CPU",
+  "scoreLabelTies": "Ties",
+  "@scoreLabelPlayer": { "description": "Score card label for the human player." },
+  "@scoreLabelCpu": { "description": "Score card label for the CPU. Usually 'CPU' across locales." },
+  "@scoreLabelTies": { "description": "Score card label for tied rounds." },
+
+  "summaryLine": "Round {round} · History: {count, plural, one{1 round} other{{count} rounds}}",
+  "@summaryLine": {
+    "description": "Compact line under the score row showing current round and history count.",
+    "placeholders": {
+      "round": { "type": "int" },
+      "count": { "type": "int" }
+    }
+  },
+
+  "phaseIdle": "Choose your move",
+  "phaseThinking": "CPU is choosing…",
+  "@phaseIdle": { "description": "Prompt shown when waiting for the player's move." },
+  "@phaseThinking": { "description": "Status shown during the brief CPU thinking beat." },
+
+  "moveRock": "Rock",
+  "movePaper": "Paper",
+  "moveScissors": "Scissors",
+  "@moveRock": { "description": "Label for the rock move (button + duel + history)." },
+  "@movePaper": { "description": "Label for the paper move." },
+  "@moveScissors": { "description": "Label for the scissors move." },
+
+  "sideYou": "You",
+  "sideCpu": "CPU",
+  "vsLabel": "VS",
+  "@sideYou": { "description": "Side label above the player's move in the duel layout." },
+  "@sideCpu": { "description": "Side label above the CPU's move in the duel layout. Usually 'CPU' across locales." },
+  "@vsLabel": { "description": "Big 'VS' between the player and CPU columns. Usually 'VS' across locales." },
+
+  "outcomePlayerWin": "You win!",
+  "outcomeCpuWin": "CPU wins!",
+  "outcomeTie": "It's a tie!",
+  "@outcomePlayerWin": { "description": "Outcome shown when the player wins the round." },
+  "@outcomeCpuWin": { "description": "Outcome shown when the CPU wins the round." },
+  "@outcomeTie": { "description": "Outcome shown when the round is a tie." },
+
+  "nextRound": "Next Round",
+  "resetGame": "Reset Game",
+  "@nextRound": { "description": "Button shown during reveal to start the next round." },
+  "@resetGame": { "description": "Always-visible button to reset scores and history." },
+
+  "resetDialogTitle": "Reset game?",
+  "resetDialogBody": "Scores and round history will be cleared.",
+  "cancel": "Cancel",
+  "resetConfirm": "Reset",
+  "@resetDialogTitle": { "description": "Title of the confirmation dialog for resetting the game." },
+  "@resetDialogBody": { "description": "Body of the confirmation dialog explaining what will be cleared." },
+  "@cancel": { "description": "Generic dialog cancel action." },
+  "@resetConfirm": { "description": "Confirm button inside the reset dialog. Kept distinct from resetGame for shorter wording." },
+
+  "recentRounds": "Recent rounds",
+  "noRoundsYet": "No rounds yet.",
+  "@recentRounds": { "description": "Header above the history list section." },
+  "@noRoundsYet": { "description": "Empty-state shown when history is empty." }
 }

@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rps_duel/generated/l10n/app_localizations.dart';
 import 'package:rps_duel/ui/game/game_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+Widget _buildApp({Locale? locale, Duration delay = Duration.zero}) {
+  return MaterialApp(
+    locale: locale,
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: GameScreen(cpuThinkingDelay: delay),
+  );
+}
 
 void main() {
   setUp(() {
@@ -9,11 +19,7 @@ void main() {
   });
 
   testWidgets('Rock walks idle → cpuThinking → reveal', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: GameScreen(cpuThinkingDelay: Duration(milliseconds: 500)),
-      ),
-    );
+    await tester.pumpWidget(_buildApp(delay: const Duration(milliseconds: 500)));
     await tester.pumpAndSettle();
 
     expect(find.text('Choose your move'), findsOneWidget);
@@ -35,11 +41,7 @@ void main() {
   });
 
   testWidgets('Reset Cancel keeps the played round', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: GameScreen(cpuThinkingDelay: Duration.zero),
-      ),
-    );
+    await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Rock'));
@@ -63,11 +65,7 @@ void main() {
   });
 
   testWidgets('Reset confirms and clears scores/history', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: GameScreen(cpuThinkingDelay: Duration.zero),
-      ),
-    );
+    await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Rock'));
@@ -88,11 +86,7 @@ void main() {
   });
 
   testWidgets('history shows latest played round after reveal', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: GameScreen(cpuThinkingDelay: Duration.zero),
-      ),
-    );
+    await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
     expect(find.text('No rounds yet.'), findsOneWidget);
@@ -102,7 +96,6 @@ void main() {
 
     expect(find.text('No rounds yet.'), findsNothing);
     expect(find.text('Recent rounds'), findsOneWidget);
-    // Row split into a round badge (Text('1')) and the duel-cell text.
     expect(find.textContaining('🪨 Rock  vs'), findsOneWidget);
     expect(find.text('1'), findsAtLeastNWidgets(1));
   });
@@ -112,16 +105,21 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: GameScreen(cpuThinkingDelay: Duration.zero),
-      ),
-    );
+    await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
 
     await tester.tap(find.text('Rock'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('renders Turkish locale strings', (tester) async {
+    await tester.pumpWidget(_buildApp(locale: const Locale('tr')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Hamleni seç'), findsOneWidget);
+    expect(find.text('Taş'), findsAtLeastNWidgets(1));
+    expect(find.text('Oyunu Sıfırla'), findsOneWidget);
   });
 }
