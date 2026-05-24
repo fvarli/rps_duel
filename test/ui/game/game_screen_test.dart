@@ -320,4 +320,54 @@ void main() {
 
     expect(find.text('1/3'), findsOneWidget);
   });
+
+  testWidgets(
+      'achievements card shows 0/4 and empty state on initial render',
+      (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Achievements'), findsOneWidget);
+    expect(find.text('0/4 unlocked'), findsOneWidget);
+    expect(find.text('No achievements yet.'), findsOneWidget);
+  });
+
+  testWidgets('winning a round unlocks First Win and surfaces a chip',
+      (tester) async {
+    // CPU plays scissors → rock wins.
+    await tester.pumpWidget(
+      _buildApp(engine: _FixedCpuEngine(MoveChoice.scissors)),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Rock'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('1/4 unlocked'), findsOneWidget);
+    expect(find.text('First Win'), findsOneWidget);
+    expect(find.text('No achievements yet.'), findsNothing);
+  });
+
+  testWidgets('Settings → Reset data preserves unlocked achievements',
+      (tester) async {
+    await tester.pumpWidget(
+      _buildApp(engine: _FixedCpuEngine(MoveChoice.scissors)),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Rock'));
+    await tester.pumpAndSettle();
+    expect(find.text('1/4 unlocked'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reset data'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reset'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Round 0 · History: 0 rounds'), findsOneWidget);
+    expect(find.text('First Win'), findsOneWidget);
+    expect(find.text('1/4 unlocked'), findsOneWidget);
+  });
 }

@@ -43,6 +43,14 @@
   "aboutDescription": "Un duelo de piedra-papel-tijera de 30 segundos para llevar en el bolsillo.",
   "aboutClose": "Cerrar",
 
+  "achievementsTitle": "Logros",
+  "achievementsCount": "{count}/{total} desbloqueados",
+  "achievementsNoneYet": "Aún no hay logros.",
+  "achievementFirstWin": "Primera victoria",
+  "achievementStreak3": "Racha de 3",
+  "achievementScissorsSpecialist": "Especialista en tijera",
+  "achievementFirst10Rounds": "10 rondas",
+
   "dailyChallengeTitle": "Reto diario",
   "dailyChallengeDescription": "Gana 3 rondas con Tijera",
   "dailyChallengeCompleted": "Completado",

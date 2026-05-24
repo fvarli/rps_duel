@@ -81,6 +81,27 @@
   "@aboutDescription": { "description": "Short tagline shown in the About dialog body." },
   "@aboutClose": { "description": "Close button on the About dialog." },
 
+  "achievementsTitle": "Achievements",
+  "achievementsCount": "{count}/{total} unlocked",
+  "achievementsNoneYet": "No achievements yet.",
+  "achievementFirstWin": "First Win",
+  "achievementStreak3": "Streak 3",
+  "achievementScissorsSpecialist": "Scissors Specialist",
+  "achievementFirst10Rounds": "10 Rounds",
+  "@achievementsTitle": { "description": "Header for the achievements card." },
+  "@achievementsCount": {
+    "description": "Count line showing how many achievements are unlocked out of the total.",
+    "placeholders": {
+      "count": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "@achievementsNoneYet": { "description": "Placeholder when no achievements are unlocked yet." },
+  "@achievementFirstWin": { "description": "Achievement: First Win." },
+  "@achievementStreak3": { "description": "Achievement: 3-win streak." },
+  "@achievementScissorsSpecialist": { "description": "Achievement: Daily Challenge (Scissors) completed." },
+  "@achievementFirst10Rounds": { "description": "Achievement: played 10 total rounds." },
+
   "dailyChallengeTitle": "Daily Challenge",
   "dailyChallengeDescription": "Win 3 rounds with Scissors",
   "dailyChallengeCompleted": "Completed",

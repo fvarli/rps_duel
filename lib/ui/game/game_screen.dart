@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:rps_duel/app/locale_scope.dart';
+import 'package:rps_duel/data/local_achievement_storage.dart';
 import 'package:rps_duel/data/local_daily_challenge_storage.dart';
 import 'package:rps_duel/data/local_difficulty_storage.dart';
 import 'package:rps_duel/data/local_game_storage.dart';
+import 'package:rps_duel/domain/achievement.dart';
 import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/domain/daily_challenge.dart';
 import 'package:rps_duel/domain/duel_controller.dart';
@@ -16,6 +18,7 @@ import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
 import 'package:rps_duel/domain/rps_engine.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/game/achievements_card.dart';
 import 'package:rps_duel/ui/game/daily_challenge_card.dart';
 import 'package:rps_duel/ui/game/difficulty_picker_sheet.dart';
 import 'package:rps_duel/ui/game/language_picker_sheet.dart';
@@ -42,6 +45,8 @@ class _GameScreenState extends State<GameScreen> {
   DifficultyStorage? _difficultyStorage;
   DailyChallengeStorage? _challengeStorage;
   DailyChallenge _challenge = DailyChallenge.initialFor(DateTime.now());
+  AchievementStorage? _achievementStorage;
+  Set<AchievementId> _achievements = <AchievementId>{};
 
   @override
   void initState() {
@@ -110,6 +115,11 @@ class _GameScreenState extends State<GameScreen> {
       unawaited(challengeStorage.save(fresh));
     }
 
+    final achievementStorage = await AchievementStorage.open();
+    if (!mounted) return;
+    _achievementStorage = achievementStorage;
+    setState(() => _achievements = achievementStorage.load());
+
     final s = _controller.state;
     final pristine = s.playerScore == 0 &&
         s.cpuScore == 0 &&
@@ -139,6 +149,17 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
+  void _updateAchievements() {
+    final next = evaluateAchievements(
+      state: _controller.state,
+      dailyChallenge: _challenge,
+      already: _achievements,
+    );
+    if (next.length != _achievements.length) {
+      setState(() => _achievements = next);
+    }
+  }
+
   void _select(MoveChoice move) {
     unawaited(_runRound(move));
   }
@@ -147,8 +168,10 @@ class _GameScreenState extends State<GameScreen> {
     await _controller.selectMoveWithDelay(move);
     if (!mounted) return;
     _updateChallenge();
+    _updateAchievements();
     await _storage?.save(_controller.state);
     await _challengeStorage?.save(_challenge);
+    await _achievementStorage?.save(_achievements);
   }
 
   void _next() {
@@ -301,6 +324,8 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                   const SizedBox(height: 16),
                   DailyChallengeCard(challenge: _challenge),
+                  const SizedBox(height: 16),
+                  AchievementsCard(unlocked: _achievements),
                   const SizedBox(height: 16),
                   _DuelSurface(
                     child: AnimatedSize(
