@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:rps_duel/data/local_game_storage.dart';
 import 'package:rps_duel/domain/duel_controller.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
 import 'package:rps_duel/domain/move_choice.dart';
@@ -23,12 +24,14 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   late final DuelController _controller;
+  LocalGameStorage? _storage;
 
   @override
   void initState() {
     super.initState();
     _controller = DuelController(cpuThinkingDelay: widget.cpuThinkingDelay);
     _controller.onStateChanged = _handleStateChanged;
+    unawaited(_loadAndApply());
   }
 
   @override
@@ -43,8 +46,32 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
+  Future<void> _loadAndApply() async {
+    final storage = await LocalGameStorage.open();
+    if (!mounted) return;
+    _storage = storage;
+    final s = _controller.state;
+    final pristine = s.playerScore == 0 &&
+        s.cpuScore == 0 &&
+        s.ties == 0 &&
+        s.roundCount == 0 &&
+        s.history.isEmpty &&
+        s.phase == DuelPhase.idle;
+    if (!pristine) return;
+    final restored = storage.load();
+    if (restored != null) {
+      _controller.restoreFrom(restored);
+    }
+  }
+
   void _select(MoveChoice move) {
-    unawaited(_controller.selectMoveWithDelay(move));
+    unawaited(_runRound(move));
+  }
+
+  Future<void> _runRound(MoveChoice move) async {
+    await _controller.selectMoveWithDelay(move);
+    if (!mounted) return;
+    await _storage?.save(_controller.state);
   }
 
   void _next() {
@@ -72,6 +99,7 @@ class _GameScreenState extends State<GameScreen> {
     if (!mounted) return;
     if (confirmed ?? false) {
       _controller.reset();
+      await _storage?.clear();
     }
   }
 

@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:rps_duel/ui/game/game_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+  });
+
   testWidgets('Rock walks idle → cpuThinking → reveal', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: GameScreen(cpuThinkingDelay: Duration(milliseconds: 200)),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.text('Choose your move'), findsOneWidget);
     expect(find.text('Next Round'), findsNothing);
@@ -34,6 +39,8 @@ void main() {
         home: GameScreen(cpuThinkingDelay: Duration.zero),
       ),
     );
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Rock'));
     await tester.pumpAndSettle();
 
@@ -60,6 +67,8 @@ void main() {
         home: GameScreen(cpuThinkingDelay: Duration.zero),
       ),
     );
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Rock'));
     await tester.pumpAndSettle();
 
@@ -83,6 +92,8 @@ void main() {
         home: GameScreen(cpuThinkingDelay: Duration.zero),
       ),
     );
+    await tester.pumpAndSettle();
+
     expect(find.text('No rounds yet.'), findsOneWidget);
 
     await tester.tap(find.text('Rock'));

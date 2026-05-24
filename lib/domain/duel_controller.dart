@@ -104,4 +104,8 @@ class DuelController {
     _setState(DuelState.initial());
     return _state;
   }
+
+  void restoreFrom(DuelState state) {
+    _setState(state);
+  }
 }
