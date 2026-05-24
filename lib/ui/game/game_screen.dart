@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:rps_duel/domain/duel_controller.dart';
@@ -7,34 +9,59 @@ import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  const GameScreen({
+    super.key,
+    this.cpuThinkingDelay = const Duration(milliseconds: 500),
+  });
+
+  final Duration cpuThinkingDelay;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  final DuelController _controller = DuelController();
+  late final DuelController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = DuelController(cpuThinkingDelay: widget.cpuThinkingDelay);
+    _controller.onStateChanged = _handleStateChanged;
+  }
+
+  @override
+  void dispose() {
+    _controller.onStateChanged = null;
+    super.dispose();
+  }
+
+  void _handleStateChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   void _select(MoveChoice move) {
-    _controller.selectMove(move);
-    setState(() {});
+    unawaited(_controller.selectMoveWithDelay(move));
   }
 
   void _next() {
     _controller.nextRound();
-    setState(() {});
   }
 
   void _reset() {
     _controller.reset();
-    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final state = _controller.state;
-    final isReveal = state.phase == DuelPhase.reveal;
+    final phase = state.phase;
+    final isIdle = phase == DuelPhase.idle;
+    final isThinking =
+        phase == DuelPhase.playerSelected || phase == DuelPhase.cpuThinking;
+    final isReveal = phase == DuelPhase.reveal;
     final historyCount = state.history.length;
     final historyWord = historyCount == 1 ? 'round' : 'rounds';
 
@@ -68,6 +95,13 @@ class _GameScreenState extends State<GameScreen> {
                   cpuMove: state.cpuMove!,
                   outcome: state.outcome!,
                 )
+              else if (isThinking)
+                Center(
+                  child: Text(
+                    'CPU is choosing…',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                )
               else
                 Center(
                   child: Text(
@@ -83,7 +117,7 @@ class _GameScreenState extends State<GameScreen> {
                       emoji: '🪨',
                       label: 'Rock',
                       onPressed:
-                          isReveal ? null : () => _select(MoveChoice.rock),
+                          isIdle ? () => _select(MoveChoice.rock) : null,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -92,7 +126,7 @@ class _GameScreenState extends State<GameScreen> {
                       emoji: '📄',
                       label: 'Paper',
                       onPressed:
-                          isReveal ? null : () => _select(MoveChoice.paper),
+                          isIdle ? () => _select(MoveChoice.paper) : null,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -101,7 +135,7 @@ class _GameScreenState extends State<GameScreen> {
                       emoji: '✂️',
                       label: 'Scissors',
                       onPressed:
-                          isReveal ? null : () => _select(MoveChoice.scissors),
+                          isIdle ? () => _select(MoveChoice.scissors) : null,
                     ),
                   ),
                 ],

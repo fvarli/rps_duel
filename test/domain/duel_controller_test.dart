@@ -143,5 +143,44 @@ void main() {
       final returned = controller.selectMove(MoveChoice.rock);
       expect(identical(returned, controller.state), isTrue);
     });
+
+    test('selectMoveWithDelay walks playerSelected → cpuThinking → reveal',
+        () async {
+      final controller = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.scissors),
+        cpuThinkingDelay: Duration.zero,
+      );
+      final phases = <DuelPhase>[];
+      controller.onStateChanged = () => phases.add(controller.state.phase);
+
+      final result = await controller.selectMoveWithDelay(MoveChoice.rock);
+
+      expect(phases, <DuelPhase>[
+        DuelPhase.playerSelected,
+        DuelPhase.cpuThinking,
+        DuelPhase.reveal,
+      ]);
+      expect(result.phase, DuelPhase.reveal);
+      expect(result.outcome, RoundOutcome.playerWin);
+      expect(result.playerScore, 1);
+      expect(result.roundCount, 1);
+    });
+
+    test('selectMoveWithDelay aborts cleanly if reset() lands mid-thinking',
+        () async {
+      final controller = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.scissors),
+        cpuThinkingDelay: const Duration(milliseconds: 50),
+      );
+
+      final pending = controller.selectMoveWithDelay(MoveChoice.rock);
+      controller.reset();
+      final result = await pending;
+
+      expect(result.phase, DuelPhase.idle);
+      expect(result.playerScore, 0);
+      expect(result.roundCount, 0);
+      expect(result.history, isEmpty);
+    });
   });
 }
