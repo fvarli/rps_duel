@@ -1,0 +1,13 @@
+# RPS Duel - Android upload signing config TEMPLATE.
+#
+# Copy this file to android/key.properties (do NOT commit) and fill in the
+# values for your local upload keystore. The build script reads this file at
+# Gradle configuration time; if absent, the release build falls back to debug
+# signing (dev-only, NOT uploadable to Play Console).
+#
+# See docs/release_android.md for the full release walkthrough.
+
+storePassword=
+keyPassword=
+keyAlias=
+storeFile=

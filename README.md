@@ -93,7 +93,8 @@ flutter build apk --release        # Android (once you have signing config)
 - [x] 73/73 tests pass
 - [x] `.gitignore` excludes signing/secret/.env patterns (defense-in-depth)
 - [ ] **Real designed launcher icon** (current is the indigo+"RPS" placeholder)
-- [ ] Production signing config (Android `key.properties`, iOS provisioning profile)
+- [x] **Android** release signing wired (key.properties-aware; see [`docs/release_android.md`](docs/release_android.md) for keystore + upload steps)
+- [ ] iOS provisioning profile + App Store Connect
 - [ ] Store screenshots + listing copy (EN/TR/ES)
 - [ ] Privacy policy URL
 - [ ] Crash reporting / analytics (deferred to Phase 11 of the original handoff)
