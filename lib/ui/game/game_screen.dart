@@ -6,6 +6,7 @@ import 'package:rps_duel/domain/duel_controller.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
+import 'package:rps_duel/domain/round_record.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
 
 class GameScreen extends StatefulWidget {
@@ -50,8 +51,28 @@ class _GameScreenState extends State<GameScreen> {
     _controller.nextRound();
   }
 
-  void _reset() {
-    _controller.reset();
+  Future<void> _confirmReset() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reset game?'),
+        content: const Text('Scores and round history will be cleared.'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    if (confirmed ?? false) {
+      _controller.reset();
+    }
   }
 
   @override
@@ -154,10 +175,13 @@ class _GameScreenState extends State<GameScreen> {
               SizedBox(
                 height: 48,
                 child: OutlinedButton(
-                  onPressed: _reset,
+                  onPressed: () {
+                    unawaited(_confirmReset());
+                  },
                   child: const Text('Reset Game'),
                 ),
               ),
+              _HistorySection(history: state.history),
             ],
           ),
         ),
@@ -259,6 +283,52 @@ class _MoveDisplay extends StatelessWidget {
         Text(_emojiFor(move), style: const TextStyle(fontSize: 56)),
         const SizedBox(height: 4),
         Text(_labelFor(move), style: theme.textTheme.titleMedium),
+      ],
+    );
+  }
+}
+
+class _HistorySection extends StatelessWidget {
+  const _HistorySection({required this.history});
+
+  final List<RoundRecord> history;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final total = history.length;
+    final visible = history.reversed.take(5).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        const Divider(height: 32),
+        Text('Recent rounds', style: theme.textTheme.titleSmall),
+        const SizedBox(height: 8),
+        if (visible.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              'No rounds yet.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+        else
+          for (var i = 0; i < visible.length; i++)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Text(
+                '${total - i} · '
+                '${_emojiFor(visible[i].playerMove)} ${_labelFor(visible[i].playerMove)}'
+                '  vs  '
+                '${_emojiFor(visible[i].cpuMove)} ${_labelFor(visible[i].cpuMove)}'
+                '  ·  ${_outcomeText(visible[i].outcome)}',
+                style: theme.textTheme.bodySmall,
+              ),
+            ),
       ],
     );
   }
