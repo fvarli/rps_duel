@@ -53,3 +53,15 @@ lib/generated/
 *.swo
 .vscode/.history/
 Thumbs.db
+
+# Signing / secrets — added Phase 9; don't wait for the first leak to add these.
+android/key.properties
+android/app/upload-keystore.jks
+**/*.jks
+**/*.keystore
+**/*.p12
+**/*.mobileprovision
+ios/Runner/GoogleService-Info.plist
+android/app/google-services.json
+.env
+.env.*
