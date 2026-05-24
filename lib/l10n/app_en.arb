@@ -68,5 +68,16 @@
   "@noRoundsYet": { "description": "Empty-state shown when history is empty." },
 
   "languagePickerTitle": "Language",
-  "@languagePickerTitle": { "description": "Header / tooltip for the in-app language switcher." }
+  "@languagePickerTitle": { "description": "Header / tooltip for the in-app language switcher." },
+
+  "settingsTitle": "Settings",
+  "settingsResetData": "Reset data",
+  "settingsAbout": "About RPS Duel",
+  "aboutDescription": "A pocketable 30-second rock-paper-scissors duel.",
+  "aboutClose": "Close",
+  "@settingsTitle": { "description": "Header / tooltip for the in-app settings mini-sheet." },
+  "@settingsResetData": { "description": "Settings tile that opens the reset confirmation dialog." },
+  "@settingsAbout": { "description": "Settings tile that opens the About dialog." },
+  "@aboutDescription": { "description": "Short tagline shown in the About dialog body." },
+  "@aboutClose": { "description": "Close button on the About dialog." }
 }

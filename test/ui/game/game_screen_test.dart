@@ -131,24 +131,27 @@ void main() {
     expect(find.text('Oyunu Sıfırla'), findsOneWidget);
   });
 
-  testWidgets('language button opens the picker sheet', (tester) async {
+  testWidgets('settings button opens the settings sheet', (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.language));
+    await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
 
+    expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
-    expect(find.text('English'), findsOneWidget);
-    expect(find.text('Türkçe'), findsOneWidget);
-    expect(find.text('Español'), findsOneWidget);
+    expect(find.text('Reset data'), findsOneWidget);
+    expect(find.text('About RPS Duel'), findsOneWidget);
   });
 
-  testWidgets('picking Türkçe switches UI to Turkish', (tester) async {
+  testWidgets('Settings → Language → Türkçe switches UI to Turkish',
+      (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.language));
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Language'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Türkçe'));
     await tester.pumpAndSettle();
@@ -157,16 +160,60 @@ void main() {
     expect(find.text('Taş'), findsAtLeastNWidgets(1));
   });
 
-  testWidgets('picking Español switches UI to Spanish', (tester) async {
+  testWidgets('Settings → Language → Español switches UI to Spanish',
+      (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.language));
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Language'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Español'));
     await tester.pumpAndSettle();
 
     expect(find.text('Elige tu jugada'), findsOneWidget);
     expect(find.text('Piedra'), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('Settings → Reset data clears the played round',
+      (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Rock'));
+    await tester.pumpAndSettle();
+    expect(find.text('Round 1 · History: 1 round'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Reset data'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reset game?'), findsOneWidget);
+    await tester.tap(find.text('Reset'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Round 0 · History: 0 rounds'), findsOneWidget);
+    expect(find.text('No rounds yet.'), findsOneWidget);
+  });
+
+  testWidgets('Settings → About shows brand + store title + tagline',
+      (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.settings));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('About RPS Duel'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('RPS Duel'), findsAtLeastNWidgets(1));
+    expect(find.text('RPS Duel: Rock Paper Scissors'), findsOneWidget);
+    expect(
+      find.text('A pocketable 30-second rock-paper-scissors duel.'),
+      findsOneWidget,
+    );
+    expect(find.text('Close'), findsOneWidget);
   });
 }

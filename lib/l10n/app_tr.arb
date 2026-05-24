@@ -35,5 +35,11 @@
   "recentRounds": "Son eller",
   "noRoundsYet": "Henüz hiç el oynanmadı.",
 
-  "languagePickerTitle": "Dil"
+  "languagePickerTitle": "Dil",
+
+  "settingsTitle": "Ayarlar",
+  "settingsResetData": "Verileri sıfırla",
+  "settingsAbout": "RPS Duel hakkında",
+  "aboutDescription": "Cebine sığan 30 saniyelik taş-kağıt-makas düellosu.",
+  "aboutClose": "Kapat"
 }

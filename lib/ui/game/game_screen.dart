@@ -13,6 +13,7 @@ import 'package:rps_duel/domain/round_record.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
 import 'package:rps_duel/ui/game/language_picker_sheet.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
+import 'package:rps_duel/ui/game/settings_sheet.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({
@@ -106,6 +107,34 @@ class _GameScreenState extends State<GameScreen> {
     _controller.nextRound();
   }
 
+  Future<void> _showAboutDialog() async {
+    final l10n = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.appName),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'RPS Duel: Rock Paper Scissors',
+              style: Theme.of(ctx).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 12),
+            Text(l10n.aboutDescription),
+          ],
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.aboutClose),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _confirmReset() async {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
@@ -145,12 +174,17 @@ class _GameScreenState extends State<GameScreen> {
         title: Text(l10n.appName),
         actions: <Widget>[
           IconButton(
-            icon: const Icon(Icons.language),
-            tooltip: l10n.languagePickerTitle,
+            icon: const Icon(Icons.settings),
+            tooltip: l10n.settingsTitle,
             onPressed: () {
-              unawaited(
-                showLanguagePicker(context, LocaleScope.of(context)),
-              );
+              unawaited(showSettingsSheet(
+                context,
+                onLanguage: () => unawaited(
+                  showLanguagePicker(context, LocaleScope.of(context)),
+                ),
+                onResetData: () => unawaited(_confirmReset()),
+                onAbout: () => unawaited(_showAboutDialog()),
+              ),);
             },
           ),
         ],

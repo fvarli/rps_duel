@@ -35,5 +35,11 @@
   "recentRounds": "Rondas recientes",
   "noRoundsYet": "Aún no hay rondas.",
 
-  "languagePickerTitle": "Idioma"
+  "languagePickerTitle": "Idioma",
+
+  "settingsTitle": "Ajustes",
+  "settingsResetData": "Restablecer datos",
+  "settingsAbout": "Acerca de RPS Duel",
+  "aboutDescription": "Un duelo de piedra-papel-tijera de 30 segundos para llevar en el bolsillo.",
+  "aboutClose": "Cerrar"
 }
