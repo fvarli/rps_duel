@@ -216,4 +216,14 @@ void main() {
     );
     expect(find.text('Close'), findsOneWidget);
   });
+
+  testWidgets('stats line is visible on initial render', (tester) async {
+    await tester.pumpWidget(_buildApp());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Streak: 0 · Best: 0 · Win rate: 0%'),
+      findsOneWidget,
+    );
+  });
 }

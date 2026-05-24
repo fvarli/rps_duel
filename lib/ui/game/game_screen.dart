@@ -230,6 +230,19 @@ class _GameScreenState extends State<GameScreen> {
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                   ),
+                  const SizedBox(height: 6),
+                  Center(
+                    child: Text(
+                      l10n.statsLine(
+                        state.currentStreak,
+                        state.bestStreak,
+                        state.winRatePercent,
+                      ),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   _DuelSurface(
                     child: AnimatedSize(

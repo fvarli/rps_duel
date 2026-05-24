@@ -79,5 +79,15 @@
   "@settingsResetData": { "description": "Settings tile that opens the reset confirmation dialog." },
   "@settingsAbout": { "description": "Settings tile that opens the About dialog." },
   "@aboutDescription": { "description": "Short tagline shown in the About dialog body." },
-  "@aboutClose": { "description": "Close button on the About dialog." }
+  "@aboutClose": { "description": "Close button on the About dialog." },
+
+  "statsLine": "Streak: {streak} · Best: {best} · Win rate: {rate}%",
+  "@statsLine": {
+    "description": "Compact secondary stats line under the round summary. Three int placeholders: current streak, best streak, win rate as a whole percent (0-100).",
+    "placeholders": {
+      "streak": { "type": "int" },
+      "best": { "type": "int" },
+      "rate": { "type": "int" }
+    }
+  }
 }

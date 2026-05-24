@@ -40,6 +40,12 @@ class DuelController {
       timestamp: _now(),
     );
 
+    final newCurrentStreak =
+        outcome == RoundOutcome.playerWin ? _state.currentStreak + 1 : 0;
+    final newBestStreak = newCurrentStreak > _state.bestStreak
+        ? newCurrentStreak
+        : _state.bestStreak;
+
     _setState(DuelState(
       phase: DuelPhase.reveal,
       playerMove: move,
@@ -51,6 +57,8 @@ class DuelController {
       ties: _state.ties + (outcome == RoundOutcome.tie ? 1 : 0),
       roundCount: _state.roundCount + 1,
       history: <RoundRecord>[..._state.history, record],
+      currentStreak: newCurrentStreak,
+      bestStreak: newBestStreak,
     ),);
     return _state;
   }
@@ -66,6 +74,8 @@ class DuelController {
       ties: _state.ties,
       roundCount: _state.roundCount,
       history: _state.history,
+      currentStreak: _state.currentStreak,
+      bestStreak: _state.bestStreak,
     ),);
     _setState(DuelState(
       phase: DuelPhase.cpuThinking,
@@ -77,6 +87,8 @@ class DuelController {
       ties: _state.ties,
       roundCount: _state.roundCount,
       history: _state.history,
+      currentStreak: _state.currentStreak,
+      bestStreak: _state.bestStreak,
     ),);
     await Future<void>.delayed(_cpuThinkingDelay);
     if (_state.phase != DuelPhase.cpuThinking) {
@@ -96,6 +108,8 @@ class DuelController {
       ties: _state.ties,
       roundCount: _state.roundCount,
       history: _state.history,
+      currentStreak: _state.currentStreak,
+      bestStreak: _state.bestStreak,
     ),);
     return _state;
   }

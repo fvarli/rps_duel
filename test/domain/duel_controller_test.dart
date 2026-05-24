@@ -182,5 +182,65 @@ void main() {
       expect(result.roundCount, 0);
       expect(result.history, isEmpty);
     });
+
+    test('player win increments currentStreak and bumps bestStreak', () {
+      final controller = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.scissors),
+      );
+      controller.selectMove(MoveChoice.rock);
+      expect(controller.state.currentStreak, 1);
+      expect(controller.state.bestStreak, 1);
+      controller.selectMove(MoveChoice.rock);
+      expect(controller.state.currentStreak, 2);
+      expect(controller.state.bestStreak, 2);
+    });
+
+    test('cpu win resets currentStreak but keeps bestStreak', () {
+      final winner = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.scissors),
+      );
+      winner.selectMove(MoveChoice.rock);
+      winner.selectMove(MoveChoice.rock);
+      winner.selectMove(MoveChoice.rock);
+      expect(winner.state.bestStreak, 3);
+
+      final loser = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.paper),
+      )..restoreFrom(winner.state);
+      loser.selectMove(MoveChoice.rock); // rock vs paper → cpuWin
+
+      expect(loser.state.currentStreak, 0);
+      expect(loser.state.bestStreak, 3);
+    });
+
+    test('tie resets currentStreak but keeps bestStreak', () {
+      final winner = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.scissors),
+      );
+      winner.selectMove(MoveChoice.rock);
+      expect(winner.state.currentStreak, 1);
+      expect(winner.state.bestStreak, 1);
+
+      final tier = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.rock),
+      )..restoreFrom(winner.state);
+      tier.selectMove(MoveChoice.rock); // rock vs rock → tie
+
+      expect(tier.state.currentStreak, 0);
+      expect(tier.state.bestStreak, 1);
+    });
+
+    test('reset zeros both currentStreak and bestStreak', () {
+      final controller = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.scissors),
+      );
+      controller.selectMove(MoveChoice.rock);
+      controller.selectMove(MoveChoice.rock);
+      expect(controller.state.bestStreak, 2);
+
+      controller.reset();
+      expect(controller.state.currentStreak, 0);
+      expect(controller.state.bestStreak, 0);
+    });
   });
 }

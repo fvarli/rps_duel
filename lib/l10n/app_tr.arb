@@ -41,5 +41,7 @@
   "settingsResetData": "Verileri sıfırla",
   "settingsAbout": "RPS Duel hakkında",
   "aboutDescription": "Cebine sığan 30 saniyelik taş-kağıt-makas düellosu.",
-  "aboutClose": "Kapat"
+  "aboutClose": "Kapat",
+
+  "statsLine": "Seri: {streak} · En iyi: {best} · Kazanma: %{rate}"
 }

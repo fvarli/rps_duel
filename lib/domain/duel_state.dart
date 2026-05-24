@@ -14,6 +14,8 @@ class DuelState {
     required this.ties,
     required this.roundCount,
     required List<RoundRecord> history,
+    this.currentStreak = 0,
+    this.bestStreak = 0,
   }) : history = List<RoundRecord>.unmodifiable(history);
 
   factory DuelState.initial() => DuelState(
@@ -37,4 +39,12 @@ class DuelState {
   final int ties;
   final int roundCount;
   final List<RoundRecord> history;
+  final int currentStreak;
+  final int bestStreak;
+
+  int get winRatePercent {
+    final completed = playerScore + cpuScore + ties;
+    if (completed == 0) return 0;
+    return (playerScore / completed * 100).round();
+  }
 }

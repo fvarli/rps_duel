@@ -24,6 +24,8 @@ class LocalGameStorage {
       'ties': state.ties,
       'roundCount': state.roundCount,
       'history': state.history.map((r) => r.toJson()).toList(),
+      'currentStreak': state.currentStreak,
+      'bestStreak': state.bestStreak,
     };
     await _prefs.setString(_key, jsonEncode(map));
   }
@@ -46,6 +48,8 @@ class LocalGameStorage {
         ties: map['ties'] as int,
         roundCount: map['roundCount'] as int,
         history: history,
+        currentStreak: (map['currentStreak'] as int?) ?? 0,
+        bestStreak: (map['bestStreak'] as int?) ?? 0,
       );
     } catch (_) {
       return null;
