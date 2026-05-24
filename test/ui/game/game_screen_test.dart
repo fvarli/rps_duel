@@ -101,6 +101,26 @@ void main() {
 
     expect(find.text('No rounds yet.'), findsNothing);
     expect(find.text('Recent rounds'), findsOneWidget);
-    expect(find.textContaining('1 · 🪨 Rock'), findsOneWidget);
+    // Row split into a round badge (Text('1')) and the duel-cell text.
+    expect(find.textContaining('🪨 Rock  vs'), findsOneWidget);
+    expect(find.text('1'), findsAtLeastNWidgets(1));
+  });
+
+  testWidgets('renders on a 360x640 viewport without overflow', (tester) async {
+    tester.view.physicalSize = const Size(360, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: GameScreen(cpuThinkingDelay: Duration.zero),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.text('Rock'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }
