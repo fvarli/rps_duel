@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 
-import 'package:rps_duel/app/home_placeholder.dart';
+import 'package:rps_duel/ui/game/game_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -8,7 +8,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/',
       name: 'home',
-      builder: (context, state) => const HomePlaceholderScreen(),
+      builder: (context, state) => const GameScreen(),
     ),
   ],
 );
