@@ -102,14 +102,21 @@ Single source of truth: `pubspec.yaml` `version: <name>+<code>`.
 | `<name>` | Android `versionName` (display) | semver-style, e.g. `0.1.0`, `0.2.0`, `1.0.0`. Bump on every Play release. |
 | `<code>` | Android `versionCode` (integer) | **Must strictly increase** every uploaded release, even for hotfixes. Play rejects duplicates. |
 
-A patch release looks like:
+Current version: **`1.0.0+1`** (versionName `1.0.0`, versionCode `1`).
+
+Worked examples for the next two releases:
 
 ```yaml
-# pubspec.yaml
-version: 0.1.1+2
+# pubspec.yaml — next bugfix release
+version: 1.0.1+2
 ```
 
-Then rebuild and re-upload.
+```yaml
+# pubspec.yaml — next feature release
+version: 1.1.0+3
+```
+
+Then rebuild and re-upload. **`versionCode` must strictly increase every uploaded release**, even for hotfixes — Play Console rejects duplicates.
 
 ---
 

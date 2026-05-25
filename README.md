@@ -4,7 +4,7 @@
 
 - **Store title:** `RPS Duel: Rock Paper Scissors`
 - **Package id:** `com.lunexa.games.rpsduel`
-- **Status:** MVP audit-complete through Phase 17
+- **Status:** v1.0.0 launch-ready (Phase 22)
 - **Targets:** Android · iOS · Web · Linux (dev)
 
 ---
@@ -83,6 +83,18 @@ flutter build apk --release        # Android (once you have signing config)
 
 ---
 
+## Release
+
+- **Current version:** `1.0.0+1` (versionName `1.0.0`, versionCode `1`)
+- **Release artifact:** `build/app/outputs/bundle/release/app-release.aab` (upload-signed; gitignored)
+- **Build + signing walkthrough:** [`docs/release_android.md`](docs/release_android.md)
+- **Play Store listing copy (EN/TR/ES):** [`docs/play_store_launch.md`](docs/play_store_launch.md)
+- **Privacy policy draft:** [`docs/privacy_policy.md`](docs/privacy_policy.md) (needs hosting at a public HTTPS URL + a contact email before Play Console publish)
+
+Bump cadence: bugfix → `1.0.1+2`, next feature → `1.1.0+3`. `versionCode` must strictly increase on every uploaded build.
+
+---
+
 ## Release readiness checklist
 
 - [x] App name, package id, bundle id consistent across all platforms (`RPS Duel` / `com.lunexa.games.rpsduel`)
@@ -95,8 +107,8 @@ flutter build apk --release        # Android (once you have signing config)
 - [ ] **Real designed launcher icon** (current is the indigo+"RPS" placeholder)
 - [x] **Android** release signing wired (key.properties-aware; see [`docs/release_android.md`](docs/release_android.md) for keystore + upload steps)
 - [ ] iOS provisioning profile + App Store Connect
-- [ ] Store screenshots + listing copy (EN/TR/ES)
-- [ ] Privacy policy URL
+- [ ] Store screenshots + listing copy (EN/TR/ES) — listing copy ready in [`docs/play_store_launch.md`](docs/play_store_launch.md); 8 screenshots still to capture (operator step)
+- [ ] Privacy policy URL — draft at [`docs/privacy_policy.md`](docs/privacy_policy.md); needs hosting at a public HTTPS URL + contact email filled in
 - [ ] Crash reporting / analytics (deferred to Phase 11 of the original handoff)
 
 ---
