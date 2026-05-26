@@ -213,6 +213,8 @@ Privacy policy URL field: paste the hosted URL of `docs/privacy_policy.md` (see 
 
 Operator step. Capture on a real Android device or emulator. Recommended dimensions: 1080×1920 (portrait) or 1080×2400 to match modern phones. Aim for 4–8 phone screenshots; Play Console allows up to 8.
 
+**Capture toolkit:** [`../store-assets/screenshots/CAPTURE_GUIDE.md`](../store-assets/screenshots/CAPTURE_GUIDE.md) — step-by-step setup per frame + an `adb` wrapper. From `store-assets/screenshots/`, run `./capture.sh N` for each of the 8 frames in the table below; the numbering matches.
+
 | # | Frame | What to show |
 |---|---|---|
 | 1 | Home / game idle | Initial state, score 0-0-0, three RPS buttons enabled. |
@@ -226,11 +228,13 @@ Operator step. Capture on a real Android device or emulator. Recommended dimensi
 
 ---
 
-## 8. Feature graphic concept (1024×500)
+## 8. Feature graphic (1024×500)
 
 Play Console requires a feature graphic for the listing header.
 
-**Concept** (designer / operator implementation step — no asset committed):
+**Generated artifact:** [`../store-assets/feature_graphic/feature_graphic.png`](../store-assets/feature_graphic/feature_graphic.png). Regenerate with `python3 store-assets/feature_graphic/generate_feature_graphic.py` whenever the palette in `lib/ui/theme/tactile_theme.dart` changes.
+
+**Composition:**
 
 - **Background:** Tactile Premium cream (`#F0E9D8`) with a subtle warm grain.
 - **Left/center title block:**

@@ -90,6 +90,7 @@ flutter build apk --release        # Android (once you have signing config)
 - **Build + signing walkthrough:** [`docs/release_android.md`](docs/release_android.md)
 - **Play Store listing copy (EN/TR/ES):** [`docs/play_store_launch.md`](docs/play_store_launch.md)
 - **Privacy policy draft:** [`docs/privacy_policy.md`](docs/privacy_policy.md) (needs hosting at a public HTTPS URL + a contact email before Play Console publish)
+- **Store visual assets:** [`store-assets/`](store-assets/) — generated 1024×500 feature graphic + `adb`-based screenshot capture toolkit (operator step)
 
 Bump cadence: bugfix → `1.0.1+2`, next feature → `1.1.0+3`. `versionCode` must strictly increase on every uploaded build.
 
