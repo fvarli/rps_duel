@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:rps_duel/ui/haptics.dart';
+
 class MoveButton extends StatelessWidget {
   const MoveButton({
     super.key,
@@ -21,7 +23,12 @@ class MoveButton extends StatelessWidget {
       child: Opacity(
         opacity: disabled ? 0.45 : 1.0,
         child: FilledButton(
-          onPressed: onPressed,
+          onPressed: onPressed == null
+              ? null
+              : () {
+                  Haptics.tap();
+                  onPressed!();
+                },
           style: FilledButton.styleFrom(
             backgroundColor: theme.colorScheme.surface,
             disabledBackgroundColor: theme.colorScheme.surface,

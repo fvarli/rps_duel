@@ -24,6 +24,7 @@ import 'package:rps_duel/ui/game/difficulty_picker_sheet.dart';
 import 'package:rps_duel/ui/game/language_picker_sheet.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
 import 'package:rps_duel/ui/game/settings_sheet.dart';
+import 'package:rps_duel/ui/haptics.dart';
 import 'package:rps_duel/ui/theme/tactile_theme.dart';
 
 class GameScreen extends StatefulWidget {
@@ -48,6 +49,7 @@ class _GameScreenState extends State<GameScreen> {
   DailyChallenge _challenge = DailyChallenge.initialFor(DateTime.now());
   AchievementStorage? _achievementStorage;
   Set<AchievementId> _achievements = <AchievementId>{};
+  DuelPhase? _previousPhase;
 
   @override
   void initState() {
@@ -56,6 +58,7 @@ class _GameScreenState extends State<GameScreen> {
       cpuThinkingDelay: widget.cpuThinkingDelay,
       engine: widget.engine,
     );
+    _previousPhase = _controller.state.phase;
     _controller.onStateChanged = _handleStateChanged;
     unawaited(_loadAndApply());
   }
@@ -67,6 +70,21 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _handleStateChanged() {
+    final newPhase = _controller.state.phase;
+    final wasReveal = _previousPhase == DuelPhase.reveal;
+    if (newPhase == DuelPhase.reveal && !wasReveal) {
+      switch (_controller.state.outcome) {
+        case RoundOutcome.playerWin:
+          Haptics.win();
+        case RoundOutcome.cpuWin:
+          Haptics.loss();
+        case RoundOutcome.tie:
+          Haptics.tie();
+        case null:
+          break;
+      }
+    }
+    _previousPhase = newPhase;
     if (mounted) {
       setState(() {});
     }
@@ -367,16 +385,20 @@ class _GameScreenState extends State<GameScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  if (isReveal) ...<Widget>[
-                    SizedBox(
-                      height: 48,
-                      child: FilledButton.tonal(
-                        onPressed: _next,
-                        child: Text(l10n.nextRound),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
+                  // Always reserve the Next Round slot so the Reset Game button
+                  // below it does not jump when the round resolves / resets.
+                  SizedBox(
+                    height: 56,
+                    child: isReveal
+                        ? Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: FilledButton.tonal(
+                              onPressed: _next,
+                              child: Text(l10n.nextRound),
+                            ),
+                          )
+                        : null,
+                  ),
                   SizedBox(
                     height: 48,
                     child: OutlinedButton(
