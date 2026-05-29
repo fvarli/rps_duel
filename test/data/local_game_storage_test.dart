@@ -17,7 +17,8 @@ void main() {
       expect(storage.load(), isNull);
     });
 
-    test('save + load roundtrip preserves scores and history; '
+    test(
+        'save + load roundtrip preserves scores and history; '
         'phase is normalized to idle', () async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final storage = await LocalGameStorage.open();

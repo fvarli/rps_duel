@@ -51,7 +51,8 @@ void main() {
   });
 
   testWidgets('Rock walks idle → cpuThinking → reveal', (tester) async {
-    await tester.pumpWidget(_buildApp(delay: const Duration(milliseconds: 500)));
+    await tester
+        .pumpWidget(_buildApp(delay: const Duration(milliseconds: 500)));
     await tester.pumpAndSettle();
 
     expect(find.text('Choose your move'), findsOneWidget);
@@ -200,8 +201,7 @@ void main() {
     expect(find.text('Piedra'), findsAtLeastNWidgets(1));
   });
 
-  testWidgets('Settings → Reset data clears the played round',
-      (tester) async {
+  testWidgets('Settings → Reset data clears the played round', (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
 
@@ -269,8 +269,7 @@ void main() {
     expect(find.text('Hard'), findsOneWidget);
   });
 
-  testWidgets(
-      'Settings → Difficulty → Easy persists and surfaces in settings',
+  testWidgets('Settings → Difficulty → Easy persists and surfaces in settings',
       (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();
@@ -321,8 +320,7 @@ void main() {
     expect(find.text('1/3'), findsOneWidget);
   });
 
-  testWidgets(
-      'achievements card shows 0/4 and empty state on initial render',
+  testWidgets('achievements card shows 0/4 and empty state on initial render',
       (tester) async {
     await tester.pumpWidget(_buildApp());
     await tester.pumpAndSettle();

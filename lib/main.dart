@@ -19,7 +19,8 @@ Future<void> main() async {
   runApp(
     LocaleScope(
       controller: localeController,
-      child: ProviderScope(child: RpsDuelApp(localeController: localeController)),
+      child:
+          ProviderScope(child: RpsDuelApp(localeController: localeController)),
     ),
   );
 }

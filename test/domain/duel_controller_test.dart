@@ -251,7 +251,8 @@ void main() {
       expect(controller.state.bestStreak, 0);
     });
 
-    test('controller defaults to normal difficulty and setDifficulty propagates',
+    test(
+        'controller defaults to normal difficulty and setDifficulty propagates',
         () {
       final controller = DuelController(
         engine: _FixedCpuEngine(MoveChoice.scissors),

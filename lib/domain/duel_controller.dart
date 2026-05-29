@@ -53,50 +53,56 @@ class DuelController {
         ? newCurrentStreak
         : _state.bestStreak;
 
-    _setState(DuelState(
-      phase: DuelPhase.reveal,
-      playerMove: move,
-      cpuMove: cpu,
-      outcome: outcome,
-      playerScore:
-          _state.playerScore + (outcome == RoundOutcome.playerWin ? 1 : 0),
-      cpuScore: _state.cpuScore + (outcome == RoundOutcome.cpuWin ? 1 : 0),
-      ties: _state.ties + (outcome == RoundOutcome.tie ? 1 : 0),
-      roundCount: _state.roundCount + 1,
-      history: <RoundRecord>[..._state.history, record],
-      currentStreak: newCurrentStreak,
-      bestStreak: newBestStreak,
-    ),);
+    _setState(
+      DuelState(
+        phase: DuelPhase.reveal,
+        playerMove: move,
+        cpuMove: cpu,
+        outcome: outcome,
+        playerScore:
+            _state.playerScore + (outcome == RoundOutcome.playerWin ? 1 : 0),
+        cpuScore: _state.cpuScore + (outcome == RoundOutcome.cpuWin ? 1 : 0),
+        ties: _state.ties + (outcome == RoundOutcome.tie ? 1 : 0),
+        roundCount: _state.roundCount + 1,
+        history: <RoundRecord>[..._state.history, record],
+        currentStreak: newCurrentStreak,
+        bestStreak: newBestStreak,
+      ),
+    );
     return _state;
   }
 
   Future<DuelState> selectMoveWithDelay(MoveChoice move) async {
-    _setState(DuelState(
-      phase: DuelPhase.playerSelected,
-      playerMove: move,
-      cpuMove: null,
-      outcome: null,
-      playerScore: _state.playerScore,
-      cpuScore: _state.cpuScore,
-      ties: _state.ties,
-      roundCount: _state.roundCount,
-      history: _state.history,
-      currentStreak: _state.currentStreak,
-      bestStreak: _state.bestStreak,
-    ),);
-    _setState(DuelState(
-      phase: DuelPhase.cpuThinking,
-      playerMove: move,
-      cpuMove: null,
-      outcome: null,
-      playerScore: _state.playerScore,
-      cpuScore: _state.cpuScore,
-      ties: _state.ties,
-      roundCount: _state.roundCount,
-      history: _state.history,
-      currentStreak: _state.currentStreak,
-      bestStreak: _state.bestStreak,
-    ),);
+    _setState(
+      DuelState(
+        phase: DuelPhase.playerSelected,
+        playerMove: move,
+        cpuMove: null,
+        outcome: null,
+        playerScore: _state.playerScore,
+        cpuScore: _state.cpuScore,
+        ties: _state.ties,
+        roundCount: _state.roundCount,
+        history: _state.history,
+        currentStreak: _state.currentStreak,
+        bestStreak: _state.bestStreak,
+      ),
+    );
+    _setState(
+      DuelState(
+        phase: DuelPhase.cpuThinking,
+        playerMove: move,
+        cpuMove: null,
+        outcome: null,
+        playerScore: _state.playerScore,
+        cpuScore: _state.cpuScore,
+        ties: _state.ties,
+        roundCount: _state.roundCount,
+        history: _state.history,
+        currentStreak: _state.currentStreak,
+        bestStreak: _state.bestStreak,
+      ),
+    );
     await Future<void>.delayed(_cpuThinkingDelay);
     if (_state.phase != DuelPhase.cpuThinking) {
       return _state;
@@ -105,19 +111,21 @@ class DuelController {
   }
 
   DuelState nextRound() {
-    _setState(DuelState(
-      phase: DuelPhase.idle,
-      playerMove: null,
-      cpuMove: null,
-      outcome: null,
-      playerScore: _state.playerScore,
-      cpuScore: _state.cpuScore,
-      ties: _state.ties,
-      roundCount: _state.roundCount,
-      history: _state.history,
-      currentStreak: _state.currentStreak,
-      bestStreak: _state.bestStreak,
-    ),);
+    _setState(
+      DuelState(
+        phase: DuelPhase.idle,
+        playerMove: null,
+        cpuMove: null,
+        outcome: null,
+        playerScore: _state.playerScore,
+        cpuScore: _state.cpuScore,
+        ties: _state.ties,
+        roundCount: _state.roundCount,
+        history: _state.history,
+        currentStreak: _state.currentStreak,
+        bestStreak: _state.bestStreak,
+      ),
+    );
     return _state;
   }
 

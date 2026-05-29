@@ -8,8 +8,7 @@ class LocaleScope extends InheritedNotifier<ValueNotifier<Locale?>> {
   }) : super(notifier: controller);
 
   static ValueNotifier<Locale?> of(BuildContext context) {
-    final scope =
-        context.dependOnInheritedWidgetOfExactType<LocaleScope>();
+    final scope = context.dependOnInheritedWidgetOfExactType<LocaleScope>();
     assert(scope != null, 'No LocaleScope found in widget tree');
     return scope!.notifier!;
   }

@@ -267,22 +267,24 @@ class _GameScreenState extends State<GameScreen> {
             icon: const Icon(Icons.settings),
             tooltip: l10n.settingsTitle,
             onPressed: () {
-              unawaited(showSettingsSheet(
-                context,
-                currentDifficulty: _controller.difficulty,
-                onDifficulty: () => unawaited(
-                  showDifficultyPicker(
-                    context,
-                    _controller.difficulty,
-                    (d) => unawaited(_setDifficulty(d)),
+              unawaited(
+                showSettingsSheet(
+                  context,
+                  currentDifficulty: _controller.difficulty,
+                  onDifficulty: () => unawaited(
+                    showDifficultyPicker(
+                      context,
+                      _controller.difficulty,
+                      (d) => unawaited(_setDifficulty(d)),
+                    ),
                   ),
+                  onLanguage: () => unawaited(
+                    showLanguagePicker(context, LocaleScope.of(context)),
+                  ),
+                  onResetData: () => unawaited(_confirmReset()),
+                  onAbout: () => unawaited(_showAboutDialog()),
                 ),
-                onLanguage: () => unawaited(
-                  showLanguagePicker(context, LocaleScope.of(context)),
-                ),
-                onResetData: () => unawaited(_confirmReset()),
-                onAbout: () => unawaited(_showAboutDialog()),
-              ),);
+              );
             },
           ),
         ],
@@ -329,7 +331,8 @@ class _GameScreenState extends State<GameScreen> {
                         state.winRatePercent,
                       ),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                     ),
                   ),
@@ -357,9 +360,8 @@ class _GameScreenState extends State<GameScreen> {
                         child: MoveButton(
                           emoji: '🪨',
                           label: l10n.moveRock,
-                          onPressed: isIdle
-                              ? () => _select(MoveChoice.rock)
-                              : null,
+                          onPressed:
+                              isIdle ? () => _select(MoveChoice.rock) : null,
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -367,9 +369,8 @@ class _GameScreenState extends State<GameScreen> {
                         child: MoveButton(
                           emoji: '📄',
                           label: l10n.movePaper,
-                          onPressed: isIdle
-                              ? () => _select(MoveChoice.paper)
-                              : null,
+                          onPressed:
+                              isIdle ? () => _select(MoveChoice.paper) : null,
                         ),
                       ),
                       const SizedBox(width: 12),
