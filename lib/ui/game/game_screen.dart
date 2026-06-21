@@ -1,18 +1,22 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:rps_duel/app/locale_scope.dart';
+import 'package:rps_duel/app/router.dart' show RecordsExtra;
 import 'package:rps_duel/data/local_achievement_storage.dart';
 import 'package:rps_duel/data/local_daily_challenge_storage.dart';
 import 'package:rps_duel/data/local_difficulty_storage.dart';
 import 'package:rps_duel/data/local_game_storage.dart';
+import 'package:rps_duel/data/local_match_moment_storage.dart';
 import 'package:rps_duel/domain/achievement.dart';
 import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/domain/daily_challenge.dart';
 import 'package:rps_duel/domain/duel_controller.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
 import 'package:rps_duel/domain/duel_state.dart';
+import 'package:rps_duel/domain/match_moment.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
@@ -22,8 +26,10 @@ import 'package:rps_duel/ui/game/achievement_unlock_overlay.dart';
 import 'package:rps_duel/ui/game/achievements_card.dart';
 import 'package:rps_duel/ui/game/daily_challenge_card.dart';
 import 'package:rps_duel/ui/game/difficulty_picker_sheet.dart';
+import 'package:rps_duel/ui/game/history_row.dart';
 import 'package:rps_duel/ui/game/language_picker_sheet.dart';
 import 'package:rps_duel/ui/game/move_button.dart';
+import 'package:rps_duel/ui/game/records_screen.dart' show momentTitleFor;
 import 'package:rps_duel/ui/game/settings_sheet.dart';
 import 'package:rps_duel/ui/haptics.dart';
 import 'package:rps_duel/ui/theme/tactile_theme.dart';
@@ -50,6 +56,9 @@ class _GameScreenState extends State<GameScreen> {
   DailyChallenge _challenge = DailyChallenge.initialFor(DateTime.now());
   AchievementStorage? _achievementStorage;
   Map<AchievementId, DateTime?> _achievements = <AchievementId, DateTime?>{};
+  MatchMomentStorage? _momentStorage;
+  Map<MatchMomentId, MatchMomentRecord> _moments =
+      <MatchMomentId, MatchMomentRecord>{};
   DuelPhase? _previousPhase;
 
   @override
@@ -140,6 +149,11 @@ class _GameScreenState extends State<GameScreen> {
     _achievementStorage = achievementStorage;
     setState(() => _achievements = achievementStorage.load());
 
+    final momentStorage = await MatchMomentStorage.open();
+    if (!mounted) return;
+    _momentStorage = momentStorage;
+    setState(() => _moments = momentStorage.load());
+
     final s = _controller.state;
     final pristine = s.playerScore == 0 &&
         s.cpuScore == 0 &&
@@ -197,6 +211,33 @@ class _GameScreenState extends State<GameScreen> {
     }
   }
 
+  void _updateMoments() {
+    final already = _moments.keys.toSet();
+    final newlyDetected = detectMoments(
+      state: _controller.state,
+      already: already,
+      now: DateTime.now(),
+    );
+    if (newlyDetected.isEmpty) return;
+    final ordered = newlyDetected.keys.toList()
+      ..sort((a, b) => a.index.compareTo(b.index));
+    setState(() {
+      final merged = Map<MatchMomentId, MatchMomentRecord>.from(_moments);
+      for (final id in ordered) {
+        merged[id] = newlyDetected[id]!;
+      }
+      _moments = merged;
+    });
+    final l10n = AppLocalizations.of(context);
+    for (final id in ordered) {
+      AchievementUnlockOverlay.enqueueCustom(
+        context,
+        header: l10n.memorableMoment,
+        title: momentTitleFor(l10n, id),
+      );
+    }
+  }
+
   void _select(MoveChoice move) {
     unawaited(_runRound(move));
   }
@@ -206,9 +247,21 @@ class _GameScreenState extends State<GameScreen> {
     if (!mounted) return;
     _updateChallenge();
     _updateAchievements();
+    _updateMoments();
     await _storage?.save(_controller.state);
     await _challengeStorage?.save(_challenge);
     await _achievementStorage?.save(_achievements);
+    await _momentStorage?.save(_moments);
+  }
+
+  void _openRecords() {
+    context.push(
+      '/records',
+      extra: RecordsExtra(
+        history: List<RoundRecord>.unmodifiable(_controller.state.history),
+        moments: Map<MatchMomentId, MatchMomentRecord>.unmodifiable(_moments),
+      ),
+    );
   }
 
   void _next() {
@@ -335,9 +388,22 @@ class _GameScreenState extends State<GameScreen> {
                   ),
                   const SizedBox(height: 16),
                   Center(
-                    child: Text(
-                      l10n.summaryLine(state.roundCount, state.history.length),
-                      style: Theme.of(context).textTheme.titleSmall,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: _openRecords,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          l10n.summaryLine(
+                            state.roundCount,
+                            state.history.length,
+                          ),
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -552,12 +618,12 @@ class _RevealArea extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         Text(
-          _outcomeText(l10n, outcome),
+          outcomeText(l10n, outcome),
           style: theme.textTheme.headlineSmall?.copyWith(
             fontFamily: 'serif',
             fontStyle: FontStyle.italic,
             fontWeight: FontWeight.w400,
-            color: _outcomeColor(theme, outcome),
+            color: outcomeColor(theme, outcome),
           ),
           textAlign: TextAlign.center,
         ),
@@ -581,9 +647,9 @@ class _MoveDisplay extends StatelessWidget {
       children: <Widget>[
         Text(sideLabel, style: theme.textTheme.labelLarge),
         const SizedBox(height: 8),
-        Text(_emojiFor(move), style: const TextStyle(fontSize: 56)),
+        Text(emojiForMove(move), style: const TextStyle(fontSize: 56)),
         const SizedBox(height: 4),
-        Text(_labelFor(l10n, move), style: theme.textTheme.titleMedium),
+        Text(labelForMove(l10n, move), style: theme.textTheme.titleMedium),
       ],
     );
   }
@@ -620,7 +686,7 @@ class _HistorySection extends StatelessWidget {
           )
         else
           for (var i = 0; i < visible.length; i++) ...<Widget>[
-            _HistoryRow(roundNumber: total - i, record: visible[i]),
+            HistoryRow(roundNumber: total - i, record: visible[i]),
             if (i < visible.length - 1)
               Divider(
                 height: 1,
@@ -630,91 +696,4 @@ class _HistorySection extends StatelessWidget {
       ],
     );
   }
-}
-
-class _HistoryRow extends StatelessWidget {
-  const _HistoryRow({required this.roundNumber, required this.record});
-
-  final int roundNumber;
-  final RoundRecord record;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: theme.colorScheme.outline),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              '$roundNumber',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              '${_emojiFor(record.playerMove)} ${_labelFor(l10n, record.playerMove)}'
-              '  vs  '
-              '${_emojiFor(record.cpuMove)} ${_labelFor(l10n, record.cpuMove)}',
-              style: theme.textTheme.bodySmall,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            _outcomeText(l10n, record.outcome),
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: _outcomeColor(theme, record.outcome),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-String _emojiFor(MoveChoice move) {
-  return switch (move) {
-    MoveChoice.rock => '🪨',
-    MoveChoice.paper => '📄',
-    MoveChoice.scissors => '✂️',
-  };
-}
-
-String _labelFor(AppLocalizations l10n, MoveChoice move) {
-  return switch (move) {
-    MoveChoice.rock => l10n.moveRock,
-    MoveChoice.paper => l10n.movePaper,
-    MoveChoice.scissors => l10n.moveScissors,
-  };
-}
-
-String _outcomeText(AppLocalizations l10n, RoundOutcome outcome) {
-  return switch (outcome) {
-    RoundOutcome.playerWin => l10n.outcomePlayerWin,
-    RoundOutcome.cpuWin => l10n.outcomeCpuWin,
-    RoundOutcome.tie => l10n.outcomeTie,
-  };
-}
-
-Color _outcomeColor(ThemeData theme, RoundOutcome outcome) {
-  return switch (outcome) {
-    RoundOutcome.playerWin => theme.colorScheme.primary,
-    RoundOutcome.cpuWin => theme.colorScheme.error,
-    RoundOutcome.tie => theme.colorScheme.onSurfaceVariant,
-  };
 }

@@ -14,23 +14,55 @@ const Duration _holdDuration = Duration(milliseconds: 2400);
 const Duration _exitDuration = Duration(milliseconds: 280);
 const double _slideTravel = 64.0;
 
-/// Floating, auto-dismissed toast that announces an achievement unlock.
+/// One payload in the unlock-toast queue. Each payload carries the
+/// pre-resolved strings the toast will render — the queue does NOT hold
+/// enum ids so the same overlay can announce achievements, narrative
+/// moments, or any future collection without growing a switch.
+class _ToastPayload {
+  const _ToastPayload({required this.header, required this.title});
+
+  final String header;
+  final String title;
+}
+
+/// Floating, auto-dismissed toast that announces a collection unlock.
 ///
-/// Queued: if multiple achievements unlock in the same round they cascade
-/// one after another in enum-index order — no stacking, no missed unlocks.
-/// Lifetime is entirely owned by this class; the game screen only enqueues.
+/// Originally built for achievements; now also surfaces narrative
+/// moments. Callers resolve the header + title to strings (so they can
+/// localize and look up the right table) and enqueue the payload.
+///
+/// Queued: if multiple unlocks happen on the same round they cascade one
+/// after another in submission order — no stacking, no missed unlocks.
 class AchievementUnlockOverlay {
   AchievementUnlockOverlay._();
 
-  static final Queue<AchievementId> _queue = Queue<AchievementId>();
+  static final Queue<_ToastPayload> _queue = Queue<_ToastPayload>();
   static bool _showing = false;
   static OverlayState? _overlay;
 
-  /// Enqueue an unlock toast. Safe to call multiple times in the same frame.
+  /// Enqueue an achievement unlock. The header defaults to the locale's
+  /// "ACHIEVEMENT UNLOCKED" strap line; the title comes from
+  /// [achievementTitle].
   static void enqueue(BuildContext context, AchievementId id) {
-    _queue.add(id);
-    _overlay ??= Overlay.maybeOf(context, rootOverlay: true);
-    _maybeShowNext();
+    final l10n = AppLocalizations.of(context);
+    _enqueuePayload(
+      context,
+      _ToastPayload(
+        header: l10n.achievementUnlocked,
+        title: achievementTitle(l10n, id),
+      ),
+    );
+  }
+
+  /// Enqueue a pre-resolved payload. Used by callers that surface
+  /// non-achievement unlocks (e.g. narrative moments) so the overlay
+  /// stays decoupled from any single id enum.
+  static void enqueueCustom(
+    BuildContext context, {
+    required String header,
+    required String title,
+  }) {
+    _enqueuePayload(context, _ToastPayload(header: header, title: title));
   }
 
   /// Clear queue + active toast without animation. Test-only.
@@ -39,6 +71,12 @@ class AchievementUnlockOverlay {
     _queue.clear();
     _showing = false;
     _overlay = null;
+  }
+
+  static void _enqueuePayload(BuildContext context, _ToastPayload payload) {
+    _queue.add(payload);
+    _overlay ??= Overlay.maybeOf(context, rootOverlay: true);
+    _maybeShowNext();
   }
 
   static void _maybeShowNext() {
@@ -51,13 +89,13 @@ class AchievementUnlockOverlay {
       return;
     }
 
-    final id = _queue.removeFirst();
+    final payload = _queue.removeFirst();
     _showing = true;
 
     late OverlayEntry entry;
     entry = OverlayEntry(
-      builder: (ctx) => _AchievementUnlockToast(
-        id: id,
+      builder: (ctx) => _UnlockToast(
+        payload: payload,
         onDismissed: () {
           entry.remove();
           _showing = false;
@@ -69,21 +107,17 @@ class AchievementUnlockOverlay {
   }
 }
 
-class _AchievementUnlockToast extends StatefulWidget {
-  const _AchievementUnlockToast({
-    required this.id,
-    required this.onDismissed,
-  });
+class _UnlockToast extends StatefulWidget {
+  const _UnlockToast({required this.payload, required this.onDismissed});
 
-  final AchievementId id;
+  final _ToastPayload payload;
   final VoidCallback onDismissed;
 
   @override
-  State<_AchievementUnlockToast> createState() =>
-      _AchievementUnlockToastState();
+  State<_UnlockToast> createState() => _UnlockToastState();
 }
 
-class _AchievementUnlockToastState extends State<_AchievementUnlockToast>
+class _UnlockToastState extends State<_UnlockToast>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _slide;
@@ -137,7 +171,6 @@ class _AchievementUnlockToastState extends State<_AchievementUnlockToast>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     return Positioned(
       top: 0,
       left: 0,
@@ -163,8 +196,8 @@ class _AchievementUnlockToastState extends State<_AchievementUnlockToast>
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 360),
                 child: _UnlockCard(
-                  header: l10n.achievementUnlocked,
-                  title: achievementTitle(l10n, widget.id),
+                  header: widget.payload.header,
+                  title: widget.payload.title,
                 ),
               ),
             ),

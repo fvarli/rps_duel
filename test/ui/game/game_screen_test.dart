@@ -410,8 +410,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('ACHIEVEMENT UNLOCKED'), findsNothing);
-    // The chip is still on screen after the toast dismisses.
-    expect(find.text('First Win'), findsOneWidget);
+    // The chip is still on screen after the achievement toast dismisses.
+    // 'First Win' is also the moment title — the moment toast is now in
+    // the queue and may be on screen or about to be, so allow either.
+    expect(find.text('First Win'), findsAtLeastNWidgets(1));
   });
 
   testWidgets('losing a round does not surface a toast', (tester) async {
@@ -425,6 +427,43 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('ACHIEVEMENT UNLOCKED'), findsNothing);
+    expect(find.text('MEMORABLE MOMENT'), findsNothing);
     expect(find.text('0/4 unlocked'), findsOneWidget);
   });
+
+  testWidgets(
+    'winning the first round queues both the achievement toast and the moment toast',
+    (tester) async {
+      // CPU plays scissors → rock wins. Triggers both:
+      //  - achievement firstWin (existing)
+      //  - moment firstWin (new)
+      await tester.pumpWidget(
+        _buildApp(engine: _FixedCpuEngine(MoveChoice.scissors)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Rock'));
+      await tester.pumpAndSettle();
+
+      // Achievements enqueue first (sorted ahead in the call site), so
+      // the first toast on screen is the achievement.
+      expect(find.text('ACHIEVEMENT UNLOCKED'), findsOneWidget);
+      // 'First Win' appears in the achievement chip AND in the active toast.
+      expect(find.text('First Win'), findsAtLeastNWidgets(1));
+
+      // Drain the achievement toast; the moment toast should follow.
+      await tester.pump(const Duration(milliseconds: 2400));
+      await tester.pumpAndSettle();
+
+      expect(find.text('ACHIEVEMENT UNLOCKED'), findsNothing);
+      expect(find.text('MEMORABLE MOMENT'), findsOneWidget);
+      // 'First Win' is still on screen because the moment shares the title.
+      expect(find.text('First Win'), findsAtLeastNWidgets(1));
+
+      // Drain the moment toast.
+      await tester.pump(const Duration(milliseconds: 2400));
+      await tester.pumpAndSettle();
+      expect(find.text('MEMORABLE MOMENT'), findsNothing);
+    },
+  );
 }

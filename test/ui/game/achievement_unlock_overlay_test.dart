@@ -62,4 +62,32 @@ void main() {
     expect(find.text('ACHIEVEMENT UNLOCKED'), findsNothing);
     expect(find.text('Streak 3'), findsNothing);
   });
+
+  testWidgets('enqueueCustom uses the caller-supplied header + title',
+      (tester) async {
+    await tester.pumpWidget(
+      _harness(
+        onPressed: (ctx) {
+          AchievementUnlockOverlay.enqueueCustom(
+            ctx,
+            header: 'MEMORABLE MOMENT',
+            title: 'Rival Breaker',
+          );
+        },
+      ),
+    );
+
+    await tester.tap(find.text('go'));
+    await tester.pumpAndSettle();
+
+    // The custom header replaces "ACHIEVEMENT UNLOCKED" for moments.
+    expect(find.text('MEMORABLE MOMENT'), findsOneWidget);
+    expect(find.text('ACHIEVEMENT UNLOCKED'), findsNothing);
+    expect(find.text('Rival Breaker'), findsOneWidget);
+
+    // Drain.
+    await tester.pump(const Duration(milliseconds: 2400));
+    await tester.pumpAndSettle();
+    expect(find.text('MEMORABLE MOMENT'), findsNothing);
+  });
 }
