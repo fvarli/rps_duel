@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:rps_duel/domain/daily_challenge.dart';
+import 'package:rps_duel/domain/daily_challenge_kind.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
 import 'package:rps_duel/ui/theme/tactile_theme.dart';
 
@@ -36,7 +37,7 @@ class DailyChallengeCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    l10n.dailyChallengeDescription,
+                    _descriptionFor(l10n, challenge),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -48,7 +49,7 @@ class DailyChallengeCard extends StatelessWidget {
             Text(
               challenge.completed
                   ? l10n.dailyChallengeCompleted
-                  : '${challenge.progress}/${DailyChallenge.target}',
+                  : '${challenge.progress}/${challenge.target}',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: challenge.completed ? TactileColors.sage : null,
@@ -59,4 +60,17 @@ class DailyChallengeCard extends StatelessWidget {
       ),
     );
   }
+}
+
+String _descriptionFor(AppLocalizations l10n, DailyChallenge c) {
+  return switch (c.kind) {
+    DailyChallengeKind.winRounds => l10n.dailyChallengeWinRounds(c.target),
+    DailyChallengeKind.winWithRock => l10n.dailyChallengeWinRock(c.target),
+    DailyChallengeKind.winWithPaper => l10n.dailyChallengeWinPaper(c.target),
+    DailyChallengeKind.winWithScissors =>
+      l10n.dailyChallengeWinScissors(c.target),
+    DailyChallengeKind.getTies => l10n.dailyChallengeGetTies(c.target),
+    DailyChallengeKind.winStreak => l10n.dailyChallengeWinStreak(c.target),
+    DailyChallengeKind.playRounds => l10n.dailyChallengePlayRounds(c.target),
+  };
 }

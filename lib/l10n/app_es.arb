@@ -64,8 +64,15 @@
   "achievementFirst10Rounds": "10 rondas",
 
   "dailyChallengeTitle": "Reto diario",
-  "dailyChallengeDescription": "Gana 3 rondas con Tijera",
   "dailyChallengeCompleted": "Completado",
+
+  "dailyChallengeWinRounds": "Gana {target} rondas hoy",
+  "dailyChallengeWinRock": "Gana {target} rondas con Piedra",
+  "dailyChallengeWinPaper": "Gana {target} rondas con Papel",
+  "dailyChallengeWinScissors": "Gana {target} rondas con Tijera",
+  "dailyChallengeGetTies": "Empata {target} rondas hoy",
+  "dailyChallengeWinStreak": "Logra una racha de {target} victorias",
+  "dailyChallengePlayRounds": "Juega {target} rondas hoy",
 
   "difficultyPickerTitle": "Dificultad",
   "difficultyEasy": "Fácil",

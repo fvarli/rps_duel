@@ -160,10 +160,15 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _updateChallenge() {
-    final history = _controller.state.history;
+    final state = _controller.state;
+    final history = state.history;
     if (history.isEmpty) return;
     final last = history.last;
-    final next = _challenge.advanceFor(last.playerMove, last.outcome);
+    final next = _challenge.advanceFor(
+      playerMove: last.playerMove,
+      outcome: last.outcome,
+      state: state,
+    );
     if (next.progress != _challenge.progress) {
       setState(() => _challenge = next);
     }

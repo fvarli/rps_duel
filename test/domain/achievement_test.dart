@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:rps_duel/domain/achievement.dart';
 import 'package:rps_duel/domain/daily_challenge.dart';
+import 'package:rps_duel/domain/daily_challenge_kind.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
 import 'package:rps_duel/domain/duel_state.dart';
 import 'package:rps_duel/domain/round_record.dart';
@@ -54,6 +55,8 @@ void main() {
     test('Scissors Specialist unlocks when daily challenge completed', () {
       const completed = DailyChallenge(
         date: '2026-05-25',
+        kind: DailyChallengeKind.winWithScissors,
+        target: 3,
         progress: 3,
         completed: true,
       );

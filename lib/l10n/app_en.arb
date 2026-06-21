@@ -128,11 +128,45 @@
   "@achievementFirst10Rounds": { "description": "Achievement: played 10 total rounds." },
 
   "dailyChallengeTitle": "Daily Challenge",
-  "dailyChallengeDescription": "Win 3 rounds with Scissors",
   "dailyChallengeCompleted": "Completed",
   "@dailyChallengeTitle": { "description": "Header for the daily challenge card." },
-  "@dailyChallengeDescription": { "description": "Short description of today's MVP challenge. The number 3 mirrors DailyChallenge.target." },
   "@dailyChallengeCompleted": { "description": "Label shown when today's challenge is finished." },
+
+  "dailyChallengeWinRounds": "Win {target} rounds today",
+  "dailyChallengeWinRock": "Win {target} rounds with Rock",
+  "dailyChallengeWinPaper": "Win {target} rounds with Paper",
+  "dailyChallengeWinScissors": "Win {target} rounds with Scissors",
+  "dailyChallengeGetTies": "Tie {target} rounds today",
+  "dailyChallengeWinStreak": "Reach a {target}-round winning streak",
+  "dailyChallengePlayRounds": "Play {target} rounds today",
+  "@dailyChallengeWinRounds": {
+    "description": "Per-kind daily challenge prompt: win N rounds today regardless of move chosen.",
+    "placeholders": { "target": { "type": "int" } }
+  },
+  "@dailyChallengeWinRock": {
+    "description": "Per-kind daily challenge prompt: win N rounds with Rock.",
+    "placeholders": { "target": { "type": "int" } }
+  },
+  "@dailyChallengeWinPaper": {
+    "description": "Per-kind daily challenge prompt: win N rounds with Paper.",
+    "placeholders": { "target": { "type": "int" } }
+  },
+  "@dailyChallengeWinScissors": {
+    "description": "Per-kind daily challenge prompt: win N rounds with Scissors. Preserved verbatim from the pre-rotation challenge.",
+    "placeholders": { "target": { "type": "int" } }
+  },
+  "@dailyChallengeGetTies": {
+    "description": "Per-kind daily challenge prompt: tie N rounds today.",
+    "placeholders": { "target": { "type": "int" } }
+  },
+  "@dailyChallengeWinStreak": {
+    "description": "Per-kind daily challenge prompt: reach an N-round winning streak in a single session.",
+    "placeholders": { "target": { "type": "int" } }
+  },
+  "@dailyChallengePlayRounds": {
+    "description": "Per-kind daily challenge prompt: play N rounds today regardless of outcome.",
+    "placeholders": { "target": { "type": "int" } }
+  },
 
   "difficultyPickerTitle": "Difficulty",
   "difficultyEasy": "Easy",

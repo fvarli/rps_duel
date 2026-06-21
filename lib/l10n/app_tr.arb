@@ -64,8 +64,15 @@
   "achievementFirst10Rounds": "10 El",
 
   "dailyChallengeTitle": "Günlük Görev",
-  "dailyChallengeDescription": "Makasla 3 el kazan",
   "dailyChallengeCompleted": "Tamamlandı",
+
+  "dailyChallengeWinRounds": "Bugün {target} el kazan",
+  "dailyChallengeWinRock": "Taşla {target} el kazan",
+  "dailyChallengeWinPaper": "Kağıtla {target} el kazan",
+  "dailyChallengeWinScissors": "Makasla {target} el kazan",
+  "dailyChallengeGetTies": "Bugün {target} elde berabere kal",
+  "dailyChallengeWinStreak": "Üst üste {target} el kazan",
+  "dailyChallengePlayRounds": "Bugün {target} el oyna",
 
   "difficultyPickerTitle": "Zorluk",
   "difficultyEasy": "Kolay",
