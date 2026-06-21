@@ -18,6 +18,7 @@ import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
 import 'package:rps_duel/domain/rps_engine.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/game/achievement_unlock_overlay.dart';
 import 'package:rps_duel/ui/game/achievements_card.dart';
 import 'package:rps_duel/ui/game/daily_challenge_card.dart';
 import 'package:rps_duel/ui/game/difficulty_picker_sheet.dart';
@@ -48,7 +49,7 @@ class _GameScreenState extends State<GameScreen> {
   DailyChallengeStorage? _challengeStorage;
   DailyChallenge _challenge = DailyChallenge.initialFor(DateTime.now());
   AchievementStorage? _achievementStorage;
-  Set<AchievementId> _achievements = <AchievementId>{};
+  Map<AchievementId, DateTime?> _achievements = <AchievementId, DateTime?>{};
   DuelPhase? _previousPhase;
 
   @override
@@ -169,13 +170,25 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _updateAchievements() {
+    final alreadySet = _achievements.keys.toSet();
     final next = evaluateAchievements(
       state: _controller.state,
       dailyChallenge: _challenge,
-      already: _achievements,
+      already: alreadySet,
     );
-    if (next.length != _achievements.length) {
-      setState(() => _achievements = next);
+    if (next.length == _achievements.length) return;
+    final newIds = next.difference(alreadySet).toList()
+      ..sort((a, b) => a.index.compareTo(b.index));
+    final now = DateTime.now();
+    setState(() {
+      final merged = Map<AchievementId, DateTime?>.from(_achievements);
+      for (final id in newIds) {
+        merged[id] = now;
+      }
+      _achievements = merged;
+    });
+    for (final id in newIds) {
+      AchievementUnlockOverlay.enqueue(context, id);
     }
   }
 

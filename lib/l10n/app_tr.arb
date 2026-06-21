@@ -46,6 +46,18 @@
   "achievementsTitle": "Başarımlar",
   "achievementsCount": "{count}/{total} kilidi açık",
   "achievementsNoneYet": "Henüz başarım yok.",
+  "achievementUnlocked": "BAŞARIM AÇILDI",
+
+  "collectionTitle": "Koleksiyon",
+  "collectionIntro": "Her düello bu kayda eklenir.",
+  "exhibitPrefix": "ESER",
+  "unlockedLabel": "açıldı",
+  "unlockedOnLabel": "{date} açıldı",
+
+  "achievementFirstWinNote": "İlk zaferin tadı.",
+  "achievementStreak3Note": "Üst üste üç el.",
+  "achievementScissorsSpecialistNote": "Bir gün, tek silahla.",
+  "achievementFirst10RoundsNote": "On el. Düellocu sahneye çıkar.",
   "achievementFirstWin": "İlk Galibiyet",
   "achievementStreak3": "3'lü Seri",
   "achievementScissorsSpecialist": "Makas Uzmanı",

@@ -46,6 +46,18 @@
   "achievementsTitle": "Logros",
   "achievementsCount": "{count}/{total} desbloqueados",
   "achievementsNoneYet": "Aún no hay logros.",
+  "achievementUnlocked": "LOGRO DESBLOQUEADO",
+
+  "collectionTitle": "Colección",
+  "collectionIntro": "Cada duelo se suma a este registro.",
+  "exhibitPrefix": "PIEZA",
+  "unlockedLabel": "desbloqueado",
+  "unlockedOnLabel": "desbloqueado {date}",
+
+  "achievementFirstWinNote": "Tu primer sabor a la victoria.",
+  "achievementStreak3Note": "Tres rondas seguidas reclamadas.",
+  "achievementScissorsSpecialistNote": "Un día puliendo una sola arma.",
+  "achievementFirst10RoundsNote": "Diez rondas. Comienza el duelista.",
   "achievementFirstWin": "Primera victoria",
   "achievementStreak3": "Racha de 3",
   "achievementScissorsSpecialist": "Especialista en tijera",

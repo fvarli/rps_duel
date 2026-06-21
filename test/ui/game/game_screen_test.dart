@@ -6,6 +6,7 @@ import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/rps_engine.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/game/achievement_unlock_overlay.dart';
 import 'package:rps_duel/ui/game/game_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,6 +49,7 @@ Widget _buildApp({
 void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues(<String, Object>{});
+    AchievementUnlockOverlay.debugReset();
   });
 
   testWidgets('Rock walks idle → cpuThinking → reveal', (tester) async {
@@ -342,7 +344,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1/4 unlocked'), findsOneWidget);
-    expect(find.text('First Win'), findsOneWidget);
+    // 'First Win' appears in the achievement chip; the unlock toast also
+    // shows it transiently for ~3s after the round resolves.
+    expect(find.text('First Win'), findsAtLeastNWidgets(1));
     expect(find.text('No achievements yet.'), findsNothing);
   });
 
@@ -365,7 +369,48 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Round 0 · History: 0 rounds'), findsOneWidget);
-    expect(find.text('First Win'), findsOneWidget);
+    // Chip survives reset; toast may still be holding (~3s lifetime).
+    expect(find.text('First Win'), findsAtLeastNWidgets(1));
     expect(find.text('1/4 unlocked'), findsOneWidget);
+  });
+
+  testWidgets('winning the first round surfaces the achievement unlock toast',
+      (tester) async {
+    await tester.pumpWidget(
+      _buildApp(engine: _FixedCpuEngine(MoveChoice.scissors)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('ACHIEVEMENT UNLOCKED'), findsNothing);
+
+    await tester.tap(find.text('Rock'));
+    await tester.pumpAndSettle();
+
+    // Toast inserted and enter animation completed.
+    expect(find.text('ACHIEVEMENT UNLOCKED'), findsOneWidget);
+    // 'First Win' appears in both the chip and the toast title.
+    expect(find.text('First Win'), findsAtLeastNWidgets(1));
+
+    // Advance past the hold + exit; the toast removes itself.
+    await tester.pump(const Duration(milliseconds: 2400));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ACHIEVEMENT UNLOCKED'), findsNothing);
+    // The chip is still on screen after the toast dismisses.
+    expect(find.text('First Win'), findsOneWidget);
+  });
+
+  testWidgets('losing a round does not surface a toast', (tester) async {
+    // CPU plays Paper → Rock loses.
+    await tester.pumpWidget(
+      _buildApp(engine: _FixedCpuEngine(MoveChoice.paper)),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Rock'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('ACHIEVEMENT UNLOCKED'), findsNothing);
+    expect(find.text('0/4 unlocked'), findsOneWidget);
   });
 }

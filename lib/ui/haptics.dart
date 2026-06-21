@@ -18,4 +18,8 @@ class Haptics {
   static void tie() {
     HapticFeedback.selectionClick();
   }
+
+  static void unlock() {
+    HapticFeedback.heavyImpact();
+  }
 }
