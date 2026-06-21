@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:rps_duel/domain/lifetime_stats.dart';
 import 'package:rps_duel/domain/match_moment.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_record.dart';
@@ -18,11 +19,13 @@ class RecordsScreen extends StatelessWidget {
     super.key,
     required this.history,
     required this.moments,
+    required this.lifetime,
     DateTime? now,
   }) : _now = now;
 
   final List<RoundRecord> history;
   final Map<MatchMomentId, MatchMomentRecord> moments;
+  final LifetimeStats lifetime;
   final DateTime? _now;
 
   @override
@@ -53,6 +56,8 @@ class RecordsScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 24),
+                  _LifetimeCard(stats: lifetime),
+                  const SizedBox(height: 16),
                   _MomentsCard(moments: moments, locale: locale),
                   const SizedBox(height: 16),
                   _TendenciesCard(history: history),
@@ -95,6 +100,67 @@ String _momentNote(AppLocalizations l10n, MatchMomentId id) {
 /// Public for the unlock-toast bridge.
 String momentTitleFor(AppLocalizations l10n, MatchMomentId id) =>
     _momentTitle(l10n, id);
+
+class _LifetimeCard extends StatelessWidget {
+  const _LifetimeCard({required this.stats});
+
+  final LifetimeStats stats;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(l10n.lifetimeSectionTitle, style: theme.textTheme.titleSmall),
+            const SizedBox(height: 10),
+            _LifetimeRow(label: l10n.lifetimeRounds, value: stats.totalRounds),
+            const SizedBox(height: 6),
+            _LifetimeRow(label: l10n.lifetimeWins, value: stats.totalWins),
+            const SizedBox(height: 6),
+            _LifetimeRow(label: l10n.lifetimeTies, value: stats.totalTies),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LifetimeRow extends StatelessWidget {
+  const _LifetimeRow({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: TactileColors.inkSoft,
+            ),
+          ),
+        ),
+        Text(
+          '$value',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
 class _MomentsCard extends StatelessWidget {
   const _MomentsCard({required this.moments, required this.locale});

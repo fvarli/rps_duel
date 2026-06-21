@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import 'package:rps_duel/domain/achievement.dart';
+import 'package:rps_duel/domain/lifetime_stats.dart';
 import 'package:rps_duel/domain/match_moment.dart';
 import 'package:rps_duel/domain/round_record.dart';
 import 'package:rps_duel/ui/game/achievements_screen.dart';
@@ -8,10 +9,15 @@ import 'package:rps_duel/ui/game/game_screen.dart';
 import 'package:rps_duel/ui/game/records_screen.dart';
 
 class RecordsExtra {
-  const RecordsExtra({required this.history, required this.moments});
+  const RecordsExtra({
+    required this.history,
+    required this.moments,
+    required this.lifetime,
+  });
 
   final List<RoundRecord> history;
   final Map<MatchMomentId, MatchMomentRecord> moments;
+  final LifetimeStats lifetime;
 }
 
 final GoRouter appRouter = GoRouter(
@@ -42,11 +48,13 @@ final GoRouter appRouter = GoRouter(
               return RecordsScreen(
                 history: extra.history,
                 moments: extra.moments,
+                lifetime: extra.lifetime,
               );
             }
-            return const RecordsScreen(
-              history: <RoundRecord>[],
-              moments: <MatchMomentId, MatchMomentRecord>{},
+            return RecordsScreen(
+              history: const <RoundRecord>[],
+              moments: const <MatchMomentId, MatchMomentRecord>{},
+              lifetime: LifetimeStats.zero(),
             );
           },
         ),

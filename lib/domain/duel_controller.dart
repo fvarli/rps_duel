@@ -8,6 +8,17 @@ import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
 import 'package:rps_duel/domain/rps_engine.dart';
 
+/// Maximum number of [RoundRecord]s the controller keeps in
+/// [DuelState.history]. The oldest rounds are dropped silently once this
+/// is exceeded. Lifetime totals are tracked separately and are not
+/// affected by the cap — see [LifetimeStats].
+const int kHistoryCap = 500;
+
+List<RoundRecord> _capHistory(List<RoundRecord> history) {
+  if (history.length <= kHistoryCap) return history;
+  return history.sublist(history.length - kHistoryCap);
+}
+
 class DuelController {
   DuelController({
     RpsEngine? engine,
@@ -64,7 +75,7 @@ class DuelController {
         cpuScore: _state.cpuScore + (outcome == RoundOutcome.cpuWin ? 1 : 0),
         ties: _state.ties + (outcome == RoundOutcome.tie ? 1 : 0),
         roundCount: _state.roundCount + 1,
-        history: <RoundRecord>[..._state.history, record],
+        history: _capHistory(<RoundRecord>[..._state.history, record]),
         currentStreak: newCurrentStreak,
         bestStreak: newBestStreak,
       ),
@@ -135,6 +146,24 @@ class DuelController {
   }
 
   void restoreFrom(DuelState state) {
-    _setState(state);
+    if (state.history.length <= kHistoryCap) {
+      _setState(state);
+      return;
+    }
+    _setState(
+      DuelState(
+        phase: state.phase,
+        playerMove: state.playerMove,
+        cpuMove: state.cpuMove,
+        outcome: state.outcome,
+        playerScore: state.playerScore,
+        cpuScore: state.cpuScore,
+        ties: state.ties,
+        roundCount: state.roundCount,
+        history: _capHistory(state.history),
+        currentStreak: state.currentStreak,
+        bestStreak: state.bestStreak,
+      ),
+    );
   }
 }

@@ -61,6 +61,10 @@
 
   "recordsTitle": "Kayıtlar",
   "recordsIntro": "Akılda kalan düellolara dair bir defter.",
+  "lifetimeSectionTitle": "Tüm Zamanlar",
+  "lifetimeRounds": "El",
+  "lifetimeWins": "Galibiyet",
+  "lifetimeTies": "Beraberlik",
   "momentsSectionTitle": "Anlar",
   "momentsEmptyState": "Oynadıkça anlar burada belirir.",
   "tendenciesSectionTitle": "Hamle eğilimleri",

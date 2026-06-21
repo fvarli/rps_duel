@@ -266,5 +266,19 @@ void main() {
       expect(controller.state.cpuMove, MoveChoice.scissors);
       expect(controller.state.outcome, RoundOutcome.playerWin);
     });
+
+    test('history is capped at $kHistoryCap entries on selectMove', () {
+      final controller = DuelController(
+        engine: _FixedCpuEngine(MoveChoice.scissors),
+      );
+      // Drive 501 rounds; the oldest one should fall off the end of history,
+      // but the aggregate roundCount keeps climbing past the cap.
+      for (var i = 0; i < kHistoryCap + 1; i++) {
+        controller.selectMove(MoveChoice.rock);
+        controller.nextRound();
+      }
+      expect(controller.state.history.length, kHistoryCap);
+      expect(controller.state.roundCount, kHistoryCap + 1);
+    });
   });
 }

@@ -9,6 +9,7 @@ import 'package:rps_duel/data/local_achievement_storage.dart';
 import 'package:rps_duel/data/local_daily_challenge_storage.dart';
 import 'package:rps_duel/data/local_difficulty_storage.dart';
 import 'package:rps_duel/data/local_game_storage.dart';
+import 'package:rps_duel/data/local_lifetime_stats_storage.dart';
 import 'package:rps_duel/data/local_match_moment_storage.dart';
 import 'package:rps_duel/domain/achievement.dart';
 import 'package:rps_duel/domain/cpu_difficulty.dart';
@@ -16,6 +17,7 @@ import 'package:rps_duel/domain/daily_challenge.dart';
 import 'package:rps_duel/domain/duel_controller.dart';
 import 'package:rps_duel/domain/duel_phase.dart';
 import 'package:rps_duel/domain/duel_state.dart';
+import 'package:rps_duel/domain/lifetime_stats.dart';
 import 'package:rps_duel/domain/match_moment.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
@@ -59,6 +61,8 @@ class _GameScreenState extends State<GameScreen> {
   MatchMomentStorage? _momentStorage;
   Map<MatchMomentId, MatchMomentRecord> _moments =
       <MatchMomentId, MatchMomentRecord>{};
+  LifetimeStatsStorage? _lifetimeStorage;
+  LifetimeStats _lifetime = LifetimeStats.zero();
   DuelPhase? _previousPhase;
 
   @override
@@ -154,6 +158,10 @@ class _GameScreenState extends State<GameScreen> {
     _momentStorage = momentStorage;
     setState(() => _moments = momentStorage.load());
 
+    final lifetimeStorage = await LifetimeStatsStorage.open();
+    if (!mounted) return;
+    _lifetimeStorage = lifetimeStorage;
+
     final s = _controller.state;
     final pristine = s.playerScore == 0 &&
         s.cpuScore == 0 &&
@@ -161,10 +169,28 @@ class _GameScreenState extends State<GameScreen> {
         s.roundCount == 0 &&
         s.history.isEmpty &&
         s.phase == DuelPhase.idle;
-    if (!pristine) return;
-    final restored = storage.load();
-    if (restored != null) {
-      _controller.restoreFrom(restored);
+    if (pristine) {
+      final restored = storage.load();
+      if (restored != null) {
+        _controller.restoreFrom(restored);
+      }
+    }
+
+    // Lifetime backfill: existing players who never had a lifetime blob
+    // get one seeded from the durable aggregate counters on the game
+    // state. New / freshly-reset installs land at zeros.
+    final stored = lifetimeStorage.load();
+    if (stored != null) {
+      setState(() => _lifetime = stored);
+    } else {
+      final cs = _controller.state;
+      final seeded = LifetimeStats(
+        totalRounds: cs.roundCount,
+        totalWins: cs.playerScore,
+        totalTies: cs.ties,
+      );
+      setState(() => _lifetime = seeded);
+      unawaited(lifetimeStorage.save(seeded));
     }
   }
 
@@ -248,10 +274,20 @@ class _GameScreenState extends State<GameScreen> {
     _updateChallenge();
     _updateAchievements();
     _updateMoments();
+    _updateLifetime();
     await _storage?.save(_controller.state);
     await _challengeStorage?.save(_challenge);
     await _achievementStorage?.save(_achievements);
     await _momentStorage?.save(_moments);
+    await _lifetimeStorage?.save(_lifetime);
+  }
+
+  void _updateLifetime() {
+    final history = _controller.state.history;
+    if (history.isEmpty) return;
+    final last = history.last;
+    final next = incrementLifetimeFor(_lifetime, last);
+    setState(() => _lifetime = next);
   }
 
   void _openRecords() {
@@ -260,6 +296,7 @@ class _GameScreenState extends State<GameScreen> {
       extra: RecordsExtra(
         history: List<RoundRecord>.unmodifiable(_controller.state.history),
         moments: Map<MatchMomentId, MatchMomentRecord>.unmodifiable(_moments),
+        lifetime: _lifetime,
       ),
     );
   }

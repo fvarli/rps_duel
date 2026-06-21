@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rps_duel/domain/lifetime_stats.dart';
 import 'package:rps_duel/domain/match_moment.dart';
 import 'package:rps_duel/domain/move_choice.dart';
 import 'package:rps_duel/domain/round_outcome.dart';
@@ -10,6 +11,7 @@ import 'package:rps_duel/ui/game/records_screen.dart';
 Widget _wrap({
   required List<RoundRecord> history,
   required Map<MatchMomentId, MatchMomentRecord> moments,
+  LifetimeStats? lifetime,
   DateTime? now,
   Locale? locale,
 }) {
@@ -17,7 +19,12 @@ Widget _wrap({
     locale: locale,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    home: RecordsScreen(history: history, moments: moments, now: now),
+    home: RecordsScreen(
+      history: history,
+      moments: moments,
+      lifetime: lifetime ?? LifetimeStats.zero(),
+      now: now,
+    ),
   );
 }
 
@@ -115,6 +122,57 @@ void main() {
     expect(find.textContaining('vs'), findsNWidgets(3));
   });
 
+  testWidgets('Lifetime card renders the three calm totals, no percentages',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        history: const <RoundRecord>[],
+        moments: const <MatchMomentId, MatchMomentRecord>{},
+        lifetime: const LifetimeStats(
+          totalRounds: 247,
+          totalWins: 89,
+          totalTies: 18,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lifetime'), findsOneWidget);
+    expect(find.text('Rounds'), findsOneWidget);
+    expect(find.text('Wins'), findsOneWidget);
+    expect(find.text('Ties'), findsOneWidget);
+    expect(find.text('247'), findsOneWidget);
+    expect(find.text('89'), findsOneWidget);
+    expect(find.text('18'), findsOneWidget);
+
+    // Strict: no percentage sign, no win-rate language, no "best move"
+    // hints, no streak counters anywhere on the screen.
+    expect(find.textContaining('%'), findsNothing);
+    expect(find.textContaining('streak'), findsNothing);
+    expect(find.textContaining('Streak'), findsNothing);
+    expect(find.textContaining('best'), findsNothing);
+  });
+
+  testWidgets('Lifetime card on a fresh install shows zeros, not absence',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        history: const <RoundRecord>[],
+        moments: const <MatchMomentId, MatchMomentRecord>{},
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Lifetime'), findsOneWidget);
+    expect(find.text('Rounds'), findsOneWidget);
+    expect(find.text('Wins'), findsOneWidget);
+    expect(find.text('Ties'), findsOneWidget);
+    // Three Lifetime rows + three Tendencies rows all show '0' on a fresh
+    // install. Assert at-least to confirm the lifetime card is present
+    // without over-constraining the timeline / tendencies cards.
+    expect(find.text('0'), findsAtLeastNWidgets(3));
+  });
+
   testWidgets('Turkish locale renders the localized section titles',
       (tester) async {
     await tester.pumpWidget(
@@ -127,6 +185,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Kayıtlar'), findsOneWidget);
+    expect(find.text('Tüm Zamanlar'), findsOneWidget);
     expect(find.text('Anlar'), findsOneWidget);
     expect(find.text('Hamle eğilimleri'), findsOneWidget);
     expect(find.text('Zaman çizelgesi'), findsOneWidget);

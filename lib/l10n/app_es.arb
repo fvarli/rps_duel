@@ -61,6 +61,10 @@
 
   "recordsTitle": "Registros",
   "recordsIntro": "Un diario de duelos memorables.",
+  "lifetimeSectionTitle": "Histórico",
+  "lifetimeRounds": "Rondas",
+  "lifetimeWins": "Victorias",
+  "lifetimeTies": "Empates",
   "momentsSectionTitle": "Momentos",
   "momentsEmptyState": "Los momentos aparecerán aquí cuando juegues.",
   "tendenciesSectionTitle": "Tendencias de jugada",
