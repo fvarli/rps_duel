@@ -173,6 +173,94 @@ void main() {
     expect(find.text('0'), findsAtLeastNWidgets(3));
   });
 
+  testWidgets('lifetime values use English thousands separator (1,247)',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        history: const <RoundRecord>[],
+        moments: const <MatchMomentId, MatchMomentRecord>{},
+        lifetime: const LifetimeStats(
+          totalRounds: 1247,
+          totalWins: 502,
+          totalTies: 88,
+        ),
+        locale: const Locale('en'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1,247'), findsOneWidget);
+    expect(find.text('502'), findsOneWidget); // under 1000 — no separator
+    expect(find.text('88'), findsOneWidget);
+    // The unformatted raw integer must not appear.
+    expect(find.text('1247'), findsNothing);
+  });
+
+  testWidgets('lifetime values use Turkish thousands separator (1.247)',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        history: const <RoundRecord>[],
+        moments: const <MatchMomentId, MatchMomentRecord>{},
+        lifetime: const LifetimeStats(
+          totalRounds: 1247,
+          totalWins: 502,
+          totalTies: 88,
+        ),
+        locale: const Locale('tr'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1.247'), findsOneWidget);
+    expect(find.text('502'), findsOneWidget);
+    expect(find.text('88'), findsOneWidget);
+    expect(find.text('1247'), findsNothing);
+    expect(find.text('1,247'), findsNothing);
+  });
+
+  testWidgets('lifetime values use Spanish thousands separator (1.247)',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        history: const <RoundRecord>[],
+        moments: const <MatchMomentId, MatchMomentRecord>{},
+        lifetime: const LifetimeStats(
+          totalRounds: 1247,
+          totalWins: 502,
+          totalTies: 88,
+        ),
+        locale: const Locale('es'),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1.247'), findsOneWidget);
+    expect(find.text('502'), findsOneWidget);
+    expect(find.text('88'), findsOneWidget);
+    expect(find.text('1247'), findsNothing);
+    expect(find.text('1,247'), findsNothing);
+  });
+
+  testWidgets('formatLifetimeNumber renders large six-figure values cleanly',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        history: const <RoundRecord>[],
+        moments: const <MatchMomentId, MatchMomentRecord>{},
+        lifetime: const LifetimeStats(
+          totalRounds: 247123,
+          totalWins: 0,
+          totalTies: 0,
+        ),
+        locale: const Locale('en'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('247,123'), findsOneWidget);
+    expect(find.text('247123'), findsNothing);
+  });
+
   testWidgets('Turkish locale renders the localized section titles',
       (tester) async {
     await tester.pumpWidget(

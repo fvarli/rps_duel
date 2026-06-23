@@ -101,6 +101,14 @@ String _momentNote(AppLocalizations l10n, MatchMomentId id) {
 String momentTitleFor(AppLocalizations l10n, MatchMomentId id) =>
     _momentTitle(l10n, id);
 
+/// Format a lifetime integer with the locale's decimal pattern so the
+/// thousands separator matches local convention: `1,247` in en-US,
+/// `1.247` in tr and es. Pure so the records-screen tests can exercise
+/// it directly without pumping a full widget tree.
+String formatLifetimeNumber(int value, Locale locale) {
+  return NumberFormat.decimalPattern(locale.toString()).format(value);
+}
+
 class _LifetimeCard extends StatelessWidget {
   const _LifetimeCard({required this.stats});
 
@@ -110,6 +118,7 @@ class _LifetimeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context);
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
@@ -119,11 +128,23 @@ class _LifetimeCard extends StatelessWidget {
           children: <Widget>[
             Text(l10n.lifetimeSectionTitle, style: theme.textTheme.titleSmall),
             const SizedBox(height: 10),
-            _LifetimeRow(label: l10n.lifetimeRounds, value: stats.totalRounds),
+            _LifetimeRow(
+              label: l10n.lifetimeRounds,
+              value: stats.totalRounds,
+              locale: locale,
+            ),
             const SizedBox(height: 6),
-            _LifetimeRow(label: l10n.lifetimeWins, value: stats.totalWins),
+            _LifetimeRow(
+              label: l10n.lifetimeWins,
+              value: stats.totalWins,
+              locale: locale,
+            ),
             const SizedBox(height: 6),
-            _LifetimeRow(label: l10n.lifetimeTies, value: stats.totalTies),
+            _LifetimeRow(
+              label: l10n.lifetimeTies,
+              value: stats.totalTies,
+              locale: locale,
+            ),
           ],
         ),
       ),
@@ -132,10 +153,15 @@ class _LifetimeCard extends StatelessWidget {
 }
 
 class _LifetimeRow extends StatelessWidget {
-  const _LifetimeRow({required this.label, required this.value});
+  const _LifetimeRow({
+    required this.label,
+    required this.value,
+    required this.locale,
+  });
 
   final String label;
   final int value;
+  final Locale locale;
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +177,7 @@ class _LifetimeRow extends StatelessWidget {
           ),
         ),
         Text(
-          '$value',
+          formatLifetimeNumber(value, locale),
           style: theme.textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: theme.colorScheme.onSurface,
