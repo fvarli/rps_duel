@@ -11,6 +11,7 @@ import 'package:rps_duel/data/local_difficulty_storage.dart';
 import 'package:rps_duel/data/local_game_storage.dart';
 import 'package:rps_duel/data/local_lifetime_stats_storage.dart';
 import 'package:rps_duel/data/local_match_moment_storage.dart';
+import 'package:rps_duel/data/local_sound_enabled_storage.dart';
 import 'package:rps_duel/domain/achievement.dart';
 import 'package:rps_duel/domain/cpu_difficulty.dart';
 import 'package:rps_duel/domain/daily_challenge.dart';
@@ -24,6 +25,7 @@ import 'package:rps_duel/domain/round_outcome.dart';
 import 'package:rps_duel/domain/round_record.dart';
 import 'package:rps_duel/domain/rps_engine.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/audio.dart';
 import 'package:rps_duel/ui/game/achievement_unlock_overlay.dart';
 import 'package:rps_duel/ui/game/achievements_card.dart';
 import 'package:rps_duel/ui/game/daily_challenge_card.dart';
@@ -63,6 +65,8 @@ class _GameScreenState extends State<GameScreen> {
       <MatchMomentId, MatchMomentRecord>{};
   LifetimeStatsStorage? _lifetimeStorage;
   LifetimeStats _lifetime = LifetimeStats.zero();
+  SoundEnabledStorage? _soundStorage;
+  bool _soundEnabled = true;
   DuelPhase? _previousPhase;
 
   @override
@@ -87,13 +91,17 @@ class _GameScreenState extends State<GameScreen> {
     final newPhase = _controller.state.phase;
     final wasReveal = _previousPhase == DuelPhase.reveal;
     if (newPhase == DuelPhase.reveal && !wasReveal) {
+      Audio.reveal();
       switch (_controller.state.outcome) {
         case RoundOutcome.playerWin:
           Haptics.win();
+          Audio.win();
         case RoundOutcome.cpuWin:
           Haptics.loss();
+          Audio.loss();
         case RoundOutcome.tie:
           Haptics.tie();
+          Audio.tie();
         case null:
           break;
       }
@@ -162,6 +170,13 @@ class _GameScreenState extends State<GameScreen> {
     if (!mounted) return;
     _lifetimeStorage = lifetimeStorage;
 
+    final soundStorage = await SoundEnabledStorage.open();
+    if (!mounted) return;
+    _soundStorage = soundStorage;
+    final soundOn = soundStorage.load();
+    Audio.setEnabled(soundOn);
+    setState(() => _soundEnabled = soundOn);
+
     final s = _controller.state;
     final pristine = s.playerScore == 0 &&
         s.cpuScore == 0 &&
@@ -197,6 +212,12 @@ class _GameScreenState extends State<GameScreen> {
   Future<void> _setDifficulty(CpuDifficulty difficulty) async {
     _controller.setDifficulty(difficulty);
     await _difficultyStorage?.save(difficulty);
+  }
+
+  void _setSoundEnabled(bool enabled) {
+    Audio.setEnabled(enabled);
+    setState(() => _soundEnabled = enabled);
+    unawaited(_soundStorage?.save(enabled));
   }
 
   void _updateChallenge() {
@@ -379,6 +400,8 @@ class _GameScreenState extends State<GameScreen> {
                 showSettingsSheet(
                   context,
                   currentDifficulty: _controller.difficulty,
+                  soundEnabled: _soundEnabled,
+                  onSoundChanged: _setSoundEnabled,
                   onDifficulty: () => unawaited(
                     showDifficultyPicker(
                       context,

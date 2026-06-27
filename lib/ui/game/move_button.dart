@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:rps_duel/ui/audio.dart';
 import 'package:rps_duel/ui/haptics.dart';
 
 class MoveButton extends StatelessWidget {
@@ -27,6 +28,7 @@ class MoveButton extends StatelessWidget {
               ? null
               : () {
                   Haptics.tap();
+                  Audio.tap();
                   onPressed!();
                 },
           style: FilledButton.styleFrom(

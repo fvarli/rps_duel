@@ -231,6 +231,9 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.settings));
     await tester.pumpAndSettle();
+    // The Sound toggle row added in PR-7 can push About below the test
+    // viewport — ensureVisible scrolls it into reach before the tap.
+    await tester.ensureVisible(find.text('About RPS Duel'));
     await tester.tap(find.text('About RPS Duel'));
     await tester.pumpAndSettle();
 

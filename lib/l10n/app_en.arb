@@ -71,6 +71,8 @@
   "@languagePickerTitle": { "description": "Header / tooltip for the in-app language switcher." },
 
   "settingsTitle": "Settings",
+  "settingsSound": "Sound",
+  "@settingsSound": { "description": "Settings tile title for the global Sound on/off toggle." },
   "settingsResetData": "Reset data",
   "settingsAbout": "About RPS Duel",
   "aboutDescription": "A pocketable 30-second rock-paper-scissors duel.",

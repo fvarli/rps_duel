@@ -23,6 +23,7 @@ dependencies:
   connectivity_plus: ^6.0.5
   shared_preferences: ^2.3.0
   cupertino_icons: ^1.0.8
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -40,6 +41,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - assets/sounds/
 
 flutter_launcher_icons:
   android: "launcher_icon"

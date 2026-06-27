@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:rps_duel/domain/achievement.dart';
 import 'package:rps_duel/generated/l10n/app_localizations.dart';
+import 'package:rps_duel/ui/audio.dart';
 import 'package:rps_duel/ui/game/achievements_card.dart' show achievementTitle;
 import 'package:rps_duel/ui/haptics.dart';
 import 'package:rps_duel/ui/theme/tactile_theme.dart';
@@ -144,6 +145,7 @@ class _UnlockToastState extends State<_UnlockToast>
     );
 
     Haptics.unlock();
+    Audio.unlock();
     _controller.forward().whenComplete(_startHold);
   }
 
