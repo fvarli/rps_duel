@@ -1,7 +1,7 @@
 name: rps_duel
 description: "RPS Duel — a pocketable 30-second rock-paper-scissors duel."
 publish_to: 'none'
-version: 1.0.2+3
+version: 1.0.3+4
 
 environment:
   sdk: ^3.5.0
