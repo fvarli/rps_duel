@@ -52,7 +52,7 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   late final DuelController _controller;
   LocalGameStorage? _storage;
   DifficultyStorage? _difficultyStorage;
@@ -78,13 +78,28 @@ class _GameScreenState extends State<GameScreen> {
     );
     _previousPhase = _controller.state.phase;
     _controller.onStateChanged = _handleStateChanged;
+    WidgetsBinding.instance.addObserver(this);
     unawaited(_loadAndApply());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.onStateChanged = null;
     super.dispose();
+  }
+
+  /// The daily challenge is keyed to the local calendar day, but the only
+  /// place that check used to run was [_loadAndApply] — reachable only
+  /// from [initState]. An app left warm across midnight therefore kept
+  /// serving (and advancing) yesterday's challenge, and that progress was
+  /// then silently discarded on the next cold start because the stored
+  /// date no longer matched. Re-checking on resume closes that gap.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state != AppLifecycleState.resumed) return;
+    unawaited(_refreshChallengeForToday());
   }
 
   void _handleStateChanged() {
@@ -146,15 +161,8 @@ class _GameScreenState extends State<GameScreen> {
     _challengeStorage = challengeStorage;
     _controller.setDifficulty(difficultyStorage.load());
 
-    final loadedChallenge = challengeStorage.load();
-    final today = DateTime.now();
-    if (loadedChallenge != null && loadedChallenge.isToday(today)) {
-      setState(() => _challenge = loadedChallenge);
-    } else {
-      final fresh = DailyChallenge.initialFor(today);
-      setState(() => _challenge = fresh);
-      unawaited(challengeStorage.save(fresh));
-    }
+    await _refreshChallengeForToday();
+    if (!mounted) return;
 
     final achievementStorage = await AchievementStorage.open();
     if (!mounted) return;
@@ -207,6 +215,28 @@ class _GameScreenState extends State<GameScreen> {
       setState(() => _lifetime = seeded);
       unawaited(lifetimeStorage.save(seeded));
     }
+  }
+
+  /// Adopt the stored challenge when it belongs to today, otherwise mint
+  /// a fresh one for the current local date and persist it.
+  ///
+  /// Idempotent: calling this when the stored record is already today's
+  /// re-adopts the same value and writes nothing. Called once during load
+  /// and again on every resume — see [didChangeAppLifecycleState].
+  Future<void> _refreshChallengeForToday() async {
+    final storage = _challengeStorage;
+    if (storage == null) return;
+    final today = DateTime.now();
+    final loaded = storage.load();
+    if (loaded != null && loaded.isToday(today)) {
+      if (!mounted) return;
+      setState(() => _challenge = loaded);
+      return;
+    }
+    final fresh = DailyChallenge.initialFor(today);
+    if (!mounted) return;
+    setState(() => _challenge = fresh);
+    await storage.save(fresh);
   }
 
   Future<void> _setDifficulty(CpuDifficulty difficulty) async {
@@ -392,6 +422,19 @@ class _GameScreenState extends State<GameScreen> {
       appBar: AppBar(
         title: Text(l10n.appName),
         actions: <Widget>[
+          // Primary entry to the Records screen. Lives in the app bar
+          // because it is always visible and costs no vertical space
+          // above the move buttons.
+          //
+          // `tooltip` alone is not enough for assistive tech: it lands on
+          // the semantics node's `tooltip` property, leaving `label`
+          // empty. The icon carries the label so the node announces as
+          // "Records, button".
+          IconButton(
+            icon: Icon(Icons.auto_stories, semanticLabel: l10n.recordsTitle),
+            tooltip: l10n.recordsTitle,
+            onPressed: _openRecords,
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: l10n.settingsTitle,
@@ -447,22 +490,24 @@ class _GameScreenState extends State<GameScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
+                  // Plain, non-interactive status text. This used to be a
+                  // bare InkWell with no icon, label or visual cue — the
+                  // only way into the Records screen. Records now has two
+                  // labelled affordances (app bar, history header), so the
+                  // unlabelled tap target is gone. Padding is retained so
+                  // the layout is unchanged.
                   Center(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(8),
-                      onTap: _openRecords,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      child: Text(
+                        l10n.summaryLine(
+                          state.roundCount,
+                          state.history.length,
                         ),
-                        child: Text(
-                          l10n.summaryLine(
-                            state.roundCount,
-                            state.history.length,
-                          ),
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
+                        style: Theme.of(context).textTheme.titleSmall,
                       ),
                     ),
                   ),
@@ -553,7 +598,10 @@ class _GameScreenState extends State<GameScreen> {
                       child: Text(l10n.resetGame),
                     ),
                   ),
-                  _HistorySection(history: state.history),
+                  _HistorySection(
+                    history: state.history,
+                    onOpenRecords: _openRecords,
+                  ),
                 ],
               ),
             ),
@@ -716,9 +764,17 @@ class _MoveDisplay extends StatelessWidget {
 }
 
 class _HistorySection extends StatelessWidget {
-  const _HistorySection({required this.history});
+  const _HistorySection({required this.history, required this.onOpenRecords});
 
   final List<RoundRecord> history;
+
+  /// Opens the Records screen. Surfaced here as a labelled row because
+  /// the Records screen previously had no affordance anywhere — its only
+  /// entry was a bare tap on the summary text, so the largest surface in
+  /// the app was effectively undiscoverable. This header is where a
+  /// player already looks when they want more of their past rounds, and
+  /// it costs no vertical space above the move buttons.
+  final VoidCallback onOpenRecords;
 
   @override
   Widget build(BuildContext context) {
@@ -731,7 +787,45 @@ class _HistorySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         const Divider(height: 32),
-        Text(l10n.recentRounds, style: theme.textTheme.titleSmall),
+        // Without an explicit label the InkWell merges both Text children
+        // and announces "Recent rounds Records" as one node. Naming the
+        // action and dropping the descendants' own semantics makes it read
+        // as a single button. Visuals are unchanged.
+        Semantics(
+          button: true,
+          label: l10n.recordsTitle,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(8),
+            onTap: onOpenRecords,
+            child: ExcludeSemantics(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        l10n.recentRounds,
+                        style: theme.textTheme.titleSmall,
+                      ),
+                    ),
+                    Text(
+                      l10n.recordsTitle,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: TactileColors.sage,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: TactileColors.sage,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
         const SizedBox(height: 8),
         if (visible.isEmpty)
           Padding(

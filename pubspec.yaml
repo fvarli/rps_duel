@@ -1,7 +1,7 @@
 name: rps_duel
 description: "RPS Duel — a pocketable 30-second rock-paper-scissors duel."
 publish_to: 'none'
-version: 1.0.3+4
+version: 1.0.4+5
 
 environment:
   sdk: ^3.5.0
@@ -18,9 +18,7 @@ dependencies:
   go_router: ^14.6.0
   freezed_annotation: ^2.4.4
   json_annotation: ^4.9.0
-  flutter_svg: ^2.0.10
   intl: any
-  connectivity_plus: ^6.0.5
   shared_preferences: ^2.3.0
   cupertino_icons: ^1.0.8
   audioplayers: ^6.1.0

@@ -4,6 +4,16 @@ import 'package:rps_duel/domain/duel_state.dart';
 enum AchievementId {
   firstWin,
   streak3,
+
+  /// Awarded for completing any Daily Challenge.
+  ///
+  /// The name is historical and deliberately NOT renamed: it is the
+  /// persisted JSON key in `rps_duel.achievements.v2`, so changing it
+  /// would orphan every unlock already on a player's device. When this
+  /// shipped there was a single challenge ("win 3 with Scissors"); the
+  /// rotation added six more kinds without touching the trigger. The
+  /// user-facing strings were corrected to match the real condition —
+  /// see `achievementDailyChallenge` in the ARB files.
   scissorsSpecialist,
   first10Rounds,
 }

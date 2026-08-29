@@ -9,7 +9,7 @@ String achievementTitle(AppLocalizations l10n, AchievementId id) {
   return switch (id) {
     AchievementId.firstWin => l10n.achievementFirstWin,
     AchievementId.streak3 => l10n.achievementStreak3,
-    AchievementId.scissorsSpecialist => l10n.achievementScissorsSpecialist,
+    AchievementId.scissorsSpecialist => l10n.achievementDailyChallenge,
     AchievementId.first10Rounds => l10n.achievementFirst10Rounds,
   };
 }

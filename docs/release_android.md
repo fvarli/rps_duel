@@ -102,7 +102,7 @@ Single source of truth: `pubspec.yaml` `version: <name>+<code>`.
 | `<name>` | Android `versionName` (display) | semver-style, e.g. `0.1.0`, `0.2.0`, `1.0.0`. Bump on every Play release. |
 | `<code>` | Android `versionCode` (integer) | **Must strictly increase** every uploaded release, even for hotfixes. Play rejects duplicates. |
 
-Current version: **`1.0.0+1`** (versionName `1.0.0`, versionCode `1`).
+Current version: **`1.0.4+5`** (versionName `1.0.4`, versionCode `5`).
 
 Worked examples for the next two releases:
 

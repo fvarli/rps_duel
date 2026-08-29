@@ -74,7 +74,7 @@ String _achievementNote(AppLocalizations l10n, AchievementId id) {
   return switch (id) {
     AchievementId.firstWin => l10n.achievementFirstWinNote,
     AchievementId.streak3 => l10n.achievementStreak3Note,
-    AchievementId.scissorsSpecialist => l10n.achievementScissorsSpecialistNote,
+    AchievementId.scissorsSpecialist => l10n.achievementDailyChallengeNote,
     AchievementId.first10Rounds => l10n.achievementFirst10RoundsNote,
   };
 }

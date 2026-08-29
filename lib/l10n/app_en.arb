@@ -105,11 +105,11 @@
 
   "achievementFirstWinNote": "Your first taste of victory.",
   "achievementStreak3Note": "Three rounds claimed in succession.",
-  "achievementScissorsSpecialistNote": "A day spent honing one weapon.",
+  "achievementDailyChallengeNote": "A day's objective, answered.",
   "achievementFirst10RoundsNote": "Ten rounds. The duelist begins.",
   "@achievementFirstWinNote": { "description": "Curator note shown beneath the title on the First Win exhibit card." },
   "@achievementStreak3Note": { "description": "Curator note for the Streak 3 exhibit card." },
-  "@achievementScissorsSpecialistNote": { "description": "Curator note for the Scissors Specialist exhibit card." },
+  "@achievementDailyChallengeNote": { "description": "Curator note for the Challenge Met exhibit card." },
   "@achievementFirst10RoundsNote": { "description": "Curator note for the 10 Rounds exhibit card." },
 
   "recordsTitle": "Records",
@@ -171,7 +171,7 @@
   "@momentTurnaroundNote": { "description": "Curator note for the Turnaround moment." },
   "achievementFirstWin": "First Win",
   "achievementStreak3": "Streak 3",
-  "achievementScissorsSpecialist": "Scissors Specialist",
+  "achievementDailyChallenge": "Challenge Met",
   "achievementFirst10Rounds": "10 Rounds",
   "@achievementsTitle": { "description": "Header for the achievements card." },
   "@achievementsCount": {
@@ -184,7 +184,7 @@
   "@achievementsNoneYet": { "description": "Placeholder when no achievements are unlocked yet." },
   "@achievementFirstWin": { "description": "Achievement: First Win." },
   "@achievementStreak3": { "description": "Achievement: 3-win streak." },
-  "@achievementScissorsSpecialist": { "description": "Achievement: Daily Challenge (Scissors) completed." },
+  "@achievementDailyChallenge": { "description": "Achievement: any Daily Challenge completed. Trigger covers all rotation kinds, not just Scissors." },
   "@achievementFirst10Rounds": { "description": "Achievement: played 10 total rounds." },
 
   "dailyChallengeTitle": "Daily Challenge",

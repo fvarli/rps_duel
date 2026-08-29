@@ -2,6 +2,33 @@
 
 > Chronological, newest first. Each entry is short enough to map to a Play Console "What's new" field (max 500 chars).
 
+## 1.0.4+5 — Correctness + discoverability
+
+- Daily Challenge now rolls over correctly at midnight. Previously an app left running overnight kept serving the previous day's objective, and that progress was discarded on the next cold start.
+- The achievement awarded for finishing a Daily Challenge is now called "Challenge Met". It was still labelled "Scissors Specialist" from before the challenge rotation shipped, so it named the wrong thing on six of the seven challenge days.
+- Records is now reachable from a labelled link in the "Recent rounds" header, not only by tapping the round summary.
+- Removed two unused dependencies. The release build no longer declares the network-state permission it never used.
+
+155 / 155 tests pass; analyzer clean.
+
+---
+
+## 1.0.3+4 — Records, Moments and sound
+
+The first release since launch, and the largest. Everything here is local and offline.
+
+- **Records screen** — a diary of your duels: lifetime totals, move tendencies, and a timeline grouped by Today / Yesterday / Earlier.
+- **Memorable moments** — seven one-time situations to discover, such as winning straight after three losses, or reading the same CPU move three times running. Situations, not scores.
+- **Collection screen** — the four achievements now live in a museum-style view with unlock dates, plus an unlock animation when you earn one.
+- **Daily Challenge rotation** — seven objectives that rotate by day instead of the single fixed one.
+- **Lifetime totals** — rounds, wins and ties, kept separately so they survive Reset Game.
+- **Sound** — six interaction sounds with an on/off switch in Settings.
+- Round history is now capped at the most recent 500 rounds; lifetime totals are unaffected.
+
+Existing progress migrates automatically. Nothing is uploaded anywhere.
+
+---
+
 ## 1.0.2+3 — Polish (closed test)
 
 - Haptic feedback added on move tap (light) and result reveal (medium on win, click on loss / tie).

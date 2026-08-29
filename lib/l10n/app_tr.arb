@@ -57,7 +57,7 @@
 
   "achievementFirstWinNote": "İlk zaferin tadı.",
   "achievementStreak3Note": "Üst üste üç el.",
-  "achievementScissorsSpecialistNote": "Bir gün, tek silahla.",
+  "achievementDailyChallengeNote": "Günün hedefi başarıldı.",
   "achievementFirst10RoundsNote": "On el. Düellocu sahneye çıkar.",
 
   "recordsTitle": "Kayıtlar",
@@ -91,7 +91,7 @@
   "momentTurnaroundNote": "Farkı kapatmaya başladığın o galibiyet.",
   "achievementFirstWin": "İlk Galibiyet",
   "achievementStreak3": "3'lü Seri",
-  "achievementScissorsSpecialist": "Makas Uzmanı",
+  "achievementDailyChallenge": "Tamamlanan Görev",
   "achievementFirst10Rounds": "10 El",
 
   "dailyChallengeTitle": "Günlük Görev",

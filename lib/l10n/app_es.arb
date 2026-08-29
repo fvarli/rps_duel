@@ -57,7 +57,7 @@
 
   "achievementFirstWinNote": "Tu primer sabor a la victoria.",
   "achievementStreak3Note": "Tres rondas seguidas reclamadas.",
-  "achievementScissorsSpecialistNote": "Un día puliendo una sola arma.",
+  "achievementDailyChallengeNote": "El objetivo de un día, cumplido.",
   "achievementFirst10RoundsNote": "Diez rondas. Comienza el duelista.",
 
   "recordsTitle": "Registros",
@@ -91,7 +91,7 @@
   "momentTurnaroundNote": "La victoria que empezó a cerrar la brecha.",
   "achievementFirstWin": "Primera victoria",
   "achievementStreak3": "Racha de 3",
-  "achievementScissorsSpecialist": "Especialista en tijera",
+  "achievementDailyChallenge": "Reto superado",
   "achievementFirst10Rounds": "10 rondas",
 
   "dailyChallengeTitle": "Reto diario",
