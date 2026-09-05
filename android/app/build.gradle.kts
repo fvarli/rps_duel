@@ -53,6 +53,26 @@ android {
     }
 
     buildTypes {
+        // Local development identities only — release is untouched below.
+        //
+        // The debug/profile builds install as `com.lunexa.games.rpsduel.dev`
+        // so they coexist with the Google Play production install on a
+        // physical device. Without this, `flutter run` would hit a signature
+        // mismatch against the Play-signed app and its installer would
+        // silently `adb uninstall` production (and all of its user data)
+        // before retrying — see AndroidDevice.installApp in flutter_tools.
+        //
+        // Only `applicationId` is suffixed. `namespace` stays
+        // com.lunexa.games.rpsduel, so `.MainActivity` and every R class
+        // still resolve, and the release application ID, signing config and
+        // version semantics are unaffected.
+        debug {
+            applicationIdSuffix = ".dev"
+        }
+        // `profile` is contributed by the Flutter Gradle Plugin. Suffix it
+        // too: `flutter run --profile` is ordinary development and must not
+        // be able to collide with the Play install either.
+        maybeCreate("profile").applicationIdSuffix = ".dev"
         release {
             // Use release signing if android/key.properties is configured;
             // otherwise fall back to debug signing so dev `flutter run --release`
