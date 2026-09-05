@@ -1,4 +1,21 @@
-# `docs/` — design + product handoff
+# `docs/`
+
+## Operational guides (current)
+
+Live developer/operator documentation. These describe how the project actually works today.
+
+| File | Role |
+|---|---|
+| [`android-device-workflow.md`](android-device-workflow.md) | Running on a physical Android device over Wireless Debugging, and the `.dev` side-by-side install that keeps the Google Play build safe. |
+| [`release_android.md`](release_android.md) | Keystore setup, signed AAB build, and the per-release Play Console workflow. |
+| [`release_notes.md`](release_notes.md) | User-facing release notes, newest first. Maps to the Play Console "What's new" field. |
+| [`privacy_policy.md`](privacy_policy.md) | Repository copy of the published privacy policy. Keep in sync with the live page. |
+
+The remaining markdown files (`product_audit.md`, `play_store_launch.md`, `play_store_closed_test_plan.md`, `closed_test_feedback_backlog.md`, `change_log_closed_test.md`, `production_access_answers_draft.md`) are the historical launch and closed-test pack, kept for the production-access narrative. They describe the v1.0.x launch window, not the current state.
+
+---
+
+## Design + product handoff
 
 These files are **historical design input**, not the current source of truth. They were authored before the Flutter project was bootstrapped, and the implementation has deliberately diverged from them. **The repository is authoritative.**
 

@@ -80,11 +80,13 @@ flutter run -d <android-device>    # Android device or emulator
 flutter run                        # auto-pick the default device
 ```
 
+Running on a physical Android phone that already has the Play build installed requires the `.dev` side-by-side setup — see [`docs/android-device-workflow.md`](docs/android-device-workflow.md) **before** the first `flutter run` against such a device.
+
 ## Test / analyze / build
 
 ```bash
 flutter analyze                    # must report 0 issues
-flutter test --concurrency=1       # 155 tests across domain + persistence + UI
+flutter test --concurrency=1       # 157 tests across domain + persistence + UI
 flutter build web                  # web release bundle
 flutter build apk --release        # Android (once you have signing config)
 ```
@@ -109,9 +111,9 @@ Bump cadence: bugfix → `1.0.1+2`, next feature → `1.1.0+3`. `versionCode` mu
 - [x] App name, package id, bundle id consistent across all platforms (`RPS Duel` / `com.lunexa.games.rpsduel`)
 - [x] Web title + PWA manifest say `RPS Duel`; favicon + maskable icons in place
 - [x] Localization wired for en/tr/es; in-app language switcher persists across restart
-- [x] Local persistence survives browser reload / app restart for all 5 storage concerns
+- [x] Local persistence survives browser reload / app restart for all 8 storage concerns
 - [x] Strict analyzer clean
-- [x] 155/155 tests pass
+- [x] 157/157 tests pass
 - [x] `.gitignore` excludes signing/secret/.env patterns (defense-in-depth)
 - [ ] **Real designed launcher icon** (current is the indigo+"RPS" placeholder)
 - [x] **Android** release signing wired (key.properties-aware; see [`docs/release_android.md`](docs/release_android.md) for keystore + upload steps)
@@ -170,7 +172,7 @@ lib/
 │       ├── language_picker_sheet.dart
 │       └── difficulty_picker_sheet.dart
 └── l10n/                           # ARB files (en / tr / es)
-test/                               # 155 tests across the same layout
+test/                               # 157 tests across the same layout
 docs/                               # design + product handoff artifacts (see docs/README.md)
 ```
 
@@ -178,7 +180,11 @@ docs/                               # design + product handoff artifacts (see do
 
 ## Docs
 
-`docs/` contains the original engineering and product handoff (HTML), the design canvas (JSX), and concept variants. They are the **source of truth** for product/architecture decisions and should not be modified casually — read [`docs/README.md`](docs/README.md) first.
+Start at [`docs/README.md`](docs/README.md), which indexes the directory.
+
+Current operational guides: [`android-device-workflow.md`](docs/android-device-workflow.md) (physical-device development), [`release_android.md`](docs/release_android.md) (keystore + Play release), [`release_notes.md`](docs/release_notes.md), [`privacy_policy.md`](docs/privacy_policy.md).
+
+`docs/html/` (the original engineering + product handoff) and `docs/concepts/` are **historical design input, not the source of truth** — the implementation deliberately diverged from them. **The repository is authoritative.** They still specify Isar persistence, ads/IAP and analytics, none of which exist or are wanted; `docs/README.md` lists the known divergences. Read them for intent, not instructions.
 
 ---
 
